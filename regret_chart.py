@@ -14,8 +14,8 @@ def compare_bandits(bandit_list):
     for b in bandit_list:
         ax.plot(x, b.regret, label=b.name)
     plt.legend()
-    plt.show()
     plt.savefig('comp.png')
+    plt.show()
     plt.clf()
     
 if __name__ == '__main__':
