@@ -1,7 +1,7 @@
 from bandits.bandit import Bandit
 from bandits.distributions import trt_dist_list, num_obs
 import numpy as np
-from bandits.utils import ucb_naive, lcb_naive
+from bandits.utils import ucb_value_naive, lcb_value_naive
 
 
 def successive_elimination(bandit, num_rounds, num_arms):
@@ -18,9 +18,9 @@ def successive_elimination(bandit, num_rounds, num_arms):
             else:
                 pass
         # calculate ucb and lcb
-        ucb = ucb_naive(num_arms, num_rounds, bandit.arm_pull_tracker,
+        ucb = ucb_value_naive(num_arms, num_rounds, bandit.arm_pull_tracker,
                         bandit.avg_reward_tracker)
-        lcb = lcb_naive(num_arms, num_rounds, bandit.arm_pull_tracker,
+        lcb = lcb_value_naive(num_arms, num_rounds, bandit.arm_pull_tracker,
                         bandit.avg_reward_tracker)
         
         # Deactivate all arms that satisfy condition ucb(a) < lcb(a')
@@ -31,9 +31,7 @@ def successive_elimination(bandit, num_rounds, num_arms):
             if ucb[arm] < np.amax(lcb_other):
                 active[arm] = 0
     
-    print(bandit.avg_reward_tracker)
-    print(bandit.arm_pull_tracker)
-    pass
+    return bandit
 
 
 if __name__ == '__main__':
@@ -41,7 +39,8 @@ if __name__ == '__main__':
     num_arms_ep = 4
     num_rounds = num_obs
     trt_dist_lis_ep = trt_dist_list[:num_arms_ep]
-    elim_bandit = Bandit(num_arms=num_arms_ep,
+    elim_bandit = Bandit(name='successive_elimination',
+                            num_arms=num_arms_ep,
                             trt_dist_list=trt_dist_lis_ep)
     successive_elimination(bandit=elim_bandit,
                            num_rounds=num_rounds, num_arms=num_arms_ep)

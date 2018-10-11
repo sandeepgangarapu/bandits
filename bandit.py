@@ -4,12 +4,13 @@ import random
 
 class Bandit:
     
-    def __init__(self, num_arms, trt_dist_list):
+    def __init__(self, name, num_arms, trt_dist_list):
         """
         :param num_arms: number of arms the bandit will have
         :param trt_dist_list: should have the order with control_dist as
         first element and other treatments in order
         """
+        self.name = name
         self.num_arms = num_arms
         self.trt_dist_list = trt_dist_list
         self.arm_pull_tracker = [0 for i in range(num_arms)]
@@ -17,6 +18,7 @@ class Bandit:
         self.avg_reward_tracker = [0 for i in range(num_arms)]
         self.max_reward = 0
         self.max_reward_arm = 0
+        self.regret = []
     
     def pull_arm(self, arm_num):
         """pulling an just generated reward"""
@@ -42,12 +44,10 @@ class Bandit:
                                       self.max_reward).flatten().tolist()
         # There might be two arms with max rewards. So we choose one at random
         self.max_reward_arm = np.random.choice(max_reward_arms)
+        self.regret.append(sum(self.arm_pull_tracker)*np.amax(
+            self.avg_reward_tracker) - sum(
+            self.total_reward_tracker))
         
-        
-        
-    
-        
-
 
     
     

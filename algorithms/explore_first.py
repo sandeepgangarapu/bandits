@@ -20,10 +20,7 @@ def explore_first(bandit, num_rounds, explore_percentage, num_arms):
     max_arm = bandit.max_reward_arm
     for round in range(num_exploit):
         bandit.pull_arm(max_arm)
-
-    print(bandit.avg_reward_tracker)
-    print(bandit.arm_pull_tracker)
-    pass
+    return bandit
 
 
 if __name__ == '__main__':
@@ -32,7 +29,8 @@ if __name__ == '__main__':
     explore_percentage = 10
     num_rounds = num_obs
     trt_dist_lis_ex = trt_dist_list[:num_arms_ex]
-    explore_bandit = Bandit(num_arms=num_arms_ex,
+    explore_bandit = Bandit(name='explore_first',
+                            num_arms=num_arms_ex,
                             trt_dist_list=trt_dist_lis_ex)
     explore_first(bandit=explore_bandit,
                  num_rounds=num_rounds,
