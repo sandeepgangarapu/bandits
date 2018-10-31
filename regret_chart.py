@@ -45,4 +45,3 @@ if __name__ == '__main__':
     bandit_list = [always_explore_bandit, explore_first_bandit,
                    epsilon_greedy_bandit, ucb_naive_bandit]
     compare_bandits(bandit_list)
-
