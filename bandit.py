@@ -1,15 +1,9 @@
 import numpy as np
-import random
 
 
 class Bandit:
     
     def __init__(self, name, num_arms, trt_dist_list):
-        """
-        :param num_arms: number of arms the bandit will have
-        :param trt_dist_list: should have the order with control_dist as
-        first element and other treatments in order
-        """
         self.name = name
         self.num_arms = num_arms
         self.trt_dist_list = trt_dist_list
@@ -48,6 +42,6 @@ class Bandit:
             self.avg_reward_tracker) - sum(
             self.total_reward_tracker))
         
-
-    
+    def return_name(self):
+        return self.name
     
