@@ -42,6 +42,4 @@ class Bandit:
             self.avg_reward_tracker) - sum(
             self.total_reward_tracker))
         
-    def return_name(self):
-        return self.name
-    
+

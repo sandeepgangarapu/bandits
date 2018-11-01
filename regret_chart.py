@@ -6,26 +6,27 @@ from bandits.algorithms.successive_elimination import successive_elimination
 from bandits.distributions import trt_dist_list, num_obs
 from bandits.bandit import Bandit
 import matplotlib.pyplot as plt
-import plotnine
+from plotnine import *
 import pandas as pd
+from bandits.algorithms.linucb import linucb
 
-
-def compare_bandits(bandit_list):
-    df = pd.DataFrame([i for i in range(1,num_obs+1)], columns=['x'])
+def compare_bandits(bandit_list, num_rounds):
+    df = pd.DataFrame([i for i in range(1, num_rounds+1)], columns=['x'])
     for b in bandit_list:
         df[b.name] = b.regret
-        print(df.head())
+    p = (ggplot(df)+ geom_line(aes('x', 'always_explore')))
+    p.save('test.png')
+    return df
 
     
     
 if __name__ == '__main__':
-    num_arms = 4
-    num_rounds = num_obs
+    num_arms = 2
+    num_rounds = 10000
     trt_dist_lis = trt_dist_list[:num_arms]
     always_explore_bandit = always_explore(Bandit("always_explore", num_arms,
                                                   trt_dist_lis),
                                            num_rounds, num_arms)
-    print(always_explore_bandit.name)
     explore_percentage = 10
     explore_first_bandit = explore_first(Bandit("explore_first", num_arms,
                                                 trt_dist_lis),
@@ -45,4 +46,7 @@ if __name__ == '__main__':
                                  num_arms)
     bandit_list = [always_explore_bandit, explore_first_bandit,
                    epsilon_greedy_bandit, ucb_naive_bandit]
-    compare_bandits(bandit_list)
+    data = compare_bandits(bandit_list, num_rounds)
+    data['lin_ucb'] = linucb()
+    print(data.head())
+    
