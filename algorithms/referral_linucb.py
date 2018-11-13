@@ -3,8 +3,8 @@ from math import sqrt
 import pandas as pd
 
 
-def linucb(feature_list, target, treatment):
-    alpha = 1  # Parameter that gives weight to the upper confidence bound
+def linucb(feature_list, target, treatment, ite, alpha):
+     # Parameter that gives weight to the upper confidence bound
     K = 4  # Num arms
     d = 7  # Num features
     num_rounds = len(feature_list)
@@ -30,26 +30,32 @@ def linucb(feature_list, target, treatment):
             b[chosen_arm] = np.add(b[chosen_arm],
                                    np.array(feature_vec) * reward)
             output.append({'chosen_arm': chosen_arm, 'reward': reward,
-                           'optimal': 1})
+                           'optimal': 1, 'ite': ite, 'alpha':alpha})
         else:
             reward = target[round]
             output.append({'chosen_arm': chosen_arm, 'reward': reward,
-                           'optimal': 0})
+                           'optimal': 0, 'ite': ite, 'alpha':alpha})
     return output
 
 
 if __name__ == '__main__':
     data = pd.read_csv('referral_input.csv')
-    # shuffle the data
-    data = data.sample(frac=1)
-    covariates = ['num_past_order', 'totalcents', 'totaldiscountcents',
-                  'totalrefunded', 'num_days', 'nps', 'num_nps_comment']
-    features = pd.DataFrame(data, columns=covariates).values
-    benefit = data['firm_gain'].values
-    cost = data['firm_cost'].values
-    group = data['group'].values
-    utility = np.subtract(benefit, cost)
-    result = linucb(features, target=utility, treatment=group)
-    result = pd.DataFrame(result)
-    result['cost'] = cost
-    result.to_csv("referral_linucb.csv")
+    num_iterations = 20
+    results = []
+    for ite in range(num_iterations):
+        # shuffle the data
+        data = data.sample(frac=1)
+        covariates = ['num_past_order', 'totalcents', 'totaldiscountcents',
+                      'totalrefunded', 'num_days', 'nps', 'num_nps_comment']
+        features = pd.DataFrame(data, columns=covariates).values
+        benefit = data['firm_gain'].values
+        cost = data['firm_cost'].values
+        group = data['group'].values
+        utility = np.subtract(benefit, cost)
+        for alpha in range(1, 20):
+            result = linucb(features, target=utility, treatment=group,
+                            ite=ite, alpha=alpha)
+            result = pd.DataFrame(result)
+            result['cost'] = cost
+            results.append(result)
+    pd.concat(results).to_csv("donor_linucb.csv")
