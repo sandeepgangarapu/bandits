@@ -27,7 +27,7 @@ def linucb():
     gender_vars = [1, 0]
     ethnicity_vars = [0, 1]
     
-    alpha = 1  # Some parameter
+    alpha = 10  # Some parameter
     K = 2  # Num arms
     d = 2  # Num features
     num_rounds = 10000
@@ -74,9 +74,10 @@ def linucb():
     data = pd.DataFrame(X, columns=['gender', 'ethnicity'])
     data['reward'] = reward_list
     data['chosen_arm'] = arm_list
-    return reward_list
+    return data
 
 
 if __name__ == '__main__':
-    linucb()
-    
+    data = linucb()
+    print(data.groupby(['gender','ethnicity','chosen_arm'], as_index=False).count())
+    print(data.groupby(['gender', 'ethnicity', 'chosen_arm'], as_index=False).mean())
