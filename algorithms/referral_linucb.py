@@ -39,9 +39,10 @@ def linucb(feature_list, target, treatment, ite, alpha):
 
 
 if __name__ == '__main__':
-    data = pd.read_csv('referral_input.csv')
-    num_iterations = 20
+    data = pd.read_csv('upsample_referral_input.csv')
+    num_iterations = 10
     results = []
+    alphas = [1,5,15]
     for ite in range(num_iterations):
         # shuffle the data
         data = data.sample(frac=1)
@@ -52,10 +53,12 @@ if __name__ == '__main__':
         cost = data['firm_cost'].values
         group = data['group'].values
         utility = np.subtract(benefit, cost)
-        for alpha in range(1, 20):
+        for alpha in alphas:
+            print(ite)
+            print(alpha)
             result = linucb(features, target=utility, treatment=group,
                             ite=ite, alpha=alpha)
             result = pd.DataFrame(result)
             result['cost'] = cost
             results.append(result)
-    pd.concat(results).to_csv("donor_linucb.csv")
+            pd.concat(results).to_csv("referral_upsample_group_linucb.csv")

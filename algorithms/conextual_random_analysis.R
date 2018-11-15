@@ -1,5 +1,6 @@
 library(dplyr)
 library(ggplot2)
+library(knitr)
 setwd("G:\\My Drive\\Research\\Contextual Bandits\\code\\bandits\\algorithms")
 
 donor <- read.csv('donor_linucb.csv') %>% group_by(alpha, ite) %>%  mutate(cumsum_cost = cumsum(cost)) %>%
@@ -16,20 +17,32 @@ ref_opt <- referral %>% filter(optimal==1)  %>% group_by(alpha, ite) %>% mutate(
   mutate(cumsum_reward = cumsum(reward)) %>% ungroup() 
 
 
-donor <- donor %>% select(cumsum_cost, cumsum_reward) %>%
+donor <- donor %>% select(alpha, ite, cumsum_cost, cumsum_reward) %>%
   group_by(alpha, ite, cumsum_cost) %>% summarise(cumsum_reward=max(cumsum_reward)) %>% ungroup() %>% 
-  group_by(alpha, cumsum_cost) %>% n()
+  group_by(alpha, cumsum_cost) %>% summarize(mean_reward=mean(cumsum_reward), se_reward = sd(cumsum_reward)/sqrt(n()))
 
-don_opt <- don_opt %>% select(cumsum_cost, cumsum_reward) %>%
-  group_by(alpha, ite, cumsum_cost) %>% summarise(cumsum_reward=max(cumsum_reward)) %>% ungroup() 
+don_opt <- don_opt %>% select(alpha, ite, cumsum_cost, cumsum_reward) %>%
+  group_by(alpha, ite, cumsum_cost) %>% summarise(cumsum_reward=max(cumsum_reward)) %>% ungroup() %>% 
+  group_by(alpha, cumsum_cost) %>% summarize(mean_reward=mean(cumsum_reward), se_reward = sd(cumsum_reward)/sqrt(n()))
 
-referral <- referral %>% select(cumsum_cost, cumsum_reward) %>%
-  group_by(alpha, ite, cumsum_cost) %>% summarise(cumsum_reward=max(cumsum_reward)) %>% ungroup() 
+referral <- referral %>% select(alpha, ite, cumsum_cost, cumsum_reward) %>%
+  group_by(alpha, ite, cumsum_cost) %>% summarise(cumsum_reward=max(cumsum_reward)) %>% ungroup() %>% 
+  group_by(alpha, cumsum_cost) %>% summarize(mean_reward=mean(cumsum_reward), se_reward = sd(cumsum_reward)/sqrt(n()))
 
-ref_opt <- ref_opt %>% select(cumsum_cost, cumsum_reward) %>%
-  group_by(alpha, ite, cumsum_cost) %>% summarise(cumsum_reward=max(cumsum_reward)) %>% ungroup() 
+ref_opt <- ref_opt %>% select(alpha, ite, cumsum_cost, cumsum_reward) %>%
+  group_by(alpha, ite, cumsum_cost) %>% summarise(cumsum_reward=max(cumsum_reward)) %>% ungroup() %>% 
+  group_by(alpha, cumsum_cost) %>% summarize(mean_reward=mean(cumsum_reward), se_reward = sd(cumsum_reward)/sqrt(n()))
 
 
-ggplot(donor, aes(cumsum_cost, cumsum_reward)) + geom_line(color="blue") + geom_line(data=don_opt, aes(cumsum_cost, cumsum_reward), color="red")
-
-ggplot(referral, aes(cumsum_cost, cumsum_reward)) + geom_line(color="blue") + geom_line(data=ref_opt, aes(cumsum_cost, cumsum_reward), color="red")
+  
+  ggplot(donor %>% filter(alpha==1), aes(cumsum_cost, mean_reward)) +
+    geom_line(color='red') +
+    geom_line(data=don_opt %>% filter(alpha==1& ite=1), aes(cumsum_cost, mean_reward), color='blue') +
+    ggsave("donor_linucb_graph.png", width = 8, height = 5)
+  
+  ggplot(donor %>% filter(alpha==15& ite=1), aes(cumsum_cost, mean_reward)) +
+    geom_line(color='red') +
+    geom_line(data=don_opt %>% filter(alpha==15), aes(cumsum_cost, mean_reward), color='blue') +
+    ggsave("donor_linucb_graph.png", width = 8, height = 5)
+  
+  
