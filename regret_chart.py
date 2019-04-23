@@ -13,9 +13,10 @@ from bandits.algorithms.linucb import linucb
 def compare_bandits(bandit_list, num_rounds):
     df = pd.DataFrame([i for i in range(1, num_rounds+1)], columns=['x'])
     for b in bandit_list:
-        df[b.name] = b.regret
-    p = (ggplot(df)+ geom_line(aes('x', 'always_explore')))
-    p.save('test.png')
+        df[b.name+"_reward"] = b.reward_tracker
+        df[b.name+"_arm"] = b.arm_tracker
+    #p = (ggplot(df)+ geom_line(aes('x', )))
+    #p.save('test.png')
     return df
 
     
@@ -44,9 +45,7 @@ if __name__ == '__main__':
     ucb_naive_bandit = ucb_naive(Bandit("ucb_naive", num_arms, trt_dist_lis),
                                  num_rounds,
                                  num_arms)
-    bandit_list = [always_explore_bandit, explore_first_bandit,
-                   epsilon_greedy_bandit, ucb_naive_bandit]
+    bandit_list = [always_explore_bandit, ucb_naive_bandit]
     data = compare_bandits(bandit_list, num_rounds)
-    data['lin_ucb'] = linucb()
-    print(data.head())
-    
+    #data['lin_ucb'] = linucb()
+    data.to_csv("bandit_comparison.csv", index=False)

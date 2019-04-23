@@ -8,6 +8,8 @@ class Bandit:
         self.num_arms = num_arms
         self.trt_dist_list = trt_dist_list
         self.arm_pull_tracker = [0 for i in range(num_arms)]
+        self.reward_tracker = []
+        self.arm_tracker = []
         self.total_reward_tracker = [0 for i in range(num_arms)]
         self.avg_reward_tracker = [0 for i in range(num_arms)]
         self.max_reward = 0
@@ -24,7 +26,10 @@ class Bandit:
         
     def update_after_pull(self, arm_num, reward):
         """Do updates to bandit params after an arm is pulled"""
-
+        # track arm pulled
+        self.arm_tracker.append(arm_num)
+        # Track reward
+        self.reward_tracker.append(reward)
         # add the arm_no that is pulled
         self.arm_pull_tracker[arm_num] = self.arm_pull_tracker[arm_num]+1
         # Add the reward to reward tracker

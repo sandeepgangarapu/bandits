@@ -15,5 +15,5 @@ def lcb_value_naive(num_arms, num_rounds, arm_pull_tracker,
     lcb = [0 for i in range(num_arms)]
     for arm in range(num_arms):
         conf_interval = sqrt((2*log(num_rounds))/(arm_pull_tracker[arm]))
-        lcb[arm] = avg_reward_tracker[arm] + conf_interval
+        lcb[arm] = avg_reward_tracker[arm] - conf_interval
     return lcb
