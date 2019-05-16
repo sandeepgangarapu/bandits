@@ -16,7 +16,7 @@ def ucb_naive(bandit, num_rounds, num_arms):
     for round in range(ucb_rounds):
         # find UCB for all arms
         ucb_round = ucb_value_naive(num_arms, ucb_rounds, bandit.arm_pull_tracker,
-                        bandit.avg_reward_tracker)
+                                    bandit.avg_reward_tracker)
         # find arm with max UCB
         arm_max_ucb = np.argmax(ucb_round)
         # Pull the arm with max ucb

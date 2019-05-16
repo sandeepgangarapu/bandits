@@ -9,6 +9,7 @@ class Bandit:
         self.trt_dist_list = trt_dist_list
         self.arm_pull_tracker = [0 for i in range(num_arms)]
         self.reward_tracker = []
+        self.arm_reward_tracker = [[] for i in range(num_arms)]
         self.arm_tracker = []
         self.total_reward_tracker = [0 for i in range(num_arms)]
         self.avg_reward_tracker = [0 for i in range(num_arms)]
@@ -30,6 +31,8 @@ class Bandit:
         self.arm_tracker.append(arm_num)
         # Track reward
         self.reward_tracker.append(reward)
+        # Track reward per arm
+        self.arm_reward_tracker[arm_num].append(reward)
         # add the arm_no that is pulled
         self.arm_pull_tracker[arm_num] = self.arm_pull_tracker[arm_num]+1
         # Add the reward to reward tracker
