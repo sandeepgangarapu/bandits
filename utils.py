@@ -30,9 +30,9 @@ def create_distributions_vanilla(num_arms):
     control_mean = 0
     variance = 1
     # this is not num_subjects
-    size = 100000
+    size = 10000
     # pick arms from uniform distribution between 0 and num_arms
-    arm_means = np.random.uniform(0, num_arms, num_arms-1)
+    arm_means = np.random.uniform(0, num_arms/10, num_arms-1)
     # we create lis of lis for all distributions
     dist_list = []
     # add control list
@@ -72,3 +72,17 @@ def lcb_value_naive(num_arms, num_rounds, arm_pull_tracker,
         conf_interval = sqrt((2*log(num_rounds))/(arm_pull_tracker[arm]))
         lcb[arm] = avg_reward_tracker[arm] - conf_interval
     return lcb
+
+
+def treatment_outcome_grouping(group, outcome):
+    """
+    :param group: list of allocated groups e.g., [0,1,0,2,3,1]
+    :param outcome: list of outcomes e.g., [1.5,2.1,3.4,5,9.34]
+    :return: outcome list_of_lis
+    """
+    unique_arms = np.unique(group)
+    outcome_lis_of_lis = []
+    for arm in unique_arms:
+        outcome_lis_of_lis.append([outcome[j] for j in range(len(group)) if group[j] == arm])
+
+    return outcome_lis_of_lis

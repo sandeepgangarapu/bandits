@@ -6,7 +6,7 @@ from bandits.bandit import Bandit
 from bandits.peeking.always_valid_p import always_valid_p_value_emp
 from bandits.utils import ucb_value_naive
 import pickle
-from bandits.peeking.utils import create_distributions_custom
+from bandits.utils import create_distributions_custom
 
 
 def stats(lis_of_lis, agg):
