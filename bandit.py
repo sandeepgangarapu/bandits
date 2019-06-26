@@ -49,5 +49,3 @@ class Bandit:
         self.regret.append(sum(self.arm_pull_tracker)*np.amax(
             self.avg_reward_tracker) - sum(
             self.total_reward_tracker))
-        
-

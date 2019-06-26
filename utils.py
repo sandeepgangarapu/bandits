@@ -26,11 +26,11 @@ trt1 = np.hstack([np.random.normal(loc=3, scale=1.0, size=num_obs),
 hte_trt_dist_list = [control, trt1]
 
 
-def create_distributions_vanilla(num_arms):
+def create_distributions_vanilla(num_arms, return_mean_var=False):
     control_mean = 0
     variance = 1
     # this is not num_subjects
-    size = 10000
+    size = 500
     # pick arms from uniform distribution between 0 and num_arms
     arm_means = np.random.uniform(0, num_arms/10, num_arms-1)
     # we create lis of lis for all distributions
@@ -41,16 +41,20 @@ def create_distributions_vanilla(num_arms):
     for i in arm_means:
         dis = np.random.normal(loc=i, scale=variance, size=size)
         dist_list.append(dis)
+    if return_mean_var:
+        arm_vars = [variance for i in range(num_arms)]
+        arm_means = np.insert(arm_means, 0, control_mean, axis=0)
+        return dist_list, arm_means, arm_vars
     return dist_list
 
 
-def create_distributions_custom(arm_means, arms_vars):
+def create_distributions_custom(arm_means, arm_vars):
     # this is not num_subjects
-    size = 100000
+    size = 500
     # pick arms from uniform distribution between 0 and num_arms
     # we create lis of lis for all distributions
     dist_list = []
-    for i, j in zip(arm_means, arms_vars):
+    for i, j in zip(arm_means, arm_vars):
         dis = np.random.normal(loc=i, scale=j, size=size)
         dist_list.append(dis)
     return dist_list
@@ -74,15 +78,23 @@ def lcb_value_naive(num_arms, num_rounds, arm_pull_tracker,
     return lcb
 
 
-def treatment_outcome_grouping(group, outcome):
+def treatment_outcome_grouping(group, outcome, group_outcome=False):
     """
     :param group: list of allocated groups e.g., [0,1,0,2,3,1]
     :param outcome: list of outcomes e.g., [1.5,2.1,3.4,5,9.34]
     :return: outcome list_of_lis
     """
-    unique_arms = np.unique(group)
+    unique_arms = np.sort(np.unique(group))
     outcome_lis_of_lis = []
     for arm in unique_arms:
         outcome_lis_of_lis.append([outcome[j] for j in range(len(group)) if group[j] == arm])
+        
+    if group_outcome:
+        return unique_arms, outcome_lis_of_lis
+    else:
+        return outcome_lis_of_lis
 
-    return outcome_lis_of_lis
+def lis_of_lis_to_dict(lis):
+    for item in lis:
+        pass
+    
