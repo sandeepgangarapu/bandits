@@ -2,22 +2,10 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 setwd("G:\\My Drive\\Research\\Contextual Bandits\\code\\bandits\\MAB_VAR")
-# ab <- read.csv("ab.csv")
-# peek <- read.csv("peek.csv")
-# mix <- read.csv("mix.csv")
-# ucb <- read.csv("ucb.csv")
-# 
-# ggplot(ab) + geom_point(aes(x=seq(1, length(ab$avg)), y=avg))
-# ggplot(peek) + geom_point(aes(x=seq(1, length(peek$avg)), y=avg))
-# ggplot(mix) + geom_point(aes(x=seq(1, length(mix$avg)), y=avg))
-# ggplot(ucb) + geom_point(aes(x=seq(1, length(ucb$avg)), y=avg))
 
 
 df <- read.csv("output.csv")
-# df <- data.frame(t(df))
-# colnames(df) <- c("ab_regret", "peek_regret", "ucb_regret", "mix_regret", "ab_mean_rmse",
-#                  "ab_var_rmse", "peek_mean_rmse", "peek_var_rmse", "ucb_mean_rmse", 
-#                  "ucb_var_rmse", "mix_mean_rmse", "mix_var_rmse")
+
 df$x = 1:nrow(df)
 df_regret <- df %>% select(x, ab_regret, ucb_regret, mix_regret) %>%
   gather("type", "regret", 2:4)

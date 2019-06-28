@@ -73,7 +73,7 @@ def rmse_outcome(group, outcome, true_mean, true_var):
         var_rmse = mean_squared_error(var_true, var_lis)
         mean_rmse_lis.append(mean_rmse)
         var_rmse_lis.append(var_rmse)
-    rmse_plot(group, outcome, true_mean, true_var)
+    # rmse_plot(group, outcome, true_mean, true_var)
     return mean_rmse_lis, var_rmse_lis
 
 
