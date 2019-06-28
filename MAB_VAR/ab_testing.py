@@ -4,7 +4,7 @@ from statsmodels.stats.power import TTestIndPower
 from bandits.utils import treatment_outcome_grouping
 
 
-def power_analysis(outcome_lis_of_lis, alpha=0.05, beta=0.2):
+def power_analysis(outcome_lis_of_lis, alpha=0.05, beta=0.1):
     """
     :param outcome_lis_of_lis: list of list of outcomes of all treatment groups
     :param alpha: significance level
@@ -26,11 +26,10 @@ def power_analysis(outcome_lis_of_lis, alpha=0.05, beta=0.2):
     # detect the smallest effect of the arm in a/b testing
     min_effect_size = np.min(np.abs(effect_size_lis))
     # find sample size using power analysis if sample_size is none
-    
+    # this sample size is for 1 arm
     sample_size = TTestIndPower().solve_power(effect_size=min_effect_size,
                                               power=1-beta, alpha=alpha)
     sample_size = int(sample_size)
-    print(sample_size)
     return sample_size
 
 
@@ -47,7 +46,7 @@ def ab_testing(outcome_lis_of_lis, sample_size=None, post_allocation=False):
     if not sample_size:
         sample_size = min(power_analysis(outcome_lis_of_lis),
                           len(outcome_lis_of_lis[0]))
-
+    
     # # we now subset so that we only run A/B testing until sample size runs out
     # ab_lis_of_lis = []
     # for group in outcome_lis_of_lis:
@@ -59,9 +58,9 @@ def ab_testing(outcome_lis_of_lis, sample_size=None, post_allocation=False):
     # in this method we assign one by one to all treatment arms
     # alternatively and realize the outcomes until we are exhausted of subjects
     for subject in range(sample_size):
-        arm = np.random.randint(0,num_arms)
-        group_assigned.append(arm)
-        outcome.append(outcome_lis_of_lis[arm][subject])
+        for arm in range(num_arms):
+            group_assigned.append(arm)
+            outcome.append(outcome_lis_of_lis[arm][subject])
     
     ab_lis_of_lis = treatment_outcome_grouping(group_assigned, outcome)
     

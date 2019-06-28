@@ -48,14 +48,14 @@ def create_distributions_vanilla(num_arms, return_mean_var=False):
     return dist_list
 
 
-def create_distributions_custom(arm_means, arm_vars):
+def create_distributions_custom(arm_means, arm_vars, num_subjects):
     # this is not num_subjects
-    size = 500
+    size = num_subjects
     # pick arms from uniform distribution between 0 and num_arms
     # we create lis of lis for all distributions
     dist_list = []
     for i, j in zip(arm_means, arm_vars):
-        dis = np.random.normal(loc=i, scale=j, size=size)
+        dis = np.random.normal(loc=i, scale=sqrt(j), size=size)
         dist_list.append(dis)
     return dist_list
 

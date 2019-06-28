@@ -3,7 +3,7 @@ from bandits.utils import treatment_outcome_grouping
 from bandits.utils import ucb_value_naive
 
 
-def vanilla_mixed_UCB(outcome_lis_of_lis, perc_ab=0.3):
+def vanilla_mixed_UCB(outcome_lis_of_lis, perc_ab=0.2):
     """
     :param outcome_lis_of_lis: list of list of outcomes of all treatment groups
     :param perc_ab: percentage of times that the allocation must be made to
@@ -26,14 +26,14 @@ def vanilla_mixed_UCB(outcome_lis_of_lis, perc_ab=0.3):
         group_assigned.append(arm)
         outcome.append(temp_outcome_lis_of_lis[arm][0])
         temp_outcome_lis_of_lis[arm] = temp_outcome_lis_of_lis[arm][1:]
-    
+        
     # for now, lets assume all groups have same no. of subjects
     for subject in range(len(outcome_lis_of_lis[0])-num_arms):
         # perc_ab of the time, we do AB testing otherwise bandits
         if np.random.uniform(0, 1) < perc_ab:
             # now that we are inside A/B testing, we randomly pick the arm
             # and assign a subject to that arm
-            arm = np.random.randint(0,num_arms)
+            arm = np.random.randint(0, num_arms)
             outcome.append(temp_outcome_lis_of_lis[arm][0])
             temp_outcome_lis_of_lis[arm] = temp_outcome_lis_of_lis[arm][1:]
         else:
@@ -56,6 +56,7 @@ def vanilla_mixed_UCB(outcome_lis_of_lis, perc_ab=0.3):
             outcome.append(temp_outcome_lis_of_lis[arm_max_ucb][0])
             temp_outcome_lis_of_lis[arm_max_ucb] = temp_outcome_lis_of_lis[
                 arm_max_ucb][1:]
+            
     return group_assigned, outcome
 
 
