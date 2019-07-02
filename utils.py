@@ -78,7 +78,8 @@ def lcb_value_naive(num_arms, num_rounds, arm_pull_tracker,
     return lcb
 
 
-def treatment_outcome_grouping(group, outcome, group_outcome=False):
+def treatment_outcome_grouping(group, outcome, group_outcome=False,
+                               all_arms=False, num_arms = None):
     """
     :param group: list of allocated groups e.g., [0,1,0,2,3,1]
     :param outcome: list of outcomes e.g., [1.5,2.1,3.4,5,9.34]
@@ -91,6 +92,13 @@ def treatment_outcome_grouping(group, outcome, group_outcome=False):
         
     if group_outcome:
         return unique_arms, outcome_lis_of_lis
+    elif all_arms:
+        arms = list(range(num_arms))
+        outcome_lis_of_lis = []
+        for arm in arms:
+            outcome_lis_of_lis.append(
+                [outcome[j] for j in range(len(group)) if group[j] == arm])
+        return arms, outcome_lis_of_lis
     else:
         return outcome_lis_of_lis
 

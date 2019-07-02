@@ -42,10 +42,7 @@ class Bandit:
         # Update max_reward_arms
         self.max_reward = np.amax(self.avg_reward_tracker)
         # note that this is a list
-        max_reward_arms = np.argwhere(self.avg_reward_tracker ==
-                                      self.max_reward).flatten().tolist()
-        # There might be two arms with max rewards. So we choose one at random
-        self.max_reward_arm = np.random.choice(max_reward_arms)
+        self.max_reward_arm = np.argmax(self.avg_reward_tracker)
         self.regret.append(sum(self.arm_pull_tracker)*np.amax(
             self.avg_reward_tracker) - sum(
             self.total_reward_tracker))
