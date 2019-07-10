@@ -100,8 +100,8 @@ def rmse_plot(group, outcome, true_mean, true_var):
         for arm in arms:
             mean_true.append(true_mean[arm])
             var_true.append(true_var[arm])
-        mean_rmse = mean_squared_error(mean_true, mean_lis)
-        var_rmse = mean_squared_error(var_true, var_lis)
+        mean_rmse = sqrt(mean_squared_error(mean_true, mean_lis))
+        var_rmse = sqrt(mean_squared_error(var_true, var_lis))
         mean_rmse_lis.append(mean_rmse)
         var_rmse_lis.append(var_rmse)
     
@@ -112,5 +112,12 @@ def rmse_plot(group, outcome, true_mean, true_var):
     plt.show()
     return mean_rmse_lis, var_rmse_lis
 
-    
-    
+
+def var_stats(group, outcome):
+    var_lis_of_lis = []
+    for i in range(1, len(group) + 1):
+        arms, outcome_lis_of_lis = treatment_outcome_grouping(
+            group[:i], outcome[:i], group_outcome=False, all_arms=True, num_arms = 10)
+        var_lis = [np.var(lis) for lis in outcome_lis_of_lis]
+        var_lis_of_lis.append(var_lis)
+    return np.array(var_lis_of_lis).flatten()

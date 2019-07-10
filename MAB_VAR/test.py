@@ -11,3 +11,7 @@ arm_pull_tracker = [group.count(arm) for arm in range(
                 num_arms)]
 
 print(arm_pull_tracker)
+arms, outcome_lis_of_lis = treatment_outcome_grouping(
+            group, outcome, group_outcome=False, all_arms=True, num_arms = 10)
+
+print(arms, outcome_lis_of_lis)

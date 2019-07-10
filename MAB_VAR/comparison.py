@@ -5,15 +5,16 @@ from bandits.MAB_VAR.var_mix_prop_thompson import mixed_prop_thompson
 from bandits.algorithms.ucb_naive import ucb_naive
 from bandits.algorithms.epsilongreedy import epsilon_greedy
 from bandits.bandit import Bandit
-from bandits.MAB_VAR.stats import regret_outcome, rmse_outcome
+from bandits.MAB_VAR.stats import regret_outcome, rmse_outcome, var_stats
 import pandas as pd
 import numpy as np
 from math import sqrt
 
 
 if __name__ == '__main__':
-    
-    np.random.seed(seed=32353534)
+
+    # seeds 3523
+    np.random.seed(seed=3523)
     # knobs
     save_output = True
     num_arms = 10
@@ -21,6 +22,7 @@ if __name__ == '__main__':
     arm_means = [0]
     other_means = np.random.uniform(0, 5, num_arms-1)
     arm_means.extend(other_means)
+    arm_means[3] = 0.35
     print(np.argmax(arm_means))
     print(arm_means)
     arm_vars = np.random.uniform(0, 5, num_arms)
@@ -90,8 +92,29 @@ if __name__ == '__main__':
     df2 = pd.DataFrame(group_assignment).T
     df2.columns = ["ab_group", "ucb_group", "eps_group", "mix_group",
                    "mix_prop_group"]
+
+    group_assignment = [ab_group, ucb_group, eps_group, mix_group,
+                        mix_prop_group]
+    df2 = pd.DataFrame(group_assignment).T
+    df2.columns = ["ab_group", "ucb_group", "eps_group", "mix_group",
+                   "mix_prop_group"]
+
+    # VARiance tracking
+    ab_var, ucb_var, eps_var, mix_var, mix_prop_var = map(
+        var_stats,
+        [ab_group, ucb_group, eps_group, mix_group, mix_prop_group],
+        [ab_outcome, ucb_outcome, eps_outcome, mix_outcome, mix_prop_outcome])
+
+
+    arm = np.tile([i for i in range(num_arms)], len(ab_group))
+
+    var_df = [arm, ab_var, ucb_var, eps_var, mix_var, mix_prop_var]
+    df3 = pd.DataFrame(var_df).T
+    df3.columns = ["arm", "ab_var", "ucb_var", "eps_var", "mix_var", "mix_prop_var"]
+
     if save_output:
         df1.to_csv("output.csv", index=False)
         df2.to_csv("groups.csv", index=False)
+        df3.to_csv("var.csv", index=False)
 
 
