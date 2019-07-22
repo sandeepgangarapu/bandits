@@ -2,6 +2,9 @@ from bandits.MAB_VAR.ab_testing import ab_testing
 from bandits.MAB_VAR.vanilla_mix import vanilla_mixed_UCB
 from bandits.MAB_VAR.var_mix_thompson import mixed_thompson
 from bandits.MAB_VAR.var_mix_prop_thompson import mixed_prop_thompson
+from bandits.MAB_VAR.treat_prop_thompson import trt_mixed_prop_thompson
+from bandits.MAB_VAR.treat_thomp import treat_mixed_thompson
+from bandits.MAB_VAR.trt_prop_variance import trt_prop_variance_est
 from bandits.algorithms.ucb_naive import ucb_naive
 from bandits.algorithms.epsilongreedy import epsilon_greedy
 from bandits.bandit import Bandit
@@ -14,7 +17,7 @@ from math import sqrt
 if __name__ == '__main__':
 
     # seeds 3523
-    np.random.seed(seed=3523)
+    np.random.seed(seed=23423)
     # knobs
     save_output = True
     num_arms = 10
@@ -30,7 +33,7 @@ if __name__ == '__main__':
     perc_ab_for_mixucb = 0.2
     ab_group, ab_outcome = ab_testing(arm_means, arm_vars,
                                       num_subjects, post_allocation=True)
-    mix_group, mix_outcome = mixed_thompson(arm_means, arm_vars,
+    trt_mix_prop_group, trt_mix_prop_outcome = trt_prop_variance_est(arm_means, arm_vars,
                                                num_subjects,
                                                perc_ab=perc_ab_for_mixucb)
 
@@ -58,10 +61,11 @@ if __name__ == '__main__':
                                 num_rounds=num_subjects, num_arms=num_arms)
     eps_group, eps_outcome = eps_bandit.arm_tracker, eps_bandit.reward_tracker
     print("---------------Calculating Regret---------------")
-    ab_regret, ucb_regret, eps_regret, mix_regret, mix_prop_regret = map(
+    ab_regret, ucb_regret, eps_regret, trt_prop_mix_regret, mix_prop_regret = \
+        map(
         regret_outcome,
-        [ab_group, ucb_group, eps_group, mix_group, mix_prop_group],
-        [ab_outcome, ucb_outcome, eps_outcome,  mix_outcome, mix_prop_outcome])
+        [ab_group, ucb_group, eps_group, trt_mix_prop_group, mix_prop_group],
+        [ab_outcome, ucb_outcome, eps_outcome,  trt_mix_prop_outcome, mix_prop_outcome])
     print("---------------Calculating RMSE---------------")
     ab_mean_rmse, ab_var_rmse = rmse_outcome(ab_group, ab_outcome,
                                              arm_means, arm_vars)
@@ -69,41 +73,42 @@ if __name__ == '__main__':
                                              arm_means, arm_vars)
     eps_mean_rmse, eps_var_rmse = rmse_outcome(eps_group, eps_outcome,
                                                arm_means, arm_vars)
-    mix_mean_rmse, mix_var_rmse = rmse_outcome(mix_group, mix_outcome,
+    trt_prop_mix_mean_rmse, trt_prop_mix_var_rmse = rmse_outcome(trt_mix_prop_group,
+                                                        trt_mix_prop_outcome,
                                              arm_means, arm_vars)
     mix_prop_mean_rmse, mix_prop_var_rmse = rmse_outcome(mix_prop_group,
                                                          mix_prop_outcome,
                                                          arm_means, arm_vars)
     
     
-    output = [ab_regret, ucb_regret, eps_regret, mix_regret, mix_prop_regret,
+    output = [ab_regret, ucb_regret, eps_regret, trt_prop_mix_regret, mix_prop_regret,
               ab_mean_rmse, ab_var_rmse, ucb_mean_rmse, ucb_var_rmse,
-              eps_mean_rmse, eps_var_rmse, mix_mean_rmse, mix_var_rmse,
+              eps_mean_rmse, eps_var_rmse, trt_prop_mix_mean_rmse, trt_prop_mix_var_rmse,
               mix_prop_mean_rmse, mix_prop_var_rmse]
     
     df1 = pd.DataFrame(output).T
-    df1.columns = ["ab_regret", "ucb_regret", "eps_regret", "mix_regret",
+    df1.columns = ["ab_regret", "ucb_regret", "eps_regret", "trt_prop_mix_regret",
                    "mix_prop_regret", "ab_mean_rmse",
                    "ab_var_rmse", "ucb_mean_rmse", "ucb_var_rmse", "eps_mean_rmse",
-                   "eps_var_rmse", "mix_mean_rmse", "mix_var_rmse", "mix_prop_mean_rmse", "mix_prop_var_rmse"]
+                   "eps_var_rmse", "trt_prop_mix_mean_rmse", "trt_prop_mix_var_rmse", "mix_prop_mean_rmse", "mix_prop_var_rmse"]
     
-    group_assignment = [ab_group, ucb_group, eps_group, mix_group,
+    group_assignment = [ab_group, ucb_group, eps_group, trt_mix_prop_group,
                         mix_prop_group]
     df2 = pd.DataFrame(group_assignment).T
-    df2.columns = ["ab_group", "ucb_group", "eps_group", "mix_group",
+    df2.columns = ["ab_group", "ucb_group", "eps_group", "trt_mix_prop_group",
                    "mix_prop_group"]
 
-    group_assignment = [ab_group, ucb_group, eps_group, mix_group,
+    group_assignment = [ab_group, ucb_group, eps_group, trt_mix_prop_group,
                         mix_prop_group]
     df2 = pd.DataFrame(group_assignment).T
-    df2.columns = ["ab_group", "ucb_group", "eps_group", "mix_group",
+    df2.columns = ["ab_group", "ucb_group", "eps_group", "trt_mix_prop_group",
                    "mix_prop_group"]
 
     # VARiance tracking
     ab_var, ucb_var, eps_var, mix_var, mix_prop_var = map(
         var_stats,
-        [ab_group, ucb_group, eps_group, mix_group, mix_prop_group],
-        [ab_outcome, ucb_outcome, eps_outcome, mix_outcome, mix_prop_outcome])
+        [ab_group, ucb_group, eps_group, trt_mix_prop_group, mix_prop_group],
+        [ab_outcome, ucb_outcome, eps_outcome, trt_mix_prop_outcome, mix_prop_outcome])
 
 
     arm = np.tile([i for i in range(num_arms)], len(ab_group))
