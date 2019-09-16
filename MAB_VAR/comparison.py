@@ -1,10 +1,6 @@
-from bandits.MAB_VAR.ab_testing import ab_testing
-from bandits.MAB_VAR.vanilla_mix import vanilla_mixed_UCB
-from bandits.MAB_VAR.var_mix_thompson import mixed_thompson
-from bandits.MAB_VAR.var_mix_prop_thompson import mixed_prop_thompson
-from bandits.MAB_VAR.treat_prop_thompson import trt_mixed_prop_thompson
-from bandits.MAB_VAR.treat_thomp import treat_mixed_thompson
-from bandits.MAB_VAR.trt_prop_variance import trt_prop_variance_est
+from bandits.MAB_VAR.algorithms.ab_testing import ab_testing
+from bandits.MAB_VAR.algorithms.trt_prop_variance import trt_prop_variance_est
+from bandits.MAB_VAR.algorithms.var_mix_prop_thompson import mixed_prop_thompson
 from bandits.algorithms.ucb_naive import ucb_naive
 from bandits.algorithms.epsilongreedy import epsilon_greedy
 from bandits.bandit import Bandit
@@ -31,22 +27,32 @@ if __name__ == '__main__':
     arm_vars = np.random.uniform(0, 5, num_arms)
     print(arm_vars)
     perc_ab_for_mixucb = 0.2
+    outcome_lis_of_lis = []
+    size = 100000
+    for arm in range(num_arms):
+        outcome_lis_of_lis.append(np.random.normal(loc=arm_means[arm],
+                                                   scale=sqrt(arm_vars[arm]),
+                                                   size=size))
+        
+        
     ab_group, ab_outcome = ab_testing(arm_means, arm_vars,
                                       num_subjects, post_allocation=True)
-    trt_mix_prop_group, trt_mix_prop_outcome = trt_prop_variance_est(arm_means, arm_vars,
-                                               num_subjects,
-                                               perc_ab=perc_ab_for_mixucb)
 
-    mix_prop_group, mix_prop_outcome = mixed_prop_thompson(arm_means, arm_vars,
+    trt_prop_var_bandit = Bandit(name='trt_prop_var_bandit', num_arms=num_arms,
+                        trt_dist_list=outcome_lis_of_lis)
+    
+    trt_mix_prop_group, trt_mix_prop_outcome = trt_prop_variance_est(
+        trt_prop_var_bandit, num_subjects, perc_ab=perc_ab_for_mixucb)
+
+    mix_bandit = Bandit(name='mix_bandit', num_arms=num_arms,
+                                 trt_dist_list=outcome_lis_of_lis)
+    
+    mix_prop_group, mix_prop_outcome = mixed_prop_thompson(mix_bandit,
                                             num_subjects,
                                             perc_ab=perc_ab_for_mixucb)
     
     print("---------------Running UCB Bandit---------------")
-    outcome_lis_of_lis = []
-    size = 10000
-    for arm in range(num_arms):
-        outcome_lis_of_lis.append(np.random.normal(loc=arm_means[arm],
-                                        scale=sqrt(arm_vars[arm]), size=size))
+    
             
     ucb_bandit = Bandit(name='ucb_naive', num_arms=num_arms,
                         trt_dist_list=outcome_lis_of_lis)

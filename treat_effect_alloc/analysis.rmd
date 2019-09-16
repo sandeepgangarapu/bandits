@@ -1,0 +1,61 @@
+---
+output:
+  pdf_document: default
+---
+```{r}
+#install.packages("cumstats")
+setwd("G:\\My Drive\\Research\\Contextual Bandits\\code\\bandits\\treat_effect_alloc")
+
+library(cumstats)
+library(ggplot2)
+```
+
+# Hypothesis
+
+### There are two outcome distributions. Control distribution is N(m_0, s_0^2), Treatment distribution is N(m_1, s_1^2). The treatment effect distribution should be N(m_1-m_0, s_0^2+s_1^2)
+
+In order to estimate treatment effect distribution accurately, There are two ways
+1. Would sampling from both distributions equally be able to estimate more accurately
+2. Would sampling from both distributions unequally be able to estimate more accurately
+
+Is there a difference?
+
+```{r, warning=FALSE}
+x = c(1:1000)
+con = rnorm(100,0,1)
+trt = rnorm(100,1,4)
+
+
+func <- function(len, prop_con){
+  varv = vector()
+  out1 = vector()
+  out2 = vector()
+  for(i in 1:len){
+    if(sample(c(1,2), 1, replace = TRUE, prob=c(prop_con,1-prop_con))==1){
+      out1 = c(out1, rnorm(1,0,1))
+      varv = c(varv, var(out1)+var(out2))
+    } else {
+      out2 = c(out2, rnorm(1, 1, 4))
+      varv = c(varv, var(out1)+var(out2))}
+    }
+  return(varv)
+}
+
+
+equal = func(1000, 0.5)
+unequal <- func(1000, 0.95)
+
+print(unequal)
+
+
+error_ca = 17-equal
+error_cb = 17-unequal
+
+
+df = data.frame(x=x, error_ca = error_ca, error_cb=error_cb)
+ggplot(df) + geom_line(aes(x,error_ca), color='blue') + geom_line(aes(x,error_cb), color='red') 
+
+# + ggsave("Same mean different variance.png")
+
+```
+
