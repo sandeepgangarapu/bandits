@@ -77,6 +77,35 @@ def rmse_outcome(group, outcome, true_mean, true_var):
     return mean_rmse_lis, var_rmse_lis
 
 
+def mse_outcome(group, outcome, true_mean, true_var):
+    """
+    :param group: list of group numbers
+    :param outcome: list of outcomes
+    :param true_mean: list of true means if arms
+    :param true_var: list of tru variances of arms
+    :return: mean rmse and variance rmse lists
+    """
+    mean_mse_lis = []
+    var_mse_lis = []
+    for i in range(1, len(group)+1):
+        arms, outcome_lis_of_lis = treatment_outcome_grouping(
+            group[:i], outcome[:i], group_outcome=True)
+        mean_lis = [np.mean(lis) for lis in outcome_lis_of_lis]
+        var_lis = [np.var(lis) for lis in outcome_lis_of_lis]
+        mean_true = []
+        var_true = []
+        for arm in arms:
+            mean_true.append(true_mean[arm])
+            var_true.append(true_var[arm])
+        mean_mse = mean_squared_error(mean_true, mean_lis)
+        var_mse = mean_squared_error(var_true, var_lis)
+        mean_mse_lis.append(mean_mse)
+        var_mse_lis.append(var_mse)
+    # rmse_plot(group, outcome, true_mean, true_var)
+    return mean_mse_lis, var_mse_lis
+
+
+
 def rmse_plot(group, outcome, true_mean, true_var):
     mean_rmse_lis = []
     var_rmse_lis = []

@@ -17,6 +17,7 @@ class Bandit:
         self.max_reward_arm = 0
         self.regret = []
         self.var_est_tracker = [0.0 for i in range(num_arms)]
+        self.var_of_var_est_tracker = [0.0 for i in range(num_arms)]
         self.var_change_tracker = [0.0 for i in range(num_arms)]
         self.trt_effect_est_tracker = [0.0 for i in range(num_arms - 1)]
         self.trt_effect_var_est_tracker = [0.0 for i in range(num_arms - 1)]
@@ -57,28 +58,33 @@ class Bandit:
         
         # var change tracker should come before var tracker
         self.var_change_tracker[arm_num] = abs(np.var(self.arm_reward_tracker[
-                                                          arm_num]) -
-                                               self.var_change_tracker[
+                                                          arm_num], ddof =1) -
+                                               self.var_est_tracker[
                                                    arm_num])
         
         self.var_est_tracker[arm_num] = np.var(
-            self.arm_reward_tracker[arm_num])
+            self.arm_reward_tracker[arm_num], ddof =1)
+
+        self.var_of_var_est_tracker[arm_num] = 2*self.var_est_tracker[
+            arm_num]/(self.arm_pull_tracker[arm_num]-1)
         
         if arm_num != 0:
             # treatment effect tracker has no control arm
             self.trt_effect_est_tracker[arm_num-1] = \
                 self.avg_reward_tracker[arm_num] - self.avg_reward_tracker[0]
             
+            # treatment effect variance is sum of variance of outcome dist
             self.trt_effect_var_est_tracker[arm_num-1] = \
             self.var_est_tracker[arm_num] \
             + self.var_est_tracker[0]
             
-            if self.arm_pull_tracker[0]-1 and self.arm_pull_tracker[
-                    arm_num]-1 !=0:
+            # variance of variance est
+            if self.arm_pull_tracker[0] and self.arm_pull_tracker[
+                    arm_num] !=0:
                 self.trt_effect_var_of_var_est_tracker[arm_num-1] = \
                 ((self.var_est_tracker[arm_num] ** 2) / (self.arm_pull_tracker[
-                arm_num]-1)) + ((self.var_est_tracker[0] ** 2) /
-                                  (self.arm_pull_tracker[0]-1))
+                arm_num])) + ((self.var_est_tracker[0] ** 2) /
+                                  (self.arm_pull_tracker[0]))
             else:
                 self.trt_effect_var_of_var_est_tracker[arm_num-1] = 0
             
@@ -95,11 +101,11 @@ class Bandit:
             if np.max(self.arm_pull_tracker) > 2:
                 self.trt_effect_var_of_var_est_tracker = \
                     [((self.var_est_tracker[arm] ** 2) /
-                      (self.arm_pull_tracker[arm]-1)) +
+                      (self.arm_pull_tracker[arm])) +
                      ((self.var_est_tracker[0] ** 2) /
-                      (self.arm_pull_tracker[0]-1))
-                     if self.arm_pull_tracker[0]-1 and self.arm_pull_tracker[
-                        arm] - 1 != 0 else 0
+                      (self.arm_pull_tracker[0]))
+                     if self.arm_pull_tracker[0] and self.arm_pull_tracker[
+                        arm] != 0 else 0
                      for arm in range(1, self.num_arms)]
             else:
                 self.trt_effect_var_of_var_est_tracker = [0 for arm in range(
