@@ -1,0 +1,286 @@
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+```
+
+
+
+
+```{r echo=FALSE, cache=TRUE}
+setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\ucb_inf\\Output")
+
+
+group_outcome <- read.csv("group_outcome_sim.csv") %>% 
+  group_by(ite,alg) %>% mutate(x=row_number()) %>%
+  ungroup()
+
+regret_mse <- read.csv("regret_mse.csv") %>% 
+  group_by(ite,alg) %>% mutate(x=row_number()) %>% ungroup()
+
+
+xi_group <- read.csv("group_eps_sim.csv")
+
+xi_regret <- read.csv("regret_mse_eps_sim.csv")
+
+# Setting new WD so that results are saved in different folder
+setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\ucb_inf\\results")
+
+
+```
+
+# Group allocation and regret comparison graphs
+
+
+```{r echo=FALSE}
+
+
+df <- group_outcome %>% filter(ite==0) 
+
+df_regret <- regret_mse %>% filter(ite==0)
+
+ggplot(df) + geom_point(aes(x=x, y=factor(group)), shape=1, alpha=0.6) + facet_grid(alg ~.) + theme_bw() +
+  labs(x='Time Period', y = 'Group') +
+  theme(axis.text.y = element_text(size = 6)) +   theme(axis.text.y = element_text(size = rel(1))) 
+# +   ggsave("group_all.png", width = 10, height = 6, dpi=300, units="in")
+
+
+ggplot(df_regret) + geom_line(aes(x=x, y=regret, color=alg)) + labs(title = "Regret") +
+  ggsave("regret_eps_n.png", width = 10, height = 6, dpi=300, units="in")
+
+
+ggplot(df_regret) + geom_line(aes(x=x, y=mean_mse, color=alg)) + labs(title = "MSE of Mean")
+
+
+ggplot(df_regret%>% filter(x<100)) + geom_line(aes(x=x, y=mean_mse, color=alg)) + labs(title = "MSE of Mean Zoomed") + ylim(0, 8) 
+
+```
+
+
+
+# Average number of allocations for each "Sub Optimal" group in each algorithm
+
+## If the horizon is just 2000 allocations
+
+```{r echo=FALSE}
+
+df <- group_outcome %>% filter(x<2000) %>% group_by(alg, group, ite) %>% count() %>% group_by(alg, group) %>% summarise(mean_alloc = mean(n))
+
+ggplot(df %>% filter(group!=8), aes(x=alg, y=mean_alloc)) + geom_bar(stat="identity") + facet_wrap(group ~.)
+
+```
+
+
+## If the horizon is 8000 allocations
+
+```{r echo=FALSE}
+
+df <- group_outcome %>% group_by(alg, group, ite) %>% count() %>% group_by(alg, group) %>% summarise(mean_alloc = mean(n))
+
+ggplot(df %>% filter(group!=8), aes(x=alg, y=mean_alloc)) + geom_bar(stat="identity") + facet_wrap(group ~.)
+
+```
+
+
+
+# results for xi simulation for ucb-inf
+
+$\eta = \frac{\sum{\frac{\sigma^2}{n}}}{\xi K}$
+$\epsilon_n = \frac{\eta}{1+\eta}$
+
+## Other possibility of epsilon 
+$\epsilon_n = tanh(\eta)$
+
+
+```{r echo=FALSE}
+
+xi_group <- xi_group %>% mutate(chi = round(chi,2)) %>%
+  group_by(chi) %>% mutate(x=row_number()) %>% ungroup()
+
+
+ggplot(xi_group) +
+  geom_point(aes(x=x, y=factor(group)), shape=1, alpha=0.6) +
+  facet_grid(chi ~.) + theme_bw() +
+  labs(x='Time Period', y = 'Group') +
+  theme(axis.text.y = element_text(size = 6)) + 
+  theme(axis.text.y = element_text(size = rel(1))) 
+
+xi_regret <- xi_regret %>% 
+  mutate(chi = factor(round(chi,2))) %>% group_by(chi) %>% 
+  mutate(x=row_number())
+
+ggplot(xi_regret) + 
+  geom_line(aes(x=x, y=regret, color=chi)) + theme_bw()
+
+ggplot(xi_regret %>% filter(x<500)) + 
+  geom_line(aes(x=x, y=mean_mse, color=chi))
+
+```
+
+
+# Small sample properties of algortihms
+
+
+```{r echo=FALSE}
+
+means = c(2.9013279, 1.01096483, 2.20275192, 0.25, 3.87932978, 3.44364749,
+          0.4534811, 1.86620435, 4.40527515, 3)
+
+vars = c(4.57899815, 2.90258678, 4.77255198, 1.56356794, 4.65556446, 0.89617444,
+         3.26568194, 3.43573849, 1, 4.83549103)
+
+```
+
+
+
+# best arm bias
+
+```{r echo=FALSE}
+
+# calculate bias
+
+# Best arm of only AB and UCB
+best <- group_outcome %>%  filter(group==which.max(means)-1) %>%
+  group_by(alg, ite) %>% summarise(mn = mean(outcome)) %>% 
+  mutate(bias = mn-max(means)) %>% group_by(alg) %>%
+  summarise(Bias = mean(bias), sd = sd(bias)/sqrt(n()))
+
+
+ggplot(best, aes(x=alg, y=Bias)) + geom_bar(stat="identity") +
+  geom_errorbar(aes(ymin=Bias-qnorm(0.975)*sd, ymax=Bias+qnorm(0.975)*sd), width=0.2) +
+  theme_bw()  + ylim(-0.1, 0.1) + theme(axis.title.x=element_blank()) +
+  geom_hline(yintercept = 0) + labs(title = "Bias of best arm") +
+  ggsave("best_bias_2.png", width = 5, height = 5, scale = 0.7, units="in")
+
+
+
+```
+
+# Worst arm bias
+
+```{r echo=FALSE}
+
+
+# Worst arm of only AB and UCB
+
+
+worst <- group_outcome %>%  filter(group==which.min(means)-1)  %>%
+  group_by(alg, ite) %>% summarise(mn = mean(outcome)) %>% 
+  mutate(bias = mn-min(means)) %>% group_by(alg) %>%
+  summarise(Bias = mean(bias), sd = sd(bias)/sqrt(n()))
+
+
+ggplot(worst, aes(x=alg, y=Bias)) + geom_bar(stat="identity") +
+  geom_errorbar(aes(ymin=Bias-qnorm(0.975)*sd, ymax=Bias+qnorm(0.975)*sd), width=0.2) +
+  theme_bw()  + ylim(-1, 1) + theme(axis.title.x=element_blank()) +
+  geom_hline(yintercept = 0) + labs(title = "Bias of worst arm") +
+  ggsave("worst_bias_2.png", width = 5, height = 5, scale = 0.7, units="in")
+
+
+
+```
+
+
+
+
+```{r echo=FALSE}
+
+
+# mse of best estimate
+
+# Best arm of only AB and UCB
+best <- group_outcome %>%  filter(group==which.max(means)-1) %>%
+  group_by(alg, ite) %>% summarise(mn = mean(outcome)) %>% group_by(alg) %>%
+  summarise(m=mean(mn), v=var(mn)) %>% mutate(mse=(m-max(means))^2+v)
+
+
+ggplot(best, aes(x=alg, y=mse)) + geom_bar(stat="identity") +
+  theme_bw()  + ylim(-0.01, 0.01) + theme(axis.title.x=element_blank()) +
+  geom_hline(yintercept = 0) + labs(title = "MSE of best arm") +
+  ggsave("best_mse_2.png", width = 5, height = 5, scale = 0.7, units="in")
+
+
+# worst arm of only AB and UCB
+worst <- group_outcome %>%  filter(group==which.min(means)-1) %>%
+  group_by(alg, ite) %>% summarise(mn = mean(outcome)) %>% group_by(alg) %>%
+  summarise(m=mean(mn), v=var(mn)) %>% mutate(mse=(m-min(means))^2+v)
+
+
+ggplot(worst, aes(x=alg, y=mse)) + geom_bar(stat="identity") +
+  theme_bw()  + ylim(-1.5, 1.5) + theme(axis.title.x=element_blank()) +
+  geom_hline(yintercept = 0) + labs(title = "MSE of worst arm") +
+  ggsave("worst_mse_2.png", width = 5, height = 5, scale = 0.7, units="in")
+
+```
+
+
+
+
+
+# Normality of worst arm - estimates (mean of worst arm = 0.25)
+
+```{r echo=FALSE}
+
+# estimate normality sim
+
+library(rcompanion)
+worst_ab <- group_outcome %>%  filter(group==which.min(means)-1 & alg=='ab') %>%
+  group_by(ite) %>% summarise(mn = mean(outcome)) 
+
+plotNormalHistogram(worst_ab$mn, prob = FALSE, col = "gray", main = "Estimates of Worst arm for AB Testing",
+                    linecol = "blue", lwd = 2, length = 1000)
+
+
+
+worst_ucb <- group_outcome %>%  filter(group==which.min(means)-1 & alg=='ucb') %>%
+  group_by(ite) %>% summarise(mn = mean(outcome)) 
+
+plotNormalHistogram(worst_ucb$mn, prob = FALSE, col = "gray", main = "Estimates of Worst arm for UCB",
+                    linecol = "blue", lwd = 2, length = 100)
+
+
+
+
+worst_ucb_inf <- group_outcome %>%  filter(group==which.min(means)-1 & alg=='ucb_inf_eps') %>%
+  group_by(ite) %>% summarise(mn = mean(outcome)) 
+
+plotNormalHistogram(worst_ucb_inf$mn, prob = FALSE, col = "gray", main = "Estimates of Worst arm for UCB-INF-EPS",
+                    linecol = "blue", lwd = 2, length = 100)
+
+
+shapiro.test(worst_ab$mn)
+shapiro.test(worst_ucb$mn)
+shapiro.test(worst_ucb_inf$mn)
+
+```
+
+
+```{r echo=FALSE}
+worst_ab <- group_outcome %>%  filter(group==6 & alg=='ab') %>%
+  group_by(ite) %>% summarise(mn = mean(outcome)) 
+
+plotNormalHistogram(worst_ab$mn, prob = FALSE, col = "gray", main = "Estimates of Worst arm for AB Testing",
+                    linecol = "blue", lwd = 2, length = 1000)
+
+
+
+worst_ucb <- group_outcome %>%  filter(group==6 & alg=='ucb') %>%
+  group_by(ite) %>% summarise(mn = mean(outcome)) 
+
+plotNormalHistogram(worst_ucb$mn, prob = FALSE, col = "gray", main = "Estimates of Worst arm for UCB",
+                    linecol = "blue", lwd = 2, length = 100)
+
+
+
+
+worst_ucb_inf <- group_outcome %>%  filter(group==6 & alg=='ucb_inf_eps') %>%
+  group_by(ite) %>% summarise(mn = mean(outcome)) 
+
+plotNormalHistogram(worst_ucb_inf$mn, prob = FALSE, col = "gray", main = "Estimates of Worst arm for UCB-INF-EPS",
+                    linecol = "blue", lwd = 2, length = 100)
+
+
+shapiro.test(worst_ab$mn)
+shapiro.test(worst_ucb$mn)
+shapiro.test(worst_ucb_inf$mn)
+```
