@@ -1,14 +1,16 @@
 import pandas as pd
 
-a = {'ite': [1,2,3,1,2,3],
+df = pd.read_csv("G:\My Drive\Projects\COVID\pincode_data.csv")
 
-'gp':['a','a','b','b','a','b'],
-'val':[1,1,1,1,1,1]}
+df_state = df.loc
+a = {}
+for i,j in zip(df.pincode, df.statename):
+    a[i] = j
 
+with open("pincode_state.json", 'w') as f:
+    f.write(str(a))
 
-df = pd.DataFrame(a)
-
-df['x'] = df.groupby(['ite','gp']).cumcount()+1
-
-print(df)
-
+print(df['pincode'].value_counts())
+df = df.set_index('pincode')
+print(df.head)
+df.to_json("pin_dist_stat.json", orient='index')

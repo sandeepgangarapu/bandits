@@ -11,11 +11,11 @@ library(tidyr)
 setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\ucb_inf\\Output")
 
 
-group_outcome <- read.csv("group_outcome_sim.csv") %>% 
+group_outcome <- read.csv("group_outcome_1.csv") %>% 
   group_by(ite,alg) %>% mutate(x=row_number()) %>%
   ungroup()
 
-regret_mse <- read.csv("regret_mse.csv") %>% 
+regret_mse <- read.csv("regret_1.csv") %>% 
   group_by(ite,alg) %>% mutate(x=row_number()) %>% ungroup()
 
 
@@ -217,70 +217,81 @@ ggplot(worst, aes(x=alg, y=mse)) + geom_bar(stat="identity") +
 
 
 
-# Normality of worst arm - estimates (mean of worst arm = 0.25)
+<!-- # Normality of worst arm - estimates (mean of worst arm = 0.25) -->
 
-```{r echo=FALSE}
+<!-- ```{r echo=FALSE} -->
 
-# estimate normality sim
+<!-- # estimate normality sim -->
 
-library(rcompanion)
-worst_ab <- group_outcome %>%  filter(group==which.min(means)-1 & alg=='ab') %>%
-  group_by(ite) %>% summarise(mn = mean(outcome)) 
+<!-- library(rcompanion) -->
+<!-- worst_ab <- group_outcome %>%  filter(group==which.min(means)-1 & alg=='ab') %>% -->
+<!--   group_by(ite) %>% summarise(mn = mean(outcome))  -->
 
-plotNormalHistogram(worst_ab$mn, prob = FALSE, col = "gray", main = "Estimates of Worst arm for AB Testing",
-                    linecol = "blue", lwd = 2, length = 1000)
-
-
-
-worst_ucb <- group_outcome %>%  filter(group==which.min(means)-1 & alg=='ucb') %>%
-  group_by(ite) %>% summarise(mn = mean(outcome)) 
-
-plotNormalHistogram(worst_ucb$mn, prob = FALSE, col = "gray", main = "Estimates of Worst arm for UCB",
-                    linecol = "blue", lwd = 2, length = 100)
+<!-- plotNormalHistogram(worst_ab$mn, prob = FALSE, col = "gray", main = "Estimates of Worst arm for AB Testing", -->
+<!--                     linecol = "blue", lwd = 2, length = 1000) -->
 
 
 
+<!-- worst_ucb <- group_outcome %>%  filter(group==which.min(means)-1 & alg=='ucb') %>% -->
+<!--   group_by(ite) %>% summarise(mn = mean(outcome))  -->
 
-worst_ucb_inf <- group_outcome %>%  filter(group==which.min(means)-1 & alg=='ucb_inf_eps') %>%
-  group_by(ite) %>% summarise(mn = mean(outcome)) 
-
-plotNormalHistogram(worst_ucb_inf$mn, prob = FALSE, col = "gray", main = "Estimates of Worst arm for UCB-INF-EPS",
-                    linecol = "blue", lwd = 2, length = 100)
-
-
-shapiro.test(worst_ab$mn)
-shapiro.test(worst_ucb$mn)
-shapiro.test(worst_ucb_inf$mn)
-
-```
-
-
-```{r echo=FALSE}
-worst_ab <- group_outcome %>%  filter(group==6 & alg=='ab') %>%
-  group_by(ite) %>% summarise(mn = mean(outcome)) 
-
-plotNormalHistogram(worst_ab$mn, prob = FALSE, col = "gray", main = "Estimates of Worst arm for AB Testing",
-                    linecol = "blue", lwd = 2, length = 1000)
-
-
-
-worst_ucb <- group_outcome %>%  filter(group==6 & alg=='ucb') %>%
-  group_by(ite) %>% summarise(mn = mean(outcome)) 
-
-plotNormalHistogram(worst_ucb$mn, prob = FALSE, col = "gray", main = "Estimates of Worst arm for UCB",
-                    linecol = "blue", lwd = 2, length = 100)
+<!-- plotNormalHistogram(worst_ucb$mn, prob = FALSE, col = "gray", main = "Estimates of Worst arm for UCB", -->
+<!--                     linecol = "blue", lwd = 2, length = 100) -->
 
 
 
 
-worst_ucb_inf <- group_outcome %>%  filter(group==6 & alg=='ucb_inf_eps') %>%
-  group_by(ite) %>% summarise(mn = mean(outcome)) 
+<!-- worst_ucb_inf <- group_outcome %>%  filter(group==which.min(means)-1 & alg=='ucb_inf_eps') %>% -->
+<!--   group_by(ite) %>% summarise(mn = mean(outcome))  -->
 
-plotNormalHistogram(worst_ucb_inf$mn, prob = FALSE, col = "gray", main = "Estimates of Worst arm for UCB-INF-EPS",
-                    linecol = "blue", lwd = 2, length = 100)
+<!-- plotNormalHistogram(worst_ucb_inf$mn, prob = FALSE, col = "gray", main = "Estimates of Worst arm for UCB-INF-EPS", -->
+<!--                     linecol = "blue", lwd = 2, length = 100) -->
 
 
-shapiro.test(worst_ab$mn)
-shapiro.test(worst_ucb$mn)
-shapiro.test(worst_ucb_inf$mn)
-```
+<!-- shapiro.test(worst_ab$mn) -->
+<!-- shapiro.test(worst_ucb$mn) -->
+<!-- shapiro.test(worst_ucb_inf$mn) -->
+
+<!-- ``` -->
+
+
+<!-- ```{r echo=FALSE} -->
+
+<!-- hist_df <- group_outcome %>% filter(alg=='ab') %>%  group_by(ite, group) %>% summarise(mn = mean(outcome))  -->
+
+
+<!-- ggplot(hist_df, aes(x = mn)) +  -->
+<!--   geom_histogram(aes(y =..density..), colour = "black", fill = "white") + -->
+<!--   geom_density(aes(y=0.045*..count..), colour="black") + -->
+<!--   facet_wrap(group ~., scales = "free_y")  -->
+<!-- stat_function(fun = dnorm, args = list(mean = mean(hist_df$mn), sd = sd(hist_df$mn))) -->
+
+
+<!-- worst_ab <- group_outcome %>%  filter(group==6 & alg=='ab') %>% -->
+<!--   group_by(ite) %>% summarise(mn = mean(outcome))  -->
+
+<!-- plotNormalHistogram(worst_ab$mn, prob = FALSE, col = "gray", main = "Estimates of Worst arm for AB Testing", -->
+<!--                     linecol = "blue", lwd = 2, length = 1000) -->
+
+
+
+<!-- worst_ucb <- group_outcome %>%  filter(group==6 & alg=='ucb') %>% -->
+<!--   group_by(ite) %>% summarise(mn = mean(outcome))  -->
+
+<!-- plotNormalHistogram(worst_ucb$mn, prob = FALSE, col = "gray", main = "Estimates of Worst arm for UCB", -->
+<!--                     linecol = "blue", lwd = 2, length = 100) -->
+
+
+
+
+<!-- worst_ucb_inf <- group_outcome %>%  filter(group==6 & alg=='ucb_inf_eps') %>% -->
+<!--   group_by(ite) %>% summarise(mn = mean(outcome))  -->
+
+<!-- plotNormalHistogram(worst_ucb_inf$mn, prob = FALSE, col = "gray", main = "Estimates of Worst arm for UCB-INF-EPS", -->
+<!--                     linecol = "blue", lwd = 2, length = 100) -->
+
+
+<!-- shapiro.test(worst_ab$mn) -->
+<!-- shapiro.test(worst_ucb$mn) -->
+<!-- shapiro.test(worst_ucb_inf$mn) -->
+<!-- ``` -->

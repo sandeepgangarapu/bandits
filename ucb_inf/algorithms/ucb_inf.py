@@ -32,4 +32,4 @@ def ucb_inf(bandit, num_subjects, perc_ab=0.2):
             arm_max_ucb = np.argmax(ucb)
             bandit.pull_arm(arm_max_ucb)
     
-    return bandit.arm_tracker, bandit.reward_tracker
+    return bandit
