@@ -104,6 +104,27 @@ def mse_outcome(group, outcome, true_mean, true_var):
     return mean_mse_lis, var_mse_lis
 
 
+def prop_mse(group, mean_est, true_est):
+    """
+    given group list and list of estimated means, the outcome will be mse at each point of time
+    :param group: list of group numbers
+    :param outcome: list of outcomes (in this case will be arm means)
+    :param true_mean: list of true means if arms
+    :param true_var: list of tru variances of arms
+    :return: mean mse and variance mse lists
+    """
+    mean_mse_lis = []
+    for i in range(1, len(group)+1):
+        arms, outcome_lis_of_lis = treatment_outcome_grouping(
+            group[:i], mean_est[:i], group_outcome=True)
+        mean_lis = [lis[-1] for lis in outcome_lis_of_lis]
+        mean_true = []
+        for arm in arms:
+            mean_true.append(true_est[arm])
+        mean_mse = mean_squared_error(mean_true, mean_lis)
+        mean_mse_lis.append(mean_mse)
+    return mean_mse_lis
+
 
 def rmse_plot(group, outcome, true_mean, true_var):
     mean_rmse_lis = []

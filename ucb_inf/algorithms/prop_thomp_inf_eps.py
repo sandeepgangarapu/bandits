@@ -13,13 +13,13 @@ def calc_eps_n(bandit, chi):
 def prop_thomp_inf_eps(bandit, num_subjects, chi=1):
     print("---------------Running Thomp INF EPS ---------------")
 
-    # allocate one subject to each arm (We can remove this later rules)
-    for ite in range(2):
-        for arm in range(bandit.num_arms):
-            bandit.pull_arm(arm, propensity=1/bandit.num_arms)
+    # # allocate one subject to each arm (We can remove this later rules)
+    # for ite in range(2):
+    #     for arm in range(bandit.num_arms):
+    #         bandit.pull_arm(arm, propensity=1/bandit.num_arms)
 
     # for now, lets assume all groups have same no. of subjects
-    for subject in range(num_subjects - (2 * bandit.num_arms)):
+    for subject in range(num_subjects):
         # perc_ab of the time, we do variance based, otherwise UCB
         if np.random.uniform(0, 1) < calc_eps_n(bandit, chi):
             # variance base, we pick arm proportional to the variance of

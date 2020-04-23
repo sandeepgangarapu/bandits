@@ -103,9 +103,6 @@ def treatment_outcome_grouping(group, outcome, group_outcome=False,
     else:
         return outcome_lis_of_lis
 
-def lis_of_lis_to_dict(lis):
-    for item in lis:
-        pass
 
 def thompson_arm_pull(m, s, type_of_pull='single'):
     """
@@ -115,6 +112,7 @@ def thompson_arm_pull(m, s, type_of_pull='single'):
     :return: if single pull, gives out only winning arm
              if monte carlo pull, gives out winning arm and prop_scores
     """
+    winning_arm = []
     # we store all sampled values in this list
     sample = []
     # we sample each arm from the prior distribution
@@ -124,12 +122,11 @@ def thompson_arm_pull(m, s, type_of_pull='single'):
         sample.append(np.random.normal(current_mean, sqrt(current_var), 1))
     # the arm that has the highest value of draw is selected
     chosen_arm = np.argmax(sample)
-
+    winning_arm.append(chosen_arm)
     if type_of_pull == 'single':
         return chosen_arm
 
     if type_of_pull == 'monte_carlo':
-        winning_arm = []
         num_pulls = 200
         for pull in range(num_pulls):
             sample = []
@@ -142,10 +139,20 @@ def thompson_arm_pull(m, s, type_of_pull='single'):
         arm_counter = Counter(winning_arm)
         prop_score_lis = []
         for arm in range(len(m)):
-            prop_score_lis.append(arm_counter[arm]/len(winning_arm))
+            prop_score_lis.append(float(arm_counter[arm]/len(winning_arm)))
 
         return chosen_arm, prop_score_lis
 
 
+def bayesian_update(prior_params, x):
+    """ m,k,v,s, are parameters of normal inverse chi squared distribution
+    https: // www.cs.ubc.ca / ~murphyk / Papers / bayesGauss.pdf"""
+    m, k, v, s = prior_params[0], prior_params[1], prior_params[2], \
+                 prior_params[3]
+    k1 = k + 1
+    v1 = v + 1
+    m1 = ((k * m) + x) / k1
+    s1 = (1 / v1) * (v * s + (k / (k + 1)) * ((m - x) ** 2))
+    return m1, k1, v1, s1
 
 

@@ -1,36 +1,33 @@
 from bandits.bandit import Bandit
-from bandits.utils import trt_dist_list, num_obs, thompson_arm_pull
+from bandits.utils import trt_dist_list, thompson_arm_pull, bayesian_update
 import numpy as np
 from math import sqrt
 
-
-
-def bayesian_update(prior_params, x):
-    """ m,k,v,s, are parameters of normal inverse chi squared distribution
-    https: // www.cs.ubc.ca / ~murphyk / Papers / bayesGauss.pdf"""
-    m, k, v, s = prior_params[0], prior_params[1], prior_params[2], \
-                 prior_params[3]
-    k1 = k + 1
-    v1 = v + 1
-    m1 = ((k*m)+x)/k1
-    s1 = (1/v1)*(v*s + (k/(k+1))*((m-x)**2))
-    return m1, k1, v1, s1
-    
     
 def thompson_sampling(bandit, num_rounds):
     """Function that reproduces the steps involved in Thompson sampling
     algorithm"""
-    print("---------------Running Thomp ---------------")
-
+    print("---------------Running Thompson Sampling ---------------")
+    
+    # allocate one subject to each arm (We can remove this later rules)
+    for ite in range(2):
+        for arm in range(bandit.num_arms):
+            bandit.pull_arm(arm, propensity=1/bandit.num_arms)
+    
     # we initialize the distributions of arms to normal inverse chi squared
     # distibution. Each arm has params (m, k, v, s).
     # m is mean and s is variance
     
     num_arms = bandit.num_arms
     
-    prior_params = [(0, 1, 1, 1) for i in range(num_arms)]
+    prior_params = [(bandit.avg_reward_tracker[i], 1,
+                     bandit.var_est_tracker[i],
+                     1) for i in
+                    range(
+    num_arms)]
     
-    for rnd in range(num_rounds):
+    
+    for rnd in range(num_rounds-(2*num_arms)):
         # we store all sampled values in this list
         arm_means = [i[0] for i in prior_params]
         arm_vars = [i[3] for i in prior_params]
