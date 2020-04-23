@@ -64,7 +64,7 @@ def main():
     save_1 = True
     np.random.seed(seed=99)
     num_arms = 10
-    num_subjects = 2000
+    num_subjects = 6000
     arm_means = np.random.uniform(0, 5, num_arms)
     arm_means[3] = 0.25
     arm_means[9] = 3
@@ -208,7 +208,7 @@ def main():
             group_outcome_df.to_csv("Output/group_outcome_prop.csv",
                                     index=False)
             regret_mse_df.to_csv("Output/regret_prop_t.csv", index=False)
-            prop_mse_df.to_csv("Output/ipw_aipw_prop.csv", index=False)
+            prop_mse_df.to_csv("Output/ipw_aipw_prop_6000.csv", index=False)
         else:
             group_outcome_df.to_csv("Output/group_outcome_sim.csv", index=False)
             regret_mse_df.to_csv("Output/regret_mse.csv", index=False)
