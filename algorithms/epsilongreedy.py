@@ -4,7 +4,7 @@ import numpy as np
 import random
 
 
-def epsilon_greedy(epsilon, bandit, num_rounds, num_arms):
+def epsilon_greedy(bandit, num_rounds, epsilon):
     """Function that reproduces the steps involved in epsilon greedy
     algorithm"""
     
@@ -13,7 +13,7 @@ def epsilon_greedy(epsilon, bandit, num_rounds, num_arms):
         if flip < epsilon:
             # if random flip is less than threshold, we explore
             # choose an arm that does not have max_reward randomly
-            arm_other = np.random.choice([i for i in range(num_arms) if i!=
+            arm_other = np.random.choice([i for i in range(bandit.num_arms) if i!=
                                           bandit.max_reward_arm])
             bandit.pull_arm(arm_other)
         else:
@@ -33,4 +33,4 @@ if __name__ == '__main__':
                             num_arms=num_arms_ep,
                             trt_dist_list=trt_dist_lis_ep)
     epsilon_greedy(epsilon=epsilon, bandit=epsilon_bandit,
-                  num_rounds=num_rounds, num_arms=num_arms_ep)
+                  num_rounds=num_rounds)

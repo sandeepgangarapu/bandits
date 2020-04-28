@@ -1,7 +1,7 @@
 from bandits.algorithms.explore_first import explore_first
 from bandits.algorithms.epsilongreedy import epsilon_greedy
 from bandits.algorithms.hte import always_explore
-from bandits.algorithms.ucb_naive import ucb_naive
+from bandits.algorithms.ucb import ucb_naive
 from bandits.algorithms.successive_elimination import successive_elimination
 from bandits.distributions import trt_dist_list, num_obs
 from bandits.bandit import Bandit

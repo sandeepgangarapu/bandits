@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from bandits.algorithms.ucb_naive import ucb_naive
+from bandits.algorithms.ucb import ucb_naive
 from bandits.bandit import Bandit
 from bandits.peeking.always_valid_p import always_valid_p_value_emp
 from bandits.utils import ucb_value_naive

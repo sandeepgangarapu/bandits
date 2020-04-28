@@ -4,18 +4,18 @@ import numpy as np
 from bandits.utils import ucb_value_naive
 
 
-def ucb_naive(bandit, num_rounds, num_arms):
+def ucb(bandit, num_rounds):
     """Function that reproduces the steps involved in ucb_naive
     algorithm"""
-    
+    print("---------------Running UCB ---------------")
     # choose each action once:
-    for arm in range(num_arms):
+    for arm in range(bandit.num_arms):
         bandit.pull_arm(arm)
     
-    ucb_rounds = num_rounds - num_arms
+    ucb_rounds = num_rounds - bandit.num_arms
     for round in range(ucb_rounds):
         # find UCB for all arms
-        ucb_round = ucb_value_naive(num_arms, ucb_rounds, bandit.arm_pull_tracker,
+        ucb_round = ucb_value_naive(bandit.num_arms, ucb_rounds, bandit.arm_pull_tracker,
                                     bandit.avg_reward_tracker)
         # find arm with max UCB
         arm_max_ucb = np.argmax(ucb_round)
@@ -32,6 +32,5 @@ if __name__ == '__main__':
     ucb_bandit = Bandit(name='ucb_naive',
                             num_arms=num_arms,
                             trt_dist_list=trt_dist_lis)
-    ucb_naive(bandit=ucb_bandit,
-              num_rounds=num_rounds,
-              num_arms=num_arms)
+    ucb(bandit=ucb_bandit,
+              num_rounds=num_rounds)
