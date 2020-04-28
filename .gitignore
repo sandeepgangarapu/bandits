@@ -1,4 +1,4 @@
 *.Rhistory
 *.ini
 *.csv
-/ucb_inf/analysis_*
+/analysis_*
