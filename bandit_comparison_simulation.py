@@ -15,8 +15,8 @@ import numpy as np
 
 class BanditSimulation:
 
-    def __init__(self, seed, num_ite, arm_means, arm_vars, eps_inf, horizon, alg_list, xi=1, output_file_path=None,
-                 prop_file_path=None):
+    def __init__(self, seed, num_ite, arm_means, arm_vars, eps_inf, horizon, alg_list, estimator_list=None,
+                 xi=1, output_file_path=None, prop_file_path=None):
         """This class is run bandits simulation for given params and give simulation output.
         :param seed: seed for randomization
         :param num_ite: number of iterations
@@ -35,6 +35,7 @@ class BanditSimulation:
         self.eps_inf = eps_inf
         self.horizon = horizon
         self.alg_list = alg_list
+        self.estimator_list = estimator_list
         self.xi = xi
         self.output_file_path = output_file_path
         self.prop_file_path = prop_file_path
@@ -57,20 +58,11 @@ class BanditSimulation:
             for alg in self.alg_list:
                 df = self.create_output_df(bandit_dict[alg], ite)
                 output_df_lis.append(df)
-                if 'thomp' in alg:
-                    alg_name = alg+'_ipw'
-                    ipw_est = ipw(bandit_dict[alg].arm_pull_tracker,
-                                  bandit_dict[alg].reward_tracker,
-                                  bandit_dict[alg].propensity_tracker)
-                    df = self.create_prop_df(bandit_dict[alg], ite, ipw_est, alg_name)
-                    output_prop_lis.append(df)
-                    alg_name = alg + '_aipw'
-                    aipw_est = aipw(bandit_dict[alg].arm_pull_tracker,
-                                  bandit_dict[alg].reward_tracker,
-                                  bandit_dict[alg].propensity_tracker)
-                    df = self.create_prop_df(bandit_dict[alg], ite, aipw_est, alg_name)
-                    output_prop_lis.append(df)
-
+                if self.estimator_list:
+                    if 'thomp' in alg:
+                        for est in self.estimator_list:
+                            df = self.run_estimators(alg, est, bandit_dict[alg], ite)
+                            output_prop_lis.append(df)
         output_df = pd.concat(output_df_lis)
         prop_df = pd.concat(output_prop_lis)
         # save output or return it
@@ -79,6 +71,19 @@ class BanditSimulation:
             prop_df.to_csv(self.prop_file_path, index=False)
         else:
             return output_df, prop_df
+
+    def run_estimators(self, alg, estimator_name, bandit, ite):
+        alg_name = alg + "_" + estimator_name
+        if estimator_name == 'ipw':
+            est_value = ipw(bandit.arm_tracker,
+                            bandit.reward_tracker,
+                            bandit.propensity_tracker)
+        if estimator_name == 'aipw':
+            est_value = aipw(bandit.arm_tracker,
+                             bandit.reward_tracker,
+                             bandit.propensity_tracker)
+        df = self.create_prop_df(bandit, ite, est_value, alg_name)
+        return df
 
     def generate_empirical_arm_outcome_dist(self):
         outcome_lis_of_lis = []

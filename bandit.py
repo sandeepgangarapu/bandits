@@ -76,32 +76,33 @@ class Bandit:
         self.avg_reward_tracker[arm_num] = self.total_reward_tracker[arm_num] / self.arm_pull_tracker[arm_num]
         if propensity is not None:
             self.propensity_tracker.append(propensity)
-            self.arm_prop_tracker[arm_num].append(propensity)
-            # IPW estimate. refer page 3 para 2 athey hadad
-            ipw_est = np.array(self.arm_reward_tracker[arm_num]) / np.array(self.arm_prop_tracker[arm_num])
-            ipw_est = ipw_est.sum()/len(self.arm_tracker)
-            if ipw_est > 100000:
-                print('hey')
-            self.ipw_tracker.append(ipw_est)
-            self.ipw_avg_reward_tracker[arm_num] = ipw_est.sum()/len(self.arm_tracker)
-
-            # AIPW estimate. refer page 6 eq 2 athey hadad
-            rew_tracker = self.arm_reward_tracker[arm_num].copy()
-            # because the prior mean for all arms is initialized to 1 in
-            # thompson sampling
-            rew_tracker.insert(0,1)
-            # AIPW term 2 mu should be mean est until the previous alloc H(t-1)
-            rew_tracker = rew_tracker[:-1]
-            mu = np.cumsum(rew_tracker)/np.arange(1, len(rew_tracker)+1)
-            term_1 = (np.array(self.arm_reward_tracker[arm_num]) /
-                        np.array(self.arm_prop_tracker[arm_num]))
-            term_2 = (np.ones(self.arm_pull_tracker[arm_num])-(np.ones(self.arm_pull_tracker[arm_num])/np.array(self.arm_prop_tracker[arm_num])))*mu
-            aipw_est = term_1 + term_2
-            term_3 = self.aipw_term_3_calculator(arm_num, rew_tracker)
-            aipw_est = (np.sum(aipw_est)+np.sum(term_3))/len(self.arm_tracker)
-            self.aipw_tracker.append(aipw_est)
-            self.aipw_avg_reward_tracker[arm_num] = aipw_est
-        # Update max_reward_arms
+        #     Commenting the estimators as we have seperate code for that
+        #     self.arm_prop_tracker[arm_num].append(propensity)
+        #     # IPW estimate. refer page 3 para 2 athey hadad
+        #     ipw_est = np.array(self.arm_reward_tracker[arm_num]) / np.array(self.arm_prop_tracker[arm_num])
+        #     ipw_est = ipw_est.sum()/len(self.arm_tracker)
+        #     if ipw_est > 100000:
+        #         print('hey')
+        #     self.ipw_tracker.append(ipw_est)
+        #     self.ipw_avg_reward_tracker[arm_num] = ipw_est.sum()/len(self.arm_tracker)
+        #
+        #     # AIPW estimate. refer page 6 eq 2 athey hadad
+        #     rew_tracker = self.arm_reward_tracker[arm_num].copy()
+        #     # because the prior mean for all arms is initialized to 1 in
+        #     # thompson sampling
+        #     rew_tracker.insert(0,1)
+        #     # AIPW term 2 mu should be mean est until the previous alloc H(t-1)
+        #     rew_tracker = rew_tracker[:-1]
+        #     mu = np.cumsum(rew_tracker)/np.arange(1, len(rew_tracker)+1)
+        #     term_1 = (np.array(self.arm_reward_tracker[arm_num]) /
+        #                 np.array(self.arm_prop_tracker[arm_num]))
+        #     term_2 = (np.ones(self.arm_pull_tracker[arm_num])-(np.ones(self.arm_pull_tracker[arm_num])/np.array(self.arm_prop_tracker[arm_num])))*mu
+        #     aipw_est = term_1 + term_2
+        #     term_3 = self.aipw_term_3_calculator(arm_num, rew_tracker)
+        #     aipw_est = (np.sum(aipw_est)+np.sum(term_3))/len(self.arm_tracker)
+        #     self.aipw_tracker.append(aipw_est)
+        #     self.aipw_avg_reward_tracker[arm_num] = aipw_est
+        # # Update max_reward_arms
         self.max_reward = np.amax(self.avg_reward_tracker)
         # note that this is a list
         self.max_reward_arm = np.argmax(self.avg_reward_tracker)
