@@ -1,4 +1,4 @@
 *.Rhistory
 *.ini
 *.csv
-/analysis_*
+/analysis/analysis_*
