@@ -6,11 +6,13 @@ true_vars = [3.84896514, 3.7338355, 1.88719468, 2.47073726, 4.64474196, 1.977270
 arm_means = np.random.uniform(0, 5, 5)
 arm_vars = np.random.uniform(0, 5, 5)
 
-sim = BanditSimulation(seed=10, num_ite=2, arm_means=true_means,
+sim = BanditSimulation(seed=10, num_ite=20, arm_means=true_means,
                        arm_vars=true_vars,
-                       eps_inf=0.5,
-                       horizon=100,
+                       eps_inf=0.2,
+                       horizon=4000,
                        alg_list=['ab', 'ucb', 'eps_greedy', 'ucb_inf_eps', 'thomp', 'thomp_inf_eps'],
-                       estimator_list=['ipw', 'aipw'])
-output, prop = sim.run_simulation()
-print(prop.head)
+                       estimator_list=['ipw', 'aipw'],
+                       output_file_path='file1.csv',
+                       prop_file_path='prop_file.csv'
+                       )
+sim.run_simulation()
