@@ -1,5 +1,4 @@
 from bandits.algorithms.ab_testing import ab_testing
-from bandits.algorithms.ucb_inf import ucb_inf
 from bandits.algorithms.thomp_inf_eps import thomp_inf_eps
 from bandits.algorithms.thompson_sampling import thompson_sampling
 from bandits.algorithms.ucb_inf_eps import ucb_inf_eps
@@ -7,7 +6,7 @@ from bandits.algorithms.ucb import ucb
 from bandits.algorithms.epsilongreedy import epsilon_greedy
 from bandits.bandit import Bandit
 from bandits.utils import mse_outcome, prop_mse
-from bandits.algorithms.weighed_estimators.weighed_estimators import ipw, aipw
+from bandits.algorithms.weighed_estimators.weighed_estimators import ipw, aipw, eval_aipw
 from math import sqrt
 import pandas as pd
 import numpy as np
@@ -15,8 +14,8 @@ import numpy as np
 
 class BanditSimulation:
 
-    def __init__(self, seed, num_ite, arm_means, arm_vars, eps_inf, horizon, alg_list, estimator_list=None,
-                 xi=1, output_file_path=None, prop_file_path=None):
+    def __init__(self, seed, num_ite, arm_means, arm_vars, eps_inf, horizon, alg_list, mse_calc=True,
+                 estimator_list=None, xi=1, dist_type='Normal', output_file_path=None):
         """This class is run bandits simulation for given params and give simulation output.
         :param seed: seed for randomization
         :param num_ite: number of iterations
@@ -26,6 +25,7 @@ class BanditSimulation:
         :param horizon: total number of available subjects
         :param alg_list: list of algorithms for simulations to run
         :param xi = xi value for inf eps
+        :param dist_type = type of outcome distribution
         """
         self.seed = seed
         self.num_ite = num_ite
@@ -35,10 +35,12 @@ class BanditSimulation:
         self.eps_inf = eps_inf
         self.horizon = horizon
         self.alg_list = alg_list
+        self.mse_calc = mse_calc
         self.estimator_list = estimator_list
         self.xi = xi
+        self.dist_type = dist_type
         self.output_file_path = output_file_path
-        self.prop_file_path = prop_file_path
+        self.type_of_pull = 'monte_carlo' if self.estimator_list else 'single'
 
     def run_simulation(self):
 
@@ -56,21 +58,31 @@ class BanditSimulation:
             # create df with necessary info
 
             for alg in self.alg_list:
-                df = self.create_output_df(bandit_dict[alg], ite)
+                df = self.create_output_df(bandit_dict[alg], ite, self.mse_calc)
                 output_df_lis.append(df)
                 if self.estimator_list:
                     if 'thomp' in alg:
                         for est in self.estimator_list:
                             df = self.run_estimators(alg, est, bandit_dict[alg], ite)
                             output_prop_lis.append(df)
-        output_df = pd.concat(output_df_lis)
-        prop_df = pd.concat(output_prop_lis)
-        # save output or return it
+                    if 'ucb' in alg:
+                        for est in self.estimator_list:
+                            df = self.run_estimators(alg, est, bandit_dict[alg], ite)
+                            output_prop_lis.append(df)
+            output_df = pd.concat(output_df_lis)
+            if output_prop_lis:
+                prop_df = pd.concat(output_prop_lis)
+                final_output = pd.concat([output_df, prop_df], axis=0, ignore_index=True)
+            else:
+                final_output = output_df
+            # save output or return it
+            if self.output_file_path is not None:
+                final_output.to_csv(self.output_file_path, index=False)
+        
         if self.output_file_path is not None:
-            output_df.to_csv(self.output_file_path, index=False)
-            prop_df.to_csv(self.prop_file_path, index=False)
+            final_output.to_csv(self.output_file_path, index=False)
         else:
-            return output_df, prop_df
+            return final_output
 
     def run_estimators(self, alg, estimator_name, bandit, ite):
         alg_name = alg + "_" + estimator_name
@@ -82,15 +94,29 @@ class BanditSimulation:
             est_value = aipw(bandit.arm_tracker,
                              bandit.reward_tracker,
                              bandit.propensity_tracker)
-        df = self.create_prop_df(bandit, ite, est_value, alg_name)
+        if estimator_name == 'eval_aipw':
+            est_value = eval_aipw(bandit.arm_tracker,
+                                  bandit.reward_tracker,
+                                  bandit.propensity_tracker,
+                                  type_of_weight='variance_stabilizing',
+                                  weight_lis_of_lis=bandit.prop_lis_tracker)
+
+        df = self.create_prop_df(bandit, ite, est_value, alg_name, self.mse_calc)
         return df
 
     def generate_empirical_arm_outcome_dist(self):
         outcome_lis_of_lis = []
         for arm in range(self.num_arms):
-            outcome_lis_of_lis.append(np.random.normal(loc=self.arm_means[arm],
-                                                       scale=sqrt(self.arm_vars[arm]),
-                                                       size=100000))
+            if self.dist_type == 'Normal':
+                outcome_lis_of_lis.append(np.random.normal(loc=self.arm_means[arm],
+                                                           scale=sqrt(self.arm_vars[arm]),
+                                                           size=100000))
+            if self.dist_type == 'Bernoulli':
+                outcome_lis_of_lis.append(np.random.binomial(size=100000, n=1, p=self.arm_means[arm]))
+            if self.dist_type == 'Uniform':
+                outcome_lis_of_lis.append(np.random.uniform(low=self.arm_means[arm]-2,
+                                                            high=self.arm_means[arm]+2,
+                                                            size=100000))
         return outcome_lis_of_lis
 
     def create_bandit_instances(self, outcome_lis_of_lis):
@@ -103,39 +129,40 @@ class BanditSimulation:
 
     def simulate_bandit(self, alg, bandit):
         if alg == 'ab':
-            ab_testing(bandit, self.horizon, self.arm_means, self.arm_vars, sample_size=None, post_allocation=True)
+            ab_testing(bandit, self.horizon, sample_size=None, post_allocation=True)
         if alg == 'ucb':
-            ucb(bandit, self.horizon)
+            ucb(bandit, self.horizon, type_of_pull=self.type_of_pull)
         if alg == 'eps_greedy':
             epsilon_greedy(bandit, self.horizon, epsilon=self.eps_inf)
-        if alg == 'ucb_inf':
-            ucb_inf(bandit, self.horizon, eps=self.eps_inf)
         if alg == 'ucb_inf_eps':
-            ucb_inf_eps(bandit, self.horizon, xi=self.xi)
+            ucb_inf_eps(bandit, self.horizon, xi=self.xi, type_of_pull=self.type_of_pull)
         if alg == 'thomp':
-            thompson_sampling(bandit, self.horizon)
+            thompson_sampling(bandit, self.horizon, type_of_pull=self.type_of_pull)
         if alg == 'thomp_inf_eps':
-            thomp_inf_eps(bandit, self.horizon, xi=self.xi)
+            thomp_inf_eps(bandit, self.horizon, xi=self.xi, type_of_pull=self.type_of_pull)
 
-    def create_output_df(self, bandit, ite):
-        mean_mse, var_mse = mse_outcome(bandit.arm_tracker, bandit.reward_tracker, self.arm_means, self.arm_vars)
-        dict = {"group": bandit.arm_tracker,
+    def create_output_df(self, bandit, ite, mse_calc):
+        dict_df = {"group": bandit.arm_tracker,
                 'outcome': bandit.reward_tracker,
                 'regret': bandit.regret,
-                'mean_mse': mean_mse,
-                'var_mse': var_mse,
                 'alg': bandit.name,
                 'ite': ite}
-        df = pd.DataFrame(dict)
+        if mse_calc:
+            mean_mse, var_mse = mse_outcome(bandit.arm_tracker, bandit.reward_tracker, self.arm_means, self.arm_vars)
+            dict_df['mean_mse'] = mean_mse
+            dict_df['var_mse'] = var_mse
+
+        df = pd.DataFrame(dict_df)
         return df
 
-    def create_prop_df(self, bandit, ite, mean_est, alg_name):
-        mean_mse = prop_mse(bandit.arm_tracker, mean_est, self.arm_means)
-        dict = {'mse': mean_mse,
-                'alg': alg_name,
-                'ite': ite,
-                'mean_est': mean_est,
-                'group': bandit.arm_tracker}
-        df = pd.DataFrame(dict)
+    def create_prop_df(self, bandit, ite, mean_est, alg_name, mse_calc):
+        dict_df = {'alg': alg_name,
+                   'ite': ite,
+                   'group': bandit.arm_tracker,
+                   'mean_est' : mean_est}
+        if mse_calc:
+            mean_mse = prop_mse(bandit.arm_tracker, mean_est, self.arm_means)
+            dict_df['mse'] = mean_mse
+        df = pd.DataFrame(dict_df)
         return df
 

@@ -14,6 +14,7 @@ class Bandit:
         self.avg_reward_tracker = [0.0 for i in range(num_arms)]
         self.arm_prop_tracker = [[] for i in range(num_arms)]
         self.propensity_tracker = []
+        self.prop_lis_tracker = []
         self.ipw_avg_reward_tracker = [0.0 for i in range(num_arms)]
         self.ipw_tracker = []
         self.aipw_tracker = []
@@ -30,36 +31,19 @@ class Bandit:
         self.trt_effect_var_of_var_est_tracker = [0.0 for i in
                                                   range(num_arms - 1)]
     
-    def pull_arm(self, arm_num, propensity=None):
+    def pull_arm(self, arm_num, prop_lis=None):
         """pulling an just generated reward"""
         
         # Generate reward from that arm
         reward = np.random.choice(self.trt_dist_list[arm_num])
         # Do all updates after the arm is pulled
 
-        if propensity is not None:
-            self.update_after_pull(arm_num, reward, propensity)
+        if prop_lis is not None:
+            self.update_after_pull(arm_num, reward, prop_lis)
         else:
             self.update_after_pull(arm_num, reward)
 
-    def aipw_term_3_calculator(self, arm, rew_lis):
-        """
-        This is to calculate term 3 of aipw estimator
-        We need to accountn for sum(mu)/T everytime the indicator function is zero.
-        This function will do that
-        :return: term_3
-        """
-        non_indicator_mu_tracker = []
-        i=1
-        for a in self.arm_tracker:
-            if a==arm:
-                i=i+1
-            else:
-                non_indicator_mu_tracker.append(np.mean(rew_lis[:i]))
-        return non_indicator_mu_tracker
-
-
-    def update_after_pull(self, arm_num, reward, propensity=None):
+    def update_after_pull(self, arm_num, reward, prop_lis=None):
         """Do updates to bandit params after an arm is pulled"""
         # track arm pulled
         self.arm_tracker.append(arm_num)
@@ -74,8 +58,9 @@ class Bandit:
                                                  arm_num] + reward
         # update average reward
         self.avg_reward_tracker[arm_num] = self.total_reward_tracker[arm_num] / self.arm_pull_tracker[arm_num]
-        if propensity is not None:
-            self.propensity_tracker.append(propensity)
+        if prop_lis is not None:
+            self.propensity_tracker.append(prop_lis[arm_num])
+            self.prop_lis_tracker.append(prop_lis)
         #     Commenting the estimators as we have seperate code for that
         #     self.arm_prop_tracker[arm_num].append(propensity)
         #     # IPW estimate. refer page 3 para 2 athey hadad
@@ -117,7 +102,7 @@ class Bandit:
                                                    arm_num])
         
         self.var_est_tracker[arm_num] = np.var(
-            self.arm_reward_tracker[arm_num], ddof =1)
+            self.arm_reward_tracker[arm_num], ddof=1)
 
         self.var_of_var_est_tracker[arm_num] = 2*self.var_est_tracker[
             arm_num]/(self.arm_pull_tracker[arm_num]-1)

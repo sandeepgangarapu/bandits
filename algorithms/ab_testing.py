@@ -29,7 +29,7 @@ def power_analysis(arm_means, arm_vars, alpha=0.05, beta=0.1):
     return sample_size
 
 
-def ab_testing(bandit, num_rounds, arm_means, arm_vars, sample_size=None,
+def ab_testing(bandit, num_rounds, sample_size=None,
                post_allocation=True):
     """
     :param bandit: ab_bandit
@@ -40,6 +40,8 @@ def ab_testing(bandit, num_rounds, arm_means, arm_vars, sample_size=None,
     :param post_allocation: if there should be max allocation after pure ab
     :return: bandit
     """
+    arm_means = np.mean(np.array(bandit.trt_dist_list), axis=1)
+    arm_vars = np.var(np.array(bandit.trt_dist_list), axis=1)
 
     num_rounds_each = int(num_rounds/bandit.num_arms)
     print("---------------Running AB testing---------------")

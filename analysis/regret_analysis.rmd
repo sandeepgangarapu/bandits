@@ -1,0 +1,184 @@
+---
+title: "MAB Simulations"
+author: "Sandeep Gangarapu"
+output: html_document
+---
+  
+  
+```{r echo=FALSE, warning=FALSE}
+suppressPackageStartupMessages(
+  {
+    library(ggplot2)
+    library(dplyr)
+    library(tidyr)
+    library(directlabels)
+    library(gganimate)
+    library(cumstats)
+  })
+```
+
+# Simulation set up
+
+We have 10 arms which have a normal outcome distribution with different means and variances. The values of these true means and variances are given below.
+
+Every time we pull an arm (make an allocation), we sample from the normal distribution of given by the mean and variance of that arm.
+
+We see from the below true values that ARM-8 should the winning arm as it has the highest mean of 4.9.
+
+
+
+```{r echo=TRUE}
+
+true_means = c(0.25, 2.82, 1.48, 4.95, 3)
+
+true_vars = c(3.84,  1.97, 2.62, 1, 4.06)
+
+grp = c(0:(length(true_means)-1))
+true_df <- data.frame(grp, true_means, true_vars)
+true_df <- true_df %>% mutate(grp=factor(grp))
+
+```
+
+Time Horizon is the number of allocations we have available synonymous to number of experimental units in an experiment. 
+In this simulation, we set time horizon to 2000 units.
+
+We run this simulation for 20 different times using various seeds.
+
+
+
+```{r echo=FALSE, cache=FALSE, warning=FALSE}
+setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")
+
+
+data <- read.csv("sim_3_20000.csv")
+
+
+seed_algs <- c("ab", "ucb", "thomp", "eps_greedy")
+inf_algs <- c("ucb_inf_eps", "thomp_inf_eps")
+est_algs <- c("thomp_ipw", "thomp_aipw", "thomp_inf_eps_ipw", "thomp_inf_eps_aipw", "thomp_eval_aipw", "thomp_inf_eps_eval_aipw")
+thomp_algs = c( "thomp", "thomp_inf_eps")
+ucb_algs <- c("ucb_inf_eps", "ucb")
+adv_algs <- c(thomp_algs, ucb_algs)
+
+
+group_outcome <- data %>% filter(alg %in% c(seed_algs, inf_algs)) %>%
+  select(alg, group, ite, outcome) %>%
+  group_by(ite,alg) %>% mutate(x=row_number()) %>%
+  ungroup()
+
+regret_mse <- data %>% filter(alg %in% c(seed_algs, inf_algs)) %>%
+  select(alg, regret, ite, mean_mse, var_mse) %>%
+  group_by(ite,alg) %>% mutate(x=row_number()) %>%
+  ungroup()
+
+prop_mse <- data %>% filter(alg %in% est_algs) %>% select(alg, ite, group, mse, mean_est) %>% 
+  group_by(ite,alg) %>% mutate(x=row_number()) %>% ungroup()
+
+xlimit <- max(group_outcome$x) + 500
+
+
+# Setting new WD so that results are saved in different folder
+setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\results")
+
+
+```
+
+# Group allocation graphs
+
+
+We first look at the allocations for widely used algorithms.
+
+* ab - AB Testing
+* eps - Epsilon Greedy
+* thomp - Thompson Sampling
+* ucb - Upper confidence bound
+
+
+```{r echo=FALSE, warning=FALSE}
+
+df <- group_outcome %>% filter(ite==0) 
+
+df_regret <- regret_mse %>% filter(ite==0)
+
+main_algs <- c("ab", "ucb", "thomp", "eps_greedy")
+
+regret_plot <- ggplot(df %>% filter(alg == main_algs)) + geom_point(aes(x=x, y=factor(group)), shape=1, alpha=0.6) +
+  facet_grid(alg ~.) +
+  theme_bw() +
+  labs(x='Time Period', y = 'Group') +
+  theme(axis.text.y = element_text(size = rel(0.7))) 
+
+regret_plot 
+
+```
+
+UCB is the most efficient. Looks like Thompson sampling is not as efficient as perceived. In this case, it is hovering between 8, 4, 0
+
+
+
+## Group allocations for Inference based allocation algorithms.
+
+For inference based allocation, we deviate from the main allocation algorithm with the probability of $\epsilon_n$ defined by
+
+
+$\eta = \frac{\sum{\frac{\sigma^2}{n}}}{\xi K}$
+  $\epsilon_n = \frac{\eta}{1+\eta}$
+  
+  $\xi$ and $K$ are user defined parameters that we will discuss later.
+
+The main idea is that by deviating from main algorithm and making inference based allocations, we learn more about an arm. Learning here implies reducing standard error of an arm. This ofcourse comes at the cost of Utility.
+
+
+```{r echo=FALSE, warning=FALSE}
+
+
+ggplot(df %>% filter(alg == adv_algs)) + geom_point(aes(x=x, y=factor(group)), shape=1, alpha=0.6) +
+  facet_grid(alg ~.) +
+  theme_bw() +
+  labs(x='Time Period', y = 'Group') +
+  theme(axis.text.y = element_text(size = rel(0.7))) 
+
+```
+
+
+"_inf_eps" suffix suggests that the algorithms makes inference based allocation with some probability. In these algorithms, the allocations are not as concentrated around few arms as those of the main algorithms (UCB, Thompson Sampling).
+
+
+
+# Regret Analysis
+
+
+```{r echo=FALSE, warning=FALSE}
+ggplot(df_regret, aes(x=x, y=regret)) + geom_line(aes(color=alg)) +
+  labs(title = "Regret") + xlim(0,xlimit) +
+  geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) +
+  theme_bw() 
+
+```
+
+UCB algorithm is the most efficient. One interesting observation is that ucb_inf_eps performs better than Thompson Sampling. This could be because of a bad seed (one random bad simulation). So, we check to see if this the same case for other iterations (other random seeds).
+
+
+
+
+## Regret over multiple iterations with 95% confidence interval
+
+```{r echo=FALSE, warning=FALSE}
+
+df_regret1 <- regret_mse %>% select(x, alg, regret) %>% group_by(x, alg) %>% 
+  summarise(mn_regret = mean(regret), se_regret = sd(regret)/sqrt(n()))
+
+
+ggplot(df_regret1, aes(x=x, y=mn_regret)) + geom_line(aes(color=alg)) +
+  geom_ribbon(aes(ymin=mn_regret-(1.96*se_regret), ymax=mn_regret+(1.96*se_regret)), 
+              alpha=0.4,  fill="grey70") +
+  labs(title = "Regret") + xlim(0,xlimit) +
+  geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) +
+  theme_bw() 
+
+```
+
+
+Regret seems to be consistent across multiple iterations for all algorithms
+
+

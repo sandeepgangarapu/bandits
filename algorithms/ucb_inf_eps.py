@@ -10,13 +10,16 @@ def calc_eps_n(bandit, xi):
     return eps_n
 
 
-def ucb_inf_eps(bandit, num_rounds, xi=1):
+def ucb_inf_eps(bandit, num_rounds, xi=1, type_of_pull='single'):
     print("---------------Running UCB INF EPS ---------------")
     
     # allocate one subject to each arm (UCB rules)
     for ite in range(2):
         for arm in range(bandit.num_arms):
-            bandit.pull_arm(arm)
+            if type_of_pull == 'monte_carlo':
+                bandit.pull_arm(arm, prop_lis=[1 if i == arm else 0 for i in range(bandit.num_arms)])
+            else:
+                bandit.pull_arm(arm)
     
     # for now, lets assume all groups have same no. of subjects
     for subject in range(num_rounds - (2 * bandit.num_arms)):
@@ -31,13 +34,26 @@ def ucb_inf_eps(bandit, num_rounds, xi=1):
             norm_prob = [v / sum(var_of_mean_est) for v in var_of_mean_est]
             arm_var = np.random.choice(list(range(bandit.num_arms)),
                                        p=norm_prob)
-            bandit.pull_arm(arm_var)
+            if type_of_pull == 'monte_carlo':
+                bandit.pull_arm(arm_var, prop_lis=norm_prob)
+            else:
+                bandit.pull_arm(arm_var)
         else:
-            ucb = ucb_value_naive(num_arms=bandit.num_arms,
-                                  num_rounds=num_rounds,
-                                  arm_pull_tracker=bandit.arm_pull_tracker,
-                                  avg_reward_tracker=bandit.avg_reward_tracker)
-            arm_max_ucb = np.argmax(ucb)
-            bandit.pull_arm(arm_max_ucb)
-    
+            if type_of_pull == 'monte_carlo':
+                arm_max_ucb, prop_lis = ucb_value_naive(bandit.num_arms, num_rounds,
+                                                        bandit.arm_pull_tracker,
+                                                        bandit.avg_reward_tracker,
+                                                        bandit.var_est_tracker,
+                                                        type_of_pull='monte_carlo')
+            else:
+                arm_max_ucb = ucb_value_naive(bandit.num_arms, num_rounds,
+                                              bandit.arm_pull_tracker,
+                                              bandit.avg_reward_tracker,
+                                              bandit.var_est_tracker)
+
+            # Pull the arm with max ucb
+            if type_of_pull == 'monte_carlo':
+                bandit.pull_arm(arm_max_ucb, prop_lis)
+            else:
+                bandit.pull_arm(arm_max_ucb)
     return bandit

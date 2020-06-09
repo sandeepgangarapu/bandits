@@ -64,12 +64,34 @@ def create_distributions_custom(arm_means, arm_vars, num_subjects):
 
 
 def ucb_value_naive(num_arms, num_rounds, arm_pull_tracker,
-                    avg_reward_tracker):
+                    avg_reward_tracker, var_reward_tracker,
+                    type_of_pull='single'):
     ucb = [0 for i in range(num_arms)]
     for arm in range(num_arms):
         conf_interval = sqrt((2*log(num_rounds))/(arm_pull_tracker[arm]))
         ucb[arm] = avg_reward_tracker[arm] + conf_interval
-    return ucb
+    chosen_arm = np.argmax(ucb)
+    if type_of_pull == 'single':
+        return chosen_arm
+    winning_arm_lis = [chosen_arm]
+    if type_of_pull == 'monte_carlo':
+        num_pulls = 3000
+        conf_interval_arms = np.sqrt((2 * log(num_rounds)) / np.array(arm_pull_tracker))
+        for pull in range(num_pulls):
+            sample = []
+            for arm in range(num_arms):
+                current_mean = avg_reward_tracker[arm]
+                current_var = var_reward_tracker[arm]
+                random_sample_mean = np.random.normal(current_mean, sqrt(current_var/arm_pull_tracker[arm]), 1)
+                ucb_local = random_sample_mean[0] + conf_interval_arms[arm]
+                sample.append(ucb_local)
+            # the arm that has the highest value of draw is selected
+            winning_arm_lis.append(np.argmax(sample))
+        arm_counter = Counter(winning_arm_lis)
+        prop_score_lis = []
+        for arm in range(num_arms):
+            prop_score_lis.append(float(arm_counter[arm] / len(winning_arm_lis)))
+        return chosen_arm, prop_score_lis
 
 
 def lcb_value_naive(num_arms, num_rounds, arm_pull_tracker,
@@ -121,7 +143,7 @@ def thompson_arm_pull(m, s, type_of_pull='single'):
     for arm in range(len(m)):
         current_mean = m[arm]
         current_var = s[arm]
-        sample.append(np.random.normal(current_mean, sqrt(current_var), 1))
+        sample.append(np.random.normal(current_mean, sqrt(current_var), 1)[0])
     # the arm that has the highest value of draw is selected
     chosen_arm = np.argmax(sample)
     winning_arm.append(chosen_arm)
@@ -129,13 +151,13 @@ def thompson_arm_pull(m, s, type_of_pull='single'):
         return chosen_arm
 
     if type_of_pull == 'monte_carlo':
-        num_pulls = 200
+        num_pulls = 2000
         for pull in range(num_pulls):
             sample = []
             for arm in range(len(m)):
                 current_mean = m[arm]
                 current_var = s[arm]
-                sample.append(np.random.normal(current_mean, sqrt(current_var), 1))
+                sample.append(np.random.normal(current_mean, sqrt(current_var), 1)[0])
             # the arm that has the highest value of draw is selected
             winning_arm.append(np.argmax(sample))
         arm_counter = Counter(winning_arm)
@@ -156,6 +178,22 @@ def bayesian_update(prior_params, x):
     m1 = ((k * m) + x) / k1
     s1 = (1 / v1) * (v * s + (k / (k + 1)) * ((m - x) ** 2))
     return m1, k1, v1, s1
+
+
+def bayesian_update_normal_inv_gamma(prior_params, lis_x):
+    """ https://www.coursera.org/lecture/bayesian/the-normal-gamma-conjugate-family-ncApT"""
+    m, n, s, d = prior_params[0], prior_params[1], prior_params[2], \
+                 prior_params[3]
+    n0 = len(lis_x)
+    d0 = n0-1
+    m0 = np.mean(lis_x)
+    s0 = np.var(lis_x, ddof=1)
+    # parameter update
+    n1 = n+n0
+    d1 = d+n0
+    m1 = ((n * m) + (n0 * m0)) / n1
+    s1 = (1 / d1) * ((s*d) + (s0*d0) + (((n0*n)/n1)*((m-m0)**2)))
+    return m1, n1, s1, d1
 
 
 def time_lis_of_lis(lis):
