@@ -1,0 +1,361 @@
+---
+title: "Bias and Normality of Thompson Sampling based algorithms"
+author: "Sandeep Gangarapu"
+output: html_document
+---
+  
+Concusions:
+
+Mean estimates of MAB and AB behave as intended for both Best and Worst arms.
+
+* Best arm estimates for Thompson IPW and AIPW are *biased* for some reason
+* Worst arm estimates for Thompson IPW and AIPW are unbiased do not follow normality. This means IPW and AIPW will only correct the bias bunt not normality.
+
+
+**We are sampling from 2 arms with distributions of N(2,1) - the worst arm and N(3,1) the best arm.**
+  
+```{r echo=FALSE, warning=FALSE}
+suppressPackageStartupMessages(
+  {
+    library(ggplot2)
+    library(dplyr)
+    library(tidyr)
+    library(rcompanion)
+  })
+```
+
+
+```{r echo=FALSE, warning=FALSE}
+
+setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")
+
+true_means = c(2,3)
+
+true_vars = c(1,1)
+
+grp = c(0:(length(true_means)-1))
+true_df <- data.frame(grp, true_means, true_vars)
+true_df <- true_df %>% mutate(grp=factor(grp))
+
+seed_algs <- c("ab", "ucb", "thomp", "eps_greedy")
+inf_algs <- c("ucb_inf_eps", "thomp_inf_eps")
+est_algs <- c("thomp_ipw", "thomp_aipw", "thomp_inf_eps_ipw",
+              "thomp_inf_eps_aipw", "thomp_eval_aipw", 'thomp_inf_eps_eval_aipw',
+              "ucb_aipw", "ucb_ipw",  "ucb_inf_eps_aipw", "ucb_inf_eps_ipw" )
+thomp_algs <- c( "thomp", "thomp_inf_eps")
+thomp_est_algs <- c( "thomp_ipw", "thomp_aipw", "thomp_eval_aipw", "thomp_inf_eps_ipw",
+                     "thomp_inf_eps_aipw", 'thomp_inf_eps_eval_aipw')
+ucb_algs <- c("ucb_inf_eps", "ucb")
+ucb_est_algs <- c("ucb_aipw", "ucb_ipw",  "ucb_inf_eps_aipw", "ucb_inf_eps_ipw")
+adv_algs <- c(thomp_algs, ucb_algs)
+# data <- read.csv("bias_500_50.csv")
+data <- read.csv("bias_500_200.csv")
+
+
+group_outcome <- data  %>%  filter(alg %in% c(seed_algs, inf_algs)) %>%
+  select(alg, group, ite, outcome) %>%
+  group_by(ite,alg) %>% mutate(x=row_number()) %>%
+  ungroup()
+means <- group_outcome  %>% group_by(group, alg, ite) %>%
+  summarise(mn = mean(outcome)) %>% ungroup()
+
+
+weighed_means <- data %>%  filter(alg %in% est_algs) %>%
+  select(alg, ite, group, mean_est) %>% 
+  group_by(ite,alg, group) %>%
+  mutate(x=row_number(), y= max(row_number())) %>%
+  ungroup() %>% filter(x==y) %>% select(-c(x,y)) %>% rename(mn = mean_est)
+
+```
+
+
+# Bias
+
+We expect sample mean estimate of *best* arm for MAB algorithms to be unbiased and drawn from Normal distribution
+
+We expect sample mean estimate of *worst* arm for MAB algorithms to be biased and not drawn from Normal distribution
+
+We expect sample mean estimate of *worst* arm for *AB* to be unbiased and drawn from Normal distribution
+
+```{r echo=FALSE, warning=FALSE}
+
+best <- means %>% filter(group==which.max(true_means)-1) %>%
+  filter (alg %in% c('ab', 'thomp')) %>% 
+  mutate(bias = mn-max(true_means)) %>% group_by(alg) %>%
+  summarise(Bias = mean(bias), se = sd(bias)/sqrt(n()))
+
+ylimit <- 0.3
+
+ggplot(best, aes(x=reorder(alg, abs(Bias)), y=Bias)) + geom_bar(stat="identity") +
+  geom_errorbar(aes(ymin=Bias-qnorm(0.975)*se, ymax=Bias+qnorm(0.975)*se), width=0.2) +
+  theme_bw()  + ylim(-ylimit, ylimit) + theme(axis.title.x=element_blank()) +
+  geom_hline(yintercept = 0) + 
+  #labs(title = "Bias of Best arm") +
+  theme(axis.text.x = element_text(angle = 90)) +
+  ggsave("bias_best.png", width = 8, height = 2, dpi=300, units="in")
+
+```
+
+
+
+```{r echo=FALSE, warning=FALSE}
+
+worst <- means %>% filter(group==which.min(true_means)-1) %>% 
+  filter (alg %in% c('ab', 'thomp')) %>% 
+  mutate(bias = mn-min(true_means)) %>% group_by(alg) %>%
+  summarise(Bias = mean(bias), se = sd(bias)/sqrt(n()))
+
+
+ggplot(worst, aes(x=reorder(alg, abs(Bias)), y=Bias)) + geom_bar(stat="identity") +
+  geom_errorbar(aes(ymin=Bias-qnorm(0.975)*se, ymax=Bias+qnorm(0.975)*se), width=0.2) +
+  theme_bw()  + ylim(-ylimit, ylimit) + theme(axis.title.x=element_blank()) +
+  geom_hline(yintercept = 0) + labs(title = "Bias of Worst arm") + theme(axis.text.x = element_text(angle = 90)) 
+
+
+```
+
+This is as expected. Thompson sampling, a MAB algorithms has a negative bias for its sample mean estimate of the worst arm.
+
+
+# Normality
+
+We Expect 
+
+* AB Testing - Best - Normal
+* AB Testing - Worst - Normal
+
+
+* Thompson Sampling - Best - Normal
+* Thompson Sampling - Worst - Not Normal
+
+
+
+```{r echo=FALSE, warning=FALSE}
+
+best_ab <- means %>%  filter(group==which.max(true_means)-1 & alg=='ab')
+
+plotNormalHistogram(best_ab$mn, prob = TRUE, col = "gray",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50,
+                    main = "Mean estimates of Best Arm - AB")
+abline(v=3,  col="red")
+
+shapiro.test(best_ab$mn)
+
+```
+
+Sample mean estimate of the best arm for AB testing follows Normal distribution.
+
+```{r echo=FALSE, warning=FALSE}
+worst_ab <- means %>%  filter(group==which.min(true_means)-1 & alg=='ab')
+
+
+
+plotNormalHistogram(worst_ab$mn, prob = TRUE, col = "gray", main = "Mean estimates of Worst Arm - AB",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50)
+
+abline(v=2,  col="red")
+
+shapiro.test(worst_ab$mn)
+
+```
+
+
+Sample mean estimate of the worst arm for AB testing follows Normal distribution.
+
+
+```{r echo=FALSE, warning=FALSE}
+
+
+best_thomp <- means %>%  filter(group==which.max(true_means)-1 & alg=='thomp') 
+
+plotNormalHistogram(best_thomp$mn, prob = TRUE, col = "gray", 
+                    main = "Mean estimates of Best Arm - Thompson Sampling",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50)
+
+abline(v=3,  col="red")
+
+shapiro.test(best_thomp$mn)
+
+```
+
+Sample mean estimate of the best arm for Thompson Sampling follows Normal distribution.
+
+
+```{r echo=FALSE, warning=FALSE}
+
+
+worst_thomp <- means %>%  filter(group==which.min(true_means)-1 & alg=='thomp') 
+
+plotNormalHistogram(worst_thomp$mn, prob = TRUE, col = "gray",
+                    main = "Mean estimates of Worst Arm - Thompson Sampling",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50)
+abline(v=2,  col="red")
+
+
+shapiro.test(worst_thomp$mn)
+```
+
+Sample mean estimate of the worst arm for Thompson Sampling does not follow Normal distribution.
+
+
+# Bias and Normality of Thompson INF
+
+We expect the algorithm to be 
+
+* Thompson INF - Best arm - Unbiased and Normal
+* Thompson INF - Worst arm - Biased and Not Normal
+
+```{r echo=FALSE, warning=FALSE}
+
+
+best <- means %>% filter(group==which.max(true_means)-1) %>%
+  filter (alg %in% c('thomp', 'thomp_inf_eps')) %>% 
+  mutate(bias = mn-max(true_means)) %>% group_by(alg) %>%
+  summarise(Bias = mean(bias), se = sd(bias)/sqrt(n()))
+
+ylimit <- 0.3
+
+ggplot(best, aes(x=reorder(alg, abs(Bias)), y=Bias)) + geom_bar(stat="identity") +
+  geom_errorbar(aes(ymin=Bias-qnorm(0.975)*se, ymax=Bias+qnorm(0.975)*se), width=0.2) +
+  theme_bw()  + ylim(-ylimit, ylimit) + theme(axis.title.x=element_blank()) +
+  geom_hline(yintercept = 0) + labs(title = "Bias of Best arm") +
+  theme(axis.text.x = element_text(angle = 90)) 
+
+
+best_thomp_inf_eps <- means %>%  filter(group==which.max(true_means)-1 & alg=='thomp_inf_eps') 
+
+plotNormalHistogram(best_thomp_inf_eps$mn, prob = TRUE, col = "gray",
+                    main = "Mean estimates of Best Arm - Thomp_Inf",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50)
+
+abline(v=3,  col="red")
+
+shapiro.test(best_thomp_inf_eps$mn)
+```
+
+Sample mean estimate of the best arm for Thompson INF follows Normal distribution and is unbiased.
+
+```{r echo=FALSE, warning=FALSE}
+
+
+worst <- means %>% filter(group==which.min(true_means)-1) %>% 
+  filter (alg %in% c('thomp', 'thomp_inf_eps')) %>% 
+  mutate(bias = mn-min(true_means)) %>% group_by(alg) %>%
+  summarise(Bias = mean(bias), se = sd(bias)/sqrt(n()))
+
+
+ggplot(worst, aes(x=reorder(alg, abs(Bias)), y=Bias)) + geom_bar(stat="identity") +
+  geom_errorbar(aes(ymin=Bias-qnorm(0.975)*se, ymax=Bias+qnorm(0.975)*se), width=0.2) +
+  theme_bw()  + ylim(-ylimit, ylimit) + theme(axis.title.x=element_blank()) +
+  geom_hline(yintercept = 0) + labs(title = "Bias of Worst arm") + theme(axis.text.x = element_text(angle = 90)) 
+
+
+
+worst_thomp_inf_eps <- means %>%  filter(group==which.min(true_means)-1 & alg=='thomp_inf_eps') 
+
+plotNormalHistogram(worst_thomp_inf_eps$mn, prob = TRUE, col = "gray", 
+                    main = "Mean estimates of Worst Arm - Thomp_Inf",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50)
+abline(v=2,  col="red")
+
+
+shapiro.test(worst_thomp_inf_eps$mn)
+```
+
+Sample mean estimate of the worst arm for Thompson INF does not follow Normal distribution and is biased.
+
+**The variance of the estimate is lower comapared to the original algorithm**
+
+
+# Weighed estimators
+
+We use IPW and AIPW estimators. We expect that the estimates will be unbiased but not sure about the normality of the estimates.
+
+```{r echo=FALSE, warning=FALSE}
+
+best <- weighed_means %>% filter(alg %in% c('thomp_ipw', 'thomp_aipw')) %>% filter(group==which.max(true_means)-1) %>% 
+  mutate(bias = mn-max(true_means)) %>% group_by(alg) %>%
+  summarise(Bias = mean(bias), se = sd(bias)/sqrt(n()))
+
+ylimit <- max(abs(c(best$Bias + qnorm(0.975)*best$se, best$Bias - qnorm(0.975)*best$se)))
+ylimit <- 0.3
+
+ggplot(best, aes(x=reorder(alg, abs(Bias)), y=Bias)) + geom_bar(stat="identity") +
+  geom_errorbar(aes(ymin=Bias-qnorm(0.975)*se, ymax=Bias+qnorm(0.975)*se), width=0.2) +
+  theme_bw()  + ylim(-ylimit, ylimit) + theme(axis.title.x=element_blank()) +
+  geom_hline(yintercept = 0) + labs(title = "Bias of best arm") +
+  theme(axis.text.x = element_text(angle = 90)) 
+
+
+best_thomp_ipw <- weighed_means %>%  filter(group==which.max(true_means)-1 & alg=='thomp_ipw') 
+
+plotNormalHistogram(best_thomp_ipw$mn, prob = TRUE, col = "gray",
+                    main = "Mean estimates of Best Arm - Thomp_IPW",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50)
+abline(v=3,  col="red")
+
+shapiro.test(best_thomp_ipw$mn)
+
+
+
+best_thomp_aipw <- weighed_means %>%  filter(group==which.max(true_means)-1 & alg=='thomp_aipw') 
+
+plotNormalHistogram(best_thomp_aipw$mn, prob = TRUE, col = "gray",
+                    main = "Mean estimates of Best Arm - Thomp_AIPW",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50)
+abline(v=3,  col="red")
+
+shapiro.test(best_thomp_aipw$mn)
+
+
+```
+
+
+**For some reason, the weighed estimators of the best arm are negatively biased** but the normality is still maintained.
+
+```{r echo=FALSE, warning=FALSE}
+
+
+worst <- weighed_means %>% filter(alg %in% c('thomp_ipw', 'thomp_aipw')) %>% filter(group==which.min(true_means)-1) %>% 
+  mutate(bias = mn-min(true_means)) %>% group_by(alg) %>%
+  summarise(Bias = mean(bias), se = sd(bias)/sqrt(n()))
+
+ylimit <- max(abs(c(worst$Bias + qnorm(0.975)*worst$se, worst$Bias - qnorm(0.975)*worst$se)))
+ylimit <- 0.3
+
+ggplot(worst, aes(x=reorder(alg, abs(Bias)), y=Bias)) + geom_bar(stat="identity") +
+  geom_errorbar(aes(ymin=Bias-qnorm(0.975)*se, ymax=Bias+qnorm(0.975)*se), width=0.2) +
+  theme_bw()  + ylim(-ylimit, ylimit) + theme(axis.title.x=element_blank()) +
+  geom_hline(yintercept = 0) + labs(title = "Bias of Worst arm") + theme(axis.text.x = element_text(angle = 90)) 
+
+
+
+worst_thomp_ipw <- weighed_means %>%  filter(group==which.min(true_means)-1 & alg=='thomp_ipw') 
+
+plotNormalHistogram(worst_thomp_ipw$mn, prob = TRUE, col = "gray",
+                    main = "Mean estimates of Worst Arm - Thomp_AIPW",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50)
+abline(v=2,  col="red")
+
+shapiro.test(worst_thomp_ipw$mn)
+
+
+
+worst_thomp_aipw <- weighed_means %>%  filter(group==which.min(true_means)-1 & alg=='thomp_aipw') 
+
+plotNormalHistogram(worst_thomp_aipw$mn, prob = TRUE, col = "gray",
+                    main = "Mean estimates of Worst Arm - Thomp_AIPW",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50)
+abline(v=2,  col="red")
+
+shapiro.test(worst_thomp_aipw$mn)
+
+
+
+```
+
+
+Worst arm estimate for IPW and AIPW are unbiased as expected but are not normal.
+
+
+

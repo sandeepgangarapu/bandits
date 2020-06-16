@@ -110,7 +110,7 @@ class BanditSimulation:
             if self.dist_type == 'Normal':
                 outcome_lis_of_lis.append(np.random.normal(loc=self.arm_means[arm],
                                                            scale=sqrt(self.arm_vars[arm]),
-                                                           size=100000))
+                                                           size=1000000))
             if self.dist_type == 'Bernoulli':
                 outcome_lis_of_lis.append(np.random.binomial(size=100000, n=1, p=self.arm_means[arm]))
             if self.dist_type == 'Uniform':

@@ -6,7 +6,7 @@ from bandits.utils import ucb_value_naive
 def ucb(bandit, num_rounds, type_of_pull='single'):
     """Function that reproduces the steps involved in ucb_naive
     algorithm"""
-    print("---------------Running UCB ---------------")
+    #print("---------------Running UCB ---------------")
     # choose each action once:
     for ite in range(2):
         for arm in range(bandit.num_arms):
@@ -15,7 +15,7 @@ def ucb(bandit, num_rounds, type_of_pull='single'):
             else:
                 bandit.pull_arm(arm)
     
-    ucb_rounds = num_rounds - bandit.num_arms
+    ucb_rounds = num_rounds - (2*bandit.num_arms)
     for round in range(ucb_rounds):
         # find UCB for all arms
         if type_of_pull == 'monte_carlo':

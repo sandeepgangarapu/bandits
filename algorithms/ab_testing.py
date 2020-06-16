@@ -14,10 +14,12 @@ def power_analysis(arm_means, arm_vars, alpha=0.05, beta=0.1):
     # find effect size of all arms
     num_arms = len(arm_means)
     effect_size_lis = []
-    for arm in range(1, num_arms):
-        effect_size = arm_means[arm]-arm_means[0]/(sqrt((arm_vars[arm]
-            +arm_vars[0])/2))
-        effect_size_lis.append(effect_size)
+    for arm1 in range(num_arms):
+        for arm2 in range(num_arms):
+            if arm1 !=arm2:
+                effect_size = (arm_means[arm1]-arm_means[arm2])/(sqrt((arm_vars[arm1]
+            +arm_vars[arm2])/2))
+                effect_size_lis.append(effect_size)
     # we calculate min effect so that the sample size is large enough to
     # detect the smallest effect of the arm in a/b testing
     min_effect_size = np.min(np.abs(effect_size_lis))

@@ -11,9 +11,9 @@ suppressPackageStartupMessages(
     library(ggplot2)
     library(dplyr)
     library(tidyr)
-    library(directlabels)
-    library(gganimate)
-    library(cumstats)
+   # library(directlabels)
+    #library(gganimate)
+   # library(cumstats)
   })
 ```
 
@@ -50,7 +50,8 @@ We run this simulation for 20 different times using various seeds.
 setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")
 
 
-data <- read.csv("sim_3_20000.csv")
+# data <- read.csv("sim_3_20000.csv")
+data <- read.csv("bias_1_2000.csv")
 
 
 seed_algs <- c("ab", "ucb", "thomp", "eps_greedy")
@@ -137,6 +138,8 @@ ggplot(df %>% filter(alg == adv_algs)) + geom_point(aes(x=x, y=factor(group)), s
   theme_bw() +
   labs(x='Time Period', y = 'Group') +
   theme(axis.text.y = element_text(size = rel(0.7))) 
+
+df1 <- df %>% filter(x<30) %>% group_by(alg, group) %>% summarise(mn = mean(outcome))
 
 ```
 
