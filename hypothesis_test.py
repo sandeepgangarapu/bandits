@@ -1,4 +1,4 @@
-from bandits.bandit_comparison_simulation import BanditSimulation
+from bandits.bandit_comparison_simulation_raw import BanditSimulation
 import numpy as np
 import pandas as pd
 

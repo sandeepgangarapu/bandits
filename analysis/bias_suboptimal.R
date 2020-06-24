@@ -28,7 +28,8 @@ ucb_algs <- c("ucb_inf_eps", "ucb")
 ucb_est_algs <- c("ucb_aipw", "ucb_ipw",  "ucb_inf_eps_aipw", "ucb_inf_eps_ipw")
 adv_algs <- c(thomp_algs, ucb_algs)
 #data <- read.csv("bias_500_50.csv")
-data <- read.csv("bias_100_500.csv")
+#data <- read.csv("bias_100_500.csv")
+data <- read.csv("res_40_500.csv")
 setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\results")
 
 
@@ -53,25 +54,26 @@ best <- means %>% filter(group==which.max(true_means)-1) %>%
 
 ylimit <- 0.3
 
-ggplot(best %>% filter(alg %in% c('thomp', 'ab')), aes(x=reorder(alg, abs(Bias)), y=Bias)) + geom_bar(stat="identity") +
+ggplot(best %>% filter(alg %in% c('thomp', 'ab', 'thomp_inf_eps')), aes(x=alg, y=Bias)) + geom_bar(stat="identity") +
   geom_errorbar(aes(ymin=Bias-qnorm(0.975)*se, ymax=Bias+qnorm(0.975)*se), width=0.2) +
   theme_bw()  + ylim(-ylimit, ylimit) + theme(axis.title.x=element_blank()) +
   geom_hline(yintercept = 0) +
   # labs(title = "Bias of best arm") +
   # theme(axis.text.x = element_text(angle = 90)) +
-  ggsave("bias_best.png", width = 4, height = 4, dpi=300, units="in")
+  ggsave("bias_best_1.png", width = 4, height = 4, dpi=300, units="in")
 
 best <- means %>% filter(group==which.max(true_means)-1) %>%
   group_by(alg) %>%
-  summarise(m=mean(mn), v=var(mn)) %>% mutate(mse=(m-max(true_means))^2+v)
+  summarise(mse = mean((mn-max(true_means))^2))
+  #summarise(m=mean(mn), v=var(mn)) %>% mutate(mse=(m-max(true_means))^2+v)
 
 
-ggplot(best  %>% filter(alg %in% c('thomp', 'ab')), aes(x=alg, y=mse)) + 
+ggplot(best  %>% filter(alg %in% c('thomp', 'ab', 'thomp_inf_eps')), aes(x=alg, y=mse)) + 
   geom_bar(stat="identity") +
   theme_bw()  + ylim(-ylimit, ylimit) + theme(axis.title.x=element_blank()) +
   geom_hline(yintercept = 0) +
   theme(axis.title.x=element_blank())  +
-  ggsave("mse_best.png", width = 4, height = 4, dpi=300, units="in")
+  ggsave("mse_best_1.png", width = 4, height = 4, dpi=300, units="in")
 
 
 worst <- means %>% filter(group==which.min(true_means)-1) %>% 
@@ -79,25 +81,26 @@ worst <- means %>% filter(group==which.min(true_means)-1) %>%
   summarise(Bias = mean(bias), se = sd(bias)/sqrt(n()))
 
 
-ggplot(worst %>% filter(alg %in% c('thomp', 'ab')), aes(x=reorder(alg, abs(Bias)), y=Bias)) + geom_bar(stat="identity") +
+ggplot(worst %>% filter(alg %in% c('thomp', 'ab', 'thomp_inf_eps')), aes(x=alg, y=Bias)) + geom_bar(stat="identity") +
   geom_errorbar(aes(ymin=Bias-qnorm(0.975)*se, ymax=Bias+qnorm(0.975)*se), width=0.2) +
   theme_bw()  + ylim(-ylimit, ylimit) + theme(axis.title.x=element_blank()) +
   geom_hline(yintercept = 0) +
   # labs(title = "Bias of Worst arm") +
   # theme(axis.text.x = element_text(angle = 90)) +
-  ggsave("bias_worst.png", width = 4, height = 4, dpi=300, units="in")
+  ggsave("bias_worst_1.png", width = 4, height = 4, dpi=300, units="in")
 
 worst <- means %>%  filter(group==which.min(true_means)-1)  %>% group_by(alg) %>%
-  summarise(m=mean(mn), v=var(mn)) %>% mutate(mse=(m-min(true_means))^2)
+  summarise(mse = mean((mn-min(true_means))^2))
+  #summarise(m=mean(mn), v=var(mn)) %>% mutate(mse=(m-min(true_means))^2)
 
 
-ggplot(worst %>% filter(alg %in% c('thomp', 'ab')), aes(x=reorder(alg, mse), y=mse)) +
+ggplot(worst %>% filter(alg %in% c('thomp', 'ab', 'thomp_inf_eps')), aes(x=alg, y=mse)) +
   geom_bar(stat="identity") +
   theme_bw()  + ylim(-ylimit, ylimit) + theme(axis.title.x=element_blank()) +
   geom_hline(yintercept = 0) +
   # labs(title = "MSE of Worst arm") +
   theme(axis.title.x=element_blank()) +
-  ggsave("mse_worst.png", width = 4, height = 4, dpi=300, units="in")
+  ggsave("mse_worst_1.png", width = 4, height = 4, dpi=300, units="in")
 
 
 library(rcompanion)
@@ -175,17 +178,20 @@ ggplot(best, aes(x=reorder(alg, abs(Bias)), y=Bias)) + geom_bar(stat="identity")
   theme(axis.text.x = element_text(angle = 90)) 
 
 
-worst <- weighed_means %>% filter(alg %in% c('thomp_ipw', 'thomp_aipw')) %>% filter(group==which.min(true_means)-1) %>% 
+worst_1 <- weighed_means %>% filter(alg %in% c('thomp_inf_eps_ipw', 'thomp_inf_eps_aipw')) %>% filter(group==which.min(true_means)-1) %>% 
   mutate(bias = mn-min(true_means)) %>% group_by(alg) %>%
   summarise(Bias = mean(bias), se = sd(bias)/sqrt(n()))
+worst <- rbind(worst, worst_1)
 
 ylimit <- max(abs(c(worst$Bias + qnorm(0.975)*worst$se, worst$Bias - qnorm(0.975)*worst$se)))
-ylimit <- 0.3
+ylimit <- 10
 
 ggplot(worst, aes(x=reorder(alg, abs(Bias)), y=Bias)) + geom_bar(stat="identity") +
   geom_errorbar(aes(ymin=Bias-qnorm(0.975)*se, ymax=Bias+qnorm(0.975)*se), width=0.2) +
   theme_bw()  + ylim(-ylimit, ylimit) + theme(axis.title.x=element_blank()) +
-  geom_hline(yintercept = 0) + labs(title = "Bias of Worst arm") + theme(axis.text.x = element_text(angle = 90)) 
+  geom_hline(yintercept = 0) +
+  theme(axis.text.x = element_text(angle = 90)) +
+  ggsave("bias_worst_weighed.png", width = 7, height = 4, dpi=300, units="in")
 
 
 

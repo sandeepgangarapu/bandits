@@ -1,6 +1,6 @@
 import numpy as np
 
-def ipw(arm_lis, reward_lis, weight_lis):
+def ipw(arm_lis, reward_lis, weight_lis, final_means = False):
     ipw_mean_est = []
     for i in range(len(arm_lis)):
         current_arm = arm_lis[i]
@@ -8,10 +8,19 @@ def ipw(arm_lis, reward_lis, weight_lis):
         ind_array = np.array([1 if j == current_arm else 0 for j in arm_lis[:i+1]])
         ipw_est = np.sum(weighed_reward*ind_array)/(i+1)
         ipw_mean_est.append(ipw_est)
+    if final_means:
+        ipw_mean_est_2 = []
+        num_arms = max(arm_lis)+1
+        for arm1 in range(num_arms):
+            for arm_lis_ind in range(len(arm_lis)-1, -1, -1):
+                if arm1 == arm_lis[arm_lis_ind]:
+                    ipw_mean_est_2.append(ipw_mean_est[arm_lis_ind])
+                    break
+        ipw_mean_est = ipw_mean_est_2.copy()
     return ipw_mean_est
 
 
-def aipw(arm_lis, reward_lis, weight_lis):
+def aipw(arm_lis, reward_lis, weight_lis, final_means = False):
     aipw_mean_est = []
     # this will initialize arm means of all arms to 0
     mean_snapshot = {key:[0] for key in np.unique(arm_lis)}
@@ -29,6 +38,15 @@ def aipw(arm_lis, reward_lis, weight_lis):
                 mean_snapshot[j].append(new_mean)
             else:
                 mean_snapshot[j].append(mean_snapshot[j][-1])
+    if final_means:
+        aipw_mean_est_2 = []
+        num_arms = max(arm_lis)+1
+        for arm1 in range(num_arms):
+            for arm_lis_ind in range(len(arm_lis) - 1, -1, -1):
+                if arm1 == arm_lis[arm_lis_ind]:
+                    aipw_mean_est_2.append(aipw_mean_est[arm_lis_ind])
+                    break
+        aipw_mean_est = aipw_mean_est_2.copy()
     return aipw_mean_est
 
 
@@ -97,8 +115,8 @@ def athey_aipw(arm_lis, reward_lis, weight_lis, weight_lis_of_lis=None):
 
 
 
-a = eval_aipw([1,0,1,0],
+a = aipw([1,0,1,0],
          [1,1,2,2],
-         [0.5, 0.5, 0.5, 0.5],
-              type_of_weight='variance_stabilizing',
-              weight_lis_of_lis=[[0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5]])
+         [0.5, 0.5, 0.5, 0.5], final_means=False)
+
+print(a)

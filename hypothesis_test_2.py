@@ -1,4 +1,4 @@
-from bandits.bandit_comparison_simulation import BanditSimulation
+from bandits.bandit_comparison_simulation_raw import BanditSimulation
 import numpy as np
 #
 # true_means = [0.25, 1.82, 1.48, 2.25, 2]
