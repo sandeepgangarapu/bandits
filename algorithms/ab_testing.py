@@ -20,6 +20,9 @@ def power_analysis(arm_means, arm_vars, alpha=0.05, beta=0.1):
                 effect_size = (arm_means[arm1]-arm_means[arm2])/(sqrt((arm_vars[arm1]
             +arm_vars[arm2])/2))
                 effect_size_lis.append(effect_size)
+    #TODO: we calculate effect sizes twice for every pair of arms. This is a very very small
+    # gain in efficiency but a gain nonetheless
+
     # we calculate min effect so that the sample size is large enough to
     # detect the smallest effect of the arm in a/b testing
     min_effect_size = np.min(np.abs(effect_size_lis))
@@ -42,8 +45,8 @@ def ab_testing(bandit, num_rounds, sample_size=None,
     :param post_allocation: if there should be max allocation after pure ab
     :return: bandit
     """
-    arm_means = np.mean(np.array(bandit.trt_dist_list), axis=1)
-    arm_vars = np.var(np.array(bandit.trt_dist_list), axis=1)
+    arm_means = bandit.arm_means
+    arm_vars = bandit.arm_vars
 
     num_rounds_each = int(num_rounds/bandit.num_arms)
     print("---------------Running AB testing---------------")
@@ -65,4 +68,3 @@ def ab_testing(bandit, num_rounds, sample_size=None,
         for round in range(remaining_rounds):
             bandit.pull_arm(winning_arm)
     return bandit
-
