@@ -25,7 +25,8 @@ def get_final_mean(num_arms, arm_lis, mean_est_t):
     return mean_est_arm
 
 
-def weighed_estimators(type, arm_lis, reward_lis, weight_lis, type_of_weight='poly_decay', weight_lis_of_lis=None, final_means=False):
+def weighed_estimators(type, arm_lis, reward_lis, weight_lis, type_of_eval_weight='poly_decay',
+                       weight_lis_of_lis=None, final_means=False):
     """
     This is a function for inverse propensity score weighed estimator
     :param type: type of weighed estimator (ex: "ipw")

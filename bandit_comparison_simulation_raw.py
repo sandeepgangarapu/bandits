@@ -13,8 +13,9 @@ import multiprocessing
 class BanditSimulation:
 
     def __init__(self, seed, num_ite, arm_means, arm_vars, eps_inf, horizon, alg_list, mse_calc=True,
-                 agg=False, estimator_list=None, xi=1, dist_type='Normal', output_file_path=None):
-        """This class is run bandits simulation for given params and give simulation output.
+                 agg=False, estimator_list=None, type_of_eval_weight=None, xi=1, dist_type='Normal',
+                 output_file_path=None):
+        """This class is to run bandits simulation for given params and give simulation output.
         :param seed: seed for randomization
         :param num_ite: number of iterations
         :param arm_means: list of arm means
@@ -25,6 +26,7 @@ class BanditSimulation:
         :param mse_calc: whether to calculate MSE
         :param agg: output aggregated values like mean etc instead of raw values of rewards
         :param estimator_list: list of estimators like ipw, aipw etc
+        :param type_of_eval_weight: type of evaluation weight for weighed estimator
         :param xi: xi value for inf eps
         :param dist_type: type of outcome distribution
         :param output_file_path: path of file where output needs to be stored
@@ -40,6 +42,7 @@ class BanditSimulation:
         self.mse_calc = mse_calc
         self.agg = agg
         self.estimator_list = estimator_list
+        self.type_of_eval_weight = type_of_eval_weight
         self.xi = xi
         self.dist_type = dist_type
         self.output_file_path = output_file_path
@@ -114,7 +117,7 @@ class BanditSimulation:
                                        bandit.reward_tracker,
                                        bandit.propensity_tracker,
                                        final_means=self.agg,
-                                       type_of_weight='variance_stabilizing',
+                                       type_of_eval_weight=self.type_of_eval_weight,
                                        weight_lis_of_lis=bandit.prop_lis_tracker)
         df = self.create_prop_df(bandit, ite, est_value, alg_name, self.mse_calc)
         return df

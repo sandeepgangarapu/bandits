@@ -1,4 +1,4 @@
 *.Rhistory
-*.ini
+**/desktop.ini
 *.csv
 /analysis/analysis_*
