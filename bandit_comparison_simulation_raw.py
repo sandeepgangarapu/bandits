@@ -6,7 +6,7 @@ from bandits.algorithms.ucb import ucb
 from bandits.algorithms.epsilongreedy import epsilon_greedy
 from bandits.bandit import Bandit
 from bandits.utils import mse_outcome, prop_mse
-from bandits.algorithms.weighed_estimators.weighed_estimators import ipw, aipw, eval_aipw
+from bandits.algorithms.weighed_estimators import weighed_estimators
 import pandas as pd
 import multiprocessing
 
@@ -85,11 +85,11 @@ class BanditSimulation:
             if self.estimator_list:
                 if 'thomp' in alg:
                     for est in self.estimator_list:
-                        df = self.run_estimators(alg, est, bandit_dict[alg], ite)
+                        df = self.run_estimator(alg, est, bandit_dict[alg], ite)
                         output_prop_lis.append(df)
                 if 'ucb' in alg:
                     for est in self.estimator_list:
-                        df = self.run_estimators(alg, est, bandit_dict[alg], ite)
+                        df = self.run_estimator(alg, est, bandit_dict[alg], ite)
                         output_prop_lis.append(df)
         output_df = pd.concat(output_df_lis)
         if output_prop_lis:
@@ -99,7 +99,7 @@ class BanditSimulation:
             ite_output = output_df
         return ite_output
 
-    def run_estimators(self, alg, estimator_name, bandit, ite):
+    def run_estimator(self, alg, estimator_name, bandit, ite):
         """
         This method will simulate estimators
         :param alg: algorithm name
@@ -108,24 +108,14 @@ class BanditSimulation:
         :param ite: num of ite
         :return: returns the df of the output of the estimator + alg + ite combination
         """
-        global est_value
         alg_name = alg + "_" + estimator_name
-        if estimator_name == 'ipw':
-            est_value = ipw(bandit.arm_tracker,
-                            bandit.reward_tracker,
-                            bandit.propensity_tracker,
-                            final_means=self.agg)
-        if estimator_name == 'aipw':
-            est_value = aipw(bandit.arm_tracker,
-                             bandit.reward_tracker,
-                             bandit.propensity_tracker,
-                             final_means=self.agg)
-        if estimator_name == 'eval_aipw':
-            est_value = eval_aipw(bandit.arm_tracker,
-                                  bandit.reward_tracker,
-                                  bandit.propensity_tracker,
-                                  type_of_weight='variance_stabilizing',
-                                  weight_lis_of_lis=bandit.prop_lis_tracker)
+        est_value = weighed_estimators(estimator_name,
+                                       bandit.arm_tracker,
+                                       bandit.reward_tracker,
+                                       bandit.propensity_tracker,
+                                       final_means=self.agg,
+                                       type_of_weight='variance_stabilizing',
+                                       weight_lis_of_lis=bandit.prop_lis_tracker)
         df = self.create_prop_df(bandit, ite, est_value, alg_name, self.mse_calc)
         return df
 
