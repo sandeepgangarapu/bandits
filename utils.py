@@ -128,10 +128,10 @@ def treatment_outcome_grouping(group, outcome, group_outcome=False,
         return outcome_lis_of_lis
 
 
-def thompson_arm_pull(m, s, type_of_pull='single'):
+def thompson_arm_pull(mean_lis, var_lis, type_of_pull='single'):
     """
-    :param m: mean list of all arms
-    :param s: variance list of all arms
+    :param mean_lis: mean list of all arms
+    :param var_lis: variance list of all arms
     :param type_of_pull: either single pull or monte carlo pull
     :return: if single pull, gives out only winning arm
              if monte carlo pull, gives out winning arm and prop_scores
@@ -140,10 +140,10 @@ def thompson_arm_pull(m, s, type_of_pull='single'):
     # we store all sampled values in this list
     sample = []
     # we sample each arm from the prior distribution
-    for arm in range(len(m)):
-        current_mean = m[arm]
-        current_var = s[arm]
-        sample.append(np.random.normal(current_mean, sqrt(current_var), 1)[0])
+    for arm in range(len(mean_lis)):
+        current_mean = mean_lis[arm]
+        current_var = var_lis[arm]
+        sample.append(np.random.normal(current_mean, sqrt(current_var)))
     # the arm that has the highest value of draw is selected
     chosen_arm = np.argmax(sample)
     winning_arm.append(chosen_arm)
@@ -154,15 +154,15 @@ def thompson_arm_pull(m, s, type_of_pull='single'):
         num_pulls = 2000
         for pull in range(num_pulls):
             sample = []
-            for arm in range(len(m)):
-                current_mean = m[arm]
-                current_var = s[arm]
-                sample.append(np.random.normal(current_mean, sqrt(current_var), 1)[0])
+            for arm in range(len(mean_lis)):
+                current_mean = mean_lis[arm]
+                current_var = var_lis[arm]
+                sample.append(np.random.normal(current_mean, sqrt(current_var)))
             # the arm that has the highest value of draw is selected
             winning_arm.append(np.argmax(sample))
         arm_counter = Counter(winning_arm)
         prop_score_lis = []
-        for arm in range(len(m)):
+        for arm in range(len(mean_lis)):
             prop_score_lis.append(float(arm_counter[arm]/len(winning_arm)))
 
         return chosen_arm, prop_score_lis

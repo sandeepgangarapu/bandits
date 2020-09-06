@@ -189,7 +189,7 @@ class BanditSimulation:
         :param mean_est: list of mean_est calculated at every time period
         :param alg_name: name of alg + estimator name (ex: thomp_aipw)
         :param mse_calc: Bool to calculate MSE
-        :return: out put df
+        :return: output df
         """
         if self.agg:
             dict_df = {'alg': alg_name,

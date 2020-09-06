@@ -80,20 +80,20 @@ def weighed_estimators(type, arm_lis, reward_lis, weight_lis, type_of_eval_weigh
 
     if type == "eval_aipw":
         global eval_weights
-        if type_of_weight == 'uniform':
+        if type_of_eval_weight == 'uniform':
             eval_weights = 1 / (np.array(list(range(1, len(arm_lis) + 1))))
-        if type_of_weight == 'poly_decay':
+        if type_of_eval_weight == 'poly_decay':
             alpha = 0.5
             eval_weights = 1 / (np.array(list(range(1, len(arm_lis) + 1))) ** alpha)
-        if type_of_weight == 'propensity_score':
+        if type_of_eval_weight == 'propensity_score':
             eval_weights = np.array(weight_lis)
-        if type_of_weight == 'variance_stabilizing':
+        if type_of_eval_weight == 'variance_stabilizing':
             eval_weights = []
             for j in range(len(arm_lis)):
                 eval_wt = np.array(weight_lis[j]) / np.sum([lis[arm_lis[j]] for lis in weight_lis_of_lis])
                 eval_weights.append(eval_wt)
             eval_weights = np.array(eval_weights)
-        if type_of_weight == 'constant_allocation':
+        if type_of_eval_weight == 'constant_allocation':
             eval_weights = np.sqrt(np.array(weight_lis)/len(arm_lis))
         eval_aipw_mean_est = []
         # this will initialize arm means of all arms to 0
@@ -118,32 +118,3 @@ def weighed_estimators(type, arm_lis, reward_lis, weight_lis, type_of_eval_weigh
         if final_means:
             eval_aipw_mean_est = get_final_mean(num_arms, arm_lis, eval_aipw_mean_est)
         return eval_aipw_mean_est
-
-
-
-def athey_aipw(arm_lis, reward_lis, weight_lis, weight_lis_of_lis=None):
-
-    eval_aipw_mean_est = []
-    # this will initialize arm means of all arms to 0
-    mean_snapshot = {key: [0] for key in np.unique(arm_lis)}
-    for i in range(len(arm_lis)):
-        current_arm = arm_lis[i]
-        inv_prop = 1 / np.array(weight_lis[:i+1])
-        weighed_reward = np.array(reward_lis[:i+1]) * inv_prop
-        ind_array = np.array([1 if k == current_arm else 0 for k in arm_lis[:i + 1]])
-        eval_array = eval_weights[:i+1]
-        mean_array = np.array(mean_snapshot[current_arm])
-        aipw_term = (weighed_reward * ind_array) + mean_array - (mean_array * ind_array * inv_prop)
-        eval_aipw_est = np.sum(aipw_term*eval_array)/np.sum(eval_array)
-        eval_aipw_mean_est.append(eval_aipw_est)
-        for j in mean_snapshot.keys():
-            if current_arm == j:
-                new_mean = ((mean_snapshot[j][-1] * len(mean_snapshot[j])) + reward_lis[i]) / (
-                            len(mean_snapshot[j]) + 1)
-                mean_snapshot[j].append(new_mean)
-            else:
-                mean_snapshot[j].append(mean_snapshot[j][-1])
-    return eval_aipw_mean_est
-
-
-
