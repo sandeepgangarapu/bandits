@@ -1,6 +1,8 @@
 from bandits.algorithms.ab_testing import ab_testing
 from bandits.algorithms.thomp_inf_eps import thomp_inf_eps
 from bandits.algorithms.thompson_sampling import thompson_sampling
+from bandits.algorithms.thompson_sampling_honda import thompson_sampling_honda
+from bandits.algorithms.thompson_inf_eps_honda import thomp_inf_eps_honda
 from bandits.algorithms.ucb_inf_eps import ucb_inf_eps
 from bandits.algorithms.ucb import ucb
 from bandits.algorithms.epsilongreedy import epsilon_greedy
@@ -152,6 +154,10 @@ class BanditSimulation:
             thompson_sampling(bandit, self.horizon, type_of_pull=self.type_of_pull)
         if alg == 'thomp_inf_eps':
             thomp_inf_eps(bandit, self.horizon, xi=self.xi, type_of_pull=self.type_of_pull)
+        if alg == 'thomp_honda':
+            thompson_sampling_honda(bandit, self.horizon, type_of_pull=self.type_of_pull)
+        if alg == 'thomp_inf_eps_honda':
+            thomp_inf_eps_honda(bandit, self.horizon, xi=self.xi, type_of_pull=self.type_of_pull)
 
     def create_output_df(self, bandit, ite, mse_calc):
         """

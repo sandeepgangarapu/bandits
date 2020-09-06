@@ -4,7 +4,7 @@ import numpy as np
 from math import sqrt
 
 
-def thompson_sampling(bandit, num_rounds, type_of_pull='single'):
+def thompson_sampling_honda(bandit, num_rounds, type_of_pull='single'):
     """Function that reproduces the steps involved in Thompson sampling
     algorithm"""
     print("---------------Running Thompson Sampling Honda ---------------")
@@ -67,5 +67,5 @@ if __name__ == '__main__':
                              arm_means=[1,2,3],
                              arm_vars=[1,1,1]
                              )
-    thompson_sampling(thompson_bandit, num_rounds=num_rounds)
+    thompson_sampling_honda(thompson_bandit, num_rounds=num_rounds)
     print("Hwllp")
