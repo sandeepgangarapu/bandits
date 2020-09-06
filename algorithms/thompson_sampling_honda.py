@@ -68,4 +68,4 @@ if __name__ == '__main__':
                              arm_vars=[1,1,1]
                              )
     thompson_sampling(thompson_bandit, num_rounds=num_rounds)
-    print("Helo")
+    print("Hwllp")

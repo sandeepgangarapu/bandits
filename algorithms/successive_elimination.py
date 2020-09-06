@@ -32,15 +32,3 @@ def successive_elimination(bandit, num_rounds, num_arms):
                 active[arm] = 0
     
     return bandit
-
-
-if __name__ == '__main__':
-    # Define bandit
-    num_arms_ep = 4
-    num_rounds = num_obs
-    trt_dist_lis_ep = trt_dist_list[:num_arms_ep]
-    elim_bandit = Bandit(name='successive_elimination',
-                            num_arms=num_arms_ep,
-                            trt_dist_list=trt_dist_lis_ep)
-    successive_elimination(bandit=elim_bandit,
-                           num_rounds=num_rounds, num_arms=num_arms_ep)

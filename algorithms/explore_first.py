@@ -22,17 +22,3 @@ def explore_first(bandit, num_rounds, explore_percentage, num_arms):
         bandit.pull_arm(max_arm)
     return bandit
 
-
-if __name__ == '__main__':
-    # Define bandit
-    num_arms_ex = 4
-    explore_percentage = 10
-    num_rounds = num_obs
-    trt_dist_lis_ex = trt_dist_list[:num_arms_ex]
-    explore_bandit = Bandit(name='explore_first',
-                            num_arms=num_arms_ex,
-                            trt_dist_list=trt_dist_lis_ex)
-    explore_first(bandit=explore_bandit,
-                 num_rounds=num_rounds,
-                 explore_percentage=explore_percentage,
-                 num_arms=num_arms_ex)

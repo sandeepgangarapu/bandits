@@ -24,27 +24,12 @@ def ucb(bandit, num_rounds, type_of_pull='single'):
                                                     bandit.avg_reward_tracker,
                                                     bandit.var_est_tracker,
                                                     type_of_pull='monte_carlo')
+            bandit.pull_arm(arm_max_ucb, prop_lis)
         else:
             arm_max_ucb = ucb_value_naive(bandit.num_arms, ucb_rounds,
                                           bandit.arm_pull_tracker,
                                           bandit.avg_reward_tracker,
                                           bandit.var_est_tracker)
-
-        # Pull the arm with max ucb
-        if type_of_pull == 'monte_carlo':
-            bandit.pull_arm(arm_max_ucb, prop_lis)
-        else:
             bandit.pull_arm(arm_max_ucb)
     return bandit
 
-
-if __name__ == '__main__':
-    # Define bandit
-    num_arms = 4
-    num_rounds = num_obs
-    trt_dist_lis = trt_dist_list[:num_arms]
-    ucb_bandit = Bandit(name='ucb_naive',
-                        num_arms=num_arms,
-                        trt_dist_list=trt_dist_lis)
-    ucb(bandit=ucb_bandit,
-        num_rounds=num_rounds)
