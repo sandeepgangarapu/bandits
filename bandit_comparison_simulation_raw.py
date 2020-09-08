@@ -1,14 +1,14 @@
-from bandits.algorithms.ab_testing import ab_testing
-from bandits.algorithms.thomp_inf_eps import thomp_inf_eps
-from bandits.algorithms.thompson_sampling import thompson_sampling
-from bandits.algorithms.thompson_sampling_honda import thompson_sampling_honda
-from bandits.algorithms.thompson_inf_eps_honda import thomp_inf_eps_honda
-from bandits.algorithms.ucb_inf_eps import ucb_inf_eps
-from bandits.algorithms.ucb import ucb
-from bandits.algorithms.epsilongreedy import epsilon_greedy
-from bandits.bandit import Bandit
-from bandits.utils import mse_outcome, prop_mse
-from bandits.algorithms.weighed_estimators import weighed_estimators
+from algorithms.ab_testing import ab_testing
+from algorithms.thomp_inf_eps import thomp_inf_eps
+from algorithms.thompson_sampling import thompson_sampling
+from algorithms.thompson_sampling_honda import thompson_sampling_honda
+from algorithms.thompson_inf_eps_honda import thomp_inf_eps_honda
+from algorithms.ucb_inf_eps import ucb_inf_eps
+from algorithms.ucb import ucb
+from algorithms.epsilongreedy import epsilon_greedy
+from bandit import Bandit
+from utils import mse_outcome, prop_mse
+from algorithms.weighed_estimators import weighed_estimators
 import pandas as pd
 import multiprocessing
 

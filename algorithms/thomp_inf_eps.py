@@ -1,6 +1,6 @@
 import numpy as np
-from bandits.utils import thompson_arm_pull, bayesian_update_normal_inv_gamma, trt_dist_list
-from bandits.bandit import Bandit
+from utils import thompson_arm_pull, bayesian_update_normal_inv_gamma, trt_dist_list
+from bandit import Bandit
 
 def calc_eps_n(bandit, xi):
     sum_of_st_err = (np.array(bandit.var_est_tracker) / np.array(

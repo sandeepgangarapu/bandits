@@ -1,5 +1,5 @@
-from bandits.bandit import Bandit
-from bandits.utils import trt_dist_list, num_obs
+from bandit import Bandit
+from utils import trt_dist_list, num_obs
 import numpy as np
 import random
 

@@ -1,12 +1,11 @@
-from bandits.algorithms.ucb import ucb
-from bandits.algorithms.ucb_inf_eps import ucb_inf_eps
+from algorithms.ucb import ucb
+from algorithms.ucb_inf_eps import ucb_inf_eps
 import numpy as np
 from collections import Counter
 from math import sqrt
-from bandits.bandit import Bandit
+from bandit import Bandit
 from scipy.spatial.distance import cosine
 from sklearn.metrics.regression import mean_squared_error
-from bandits.algorithms.weighed_estimators.weighed_estimators import ipw, aipw
 import pandas as pd
 
 

@@ -1,6 +1,6 @@
 import numpy as np
-from bandits.utils import thompson_arm_pull
-from bandits.bandit import Bandit
+from utils import thompson_arm_pull
+from bandit import Bandit
 from math import sqrt
 
 

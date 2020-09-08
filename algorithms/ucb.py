@@ -1,6 +1,6 @@
-from bandits.bandit import Bandit
-from bandits.utils import trt_dist_list, num_obs
-from bandits.utils import ucb_value_naive
+from bandit import Bandit
+from utils import trt_dist_list, num_obs
+from utils import ucb_value_naive
 
 
 def ucb(bandit, num_rounds, type_of_pull='single'):

@@ -1,5 +1,5 @@
-from bandits.bandit import Bandit
-from bandits.utils import trt_dist_list, thompson_arm_pull, bayesian_update_normal_inv_gamma
+from bandit import Bandit
+from utils import trt_dist_list, thompson_arm_pull, bayesian_update_normal_inv_gamma
 import numpy as np
 from math import sqrt
 

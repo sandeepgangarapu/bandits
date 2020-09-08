@@ -1,6 +1,6 @@
-from bandits.ucb_inf.algorithms.ucb_inf_eps import ucb_inf_eps
-from bandits.bandit import Bandit
-from bandits.ucb_inf.stats import regret_outcome, mse_outcome
+from algorithms.ucb_inf_eps import ucb_inf_eps
+from bandit import Bandit
+from utils import regret_outcome, mse_outcome
 import pandas as pd
 import numpy as np
 from math import sqrt

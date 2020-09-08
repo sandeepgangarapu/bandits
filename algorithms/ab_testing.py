@@ -1,7 +1,7 @@
 import numpy as np
 from math import sqrt
 from statsmodels.stats.power import TTestIndPower
-from bandits.utils import treatment_outcome_grouping
+from utils import treatment_outcome_grouping
 
 
 def power_analysis(arm_means, arm_vars, alpha=0.05, beta=0.1):

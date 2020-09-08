@@ -1,7 +1,7 @@
-from bandits.bandit import Bandit
-from bandits.distributions import trt_dist_list, num_obs
+from bandit import Bandit
+from distributions import trt_dist_list, num_obs
 import numpy as np
-from bandits.utils import ucb_value_naive, lcb_value_naive
+from utils import ucb_value_naive, lcb_value_naive
 
 
 def successive_elimination(bandit, num_rounds, num_arms):

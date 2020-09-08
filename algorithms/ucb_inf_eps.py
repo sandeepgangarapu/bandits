@@ -1,5 +1,5 @@
 import numpy as np
-from bandits.utils import ucb_value_naive
+from utils import ucb_value_naive
 
 
 def calc_eps_n(bandit, xi):
