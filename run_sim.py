@@ -16,8 +16,8 @@ sim = BanditSimulation(seed=12412, num_ite=10, arm_means=true_means,
                        eps_inf=0.2,
                        horizon=2000,
                        alg_list=alg_list,
-                       # estimator_list=['aipw', 'ipw'],
-                       mse_calc = False,
+                       estimator_list=['aipw', 'ipw'],
+                       mse_calc = True,
                        output_file_path='analysis/output/thomp_honda'
                                         '.csv')
 

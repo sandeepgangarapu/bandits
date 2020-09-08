@@ -9,12 +9,12 @@ suppressPackageStartupMessages(
 setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")
 
 
-data <- read.csv("regret_3_2000_1.csv")
+data <- read.csv("thomp_honda.csv")
 #data <- read.csv("bias_1_2000.csv")
 
 
-seed_algs <- c("ab", "ucb", "thomp", "eps_greedy")
-inf_algs <- c("ucb_inf_eps", "thomp_inf_eps")
+seed_algs <- c("ab", "ucb", "thomp", "eps_greedy", "thomp_honda")
+inf_algs <- c("ucb_inf_eps", "thomp_inf_eps", "thomp_inf_eps_honda")
 est_algs <- c("thomp_ipw", "thomp_aipw", "thomp_inf_eps_ipw", "thomp_inf_eps_aipw", "thomp_eval_aipw", "thomp_inf_eps_eval_aipw")
 thomp_algs = c( "thomp", "thomp_inf_eps")
 ucb_algs <- c("ucb_inf_eps", "ucb")
@@ -23,12 +23,12 @@ adv_algs <- c(thomp_algs, ucb_algs)
 
 group_outcome <- data %>% filter(alg %in% c(seed_algs, inf_algs)) %>%
   select(alg, group, ite, outcome) %>%
-  group_by(ite,alg) %>% mutate(x=row_number()) %>% filter(x<500) %>% 
+  group_by(ite,alg) %>% mutate(x=row_number())  %>% 
   ungroup()
 
 regret_mse <- data %>% filter(alg %in% c(seed_algs, inf_algs)) %>%
-  select(alg, regret, ite, mean_mse, var_mse) %>%
-  group_by(ite,alg) %>% mutate(x=row_number()) %>% filter(x<500) %>% 
+  select(alg, regret, ite) %>%
+  group_by(ite,alg) %>% mutate(x=row_number()) %>% 
   ungroup()
 
 
