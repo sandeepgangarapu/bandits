@@ -11,7 +11,7 @@ alg_list=['ab', 'ucb', 'thomp', 'thomp_inf_eps', 'thomp_honda', 'thomp_inf_eps_h
 #
 # estimator_list=['aipw', 'eval_aipw', 'ipw'],
 
-sim = BanditSimulation(seed=12412, num_ite=1, arm_means=true_means,
+sim = BanditSimulation(seed=12412, num_ite=10, arm_means=true_means,
                        arm_vars=true_vars,
                        eps_inf=0.2,
                        horizon=2000,
@@ -21,5 +21,5 @@ sim = BanditSimulation(seed=12412, num_ite=1, arm_means=true_means,
                        output_file_path='analysis/output/thomp_honda'
                                         '.csv')
 
-sim.run_simulation()
+sim.run_simulation_multiprocessing()
 
