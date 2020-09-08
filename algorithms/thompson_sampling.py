@@ -37,11 +37,10 @@ def thompson_sampling(bandit, num_rounds, type_of_pull='single'):
         arm_means = [i[0] for i in prior_params]
         arm_vars = [i[2] for i in prior_params]
         if type_of_pull == 'monte_carlo':
-            chosen_arm, prop_lis = thompson_arm_pull(m=arm_means, s=arm_vars,
-                                                 type_of_pull=type_of_pull)
-        else:
-            chosen_arm = thompson_arm_pull(m=arm_means, s=arm_vars,
+            chosen_arm, prop_lis = thompson_arm_pull(mean_lis=arm_means, var_lis=arm_vars,
                                                      type_of_pull=type_of_pull)
+        else:
+            chosen_arm = thompson_arm_pull(mean_lis=arm_means, var_lis=arm_vars, type_of_pull=type_of_pull)
         # That chosen arm is pulled to observe reward
         # we pull the arm twice
         if type_of_pull == 'monte_carlo':

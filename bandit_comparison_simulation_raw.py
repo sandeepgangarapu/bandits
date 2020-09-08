@@ -67,7 +67,7 @@ class BanditSimulation:
         else:
             return final_output
 
-    def run_simulation(self, ite):
+    def run_simulation(self, ite=1):
         """
         each simulation is run in this method
         :param ite: number of ite so it can be stored in the output

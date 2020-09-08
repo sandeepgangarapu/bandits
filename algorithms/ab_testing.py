@@ -64,7 +64,7 @@ def ab_testing(bandit, num_rounds, sample_size=None,
     if post_allocation:
         remaining_rounds = num_rounds-(sample_size*bandit.num_arms)
         # for now we will check for means and allocate the rest to the winning
-        winning_arm = bandit.max_reward_arm
+        winning_arm = np.argmax(bandit.avg_reward_tracker)
         for round in range(remaining_rounds):
             bandit.pull_arm(winning_arm)
     return bandit
