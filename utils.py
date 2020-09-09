@@ -64,34 +64,14 @@ def create_distributions_custom(arm_means, arm_vars, num_subjects):
 
 
 def ucb_value_naive(num_arms, num_rounds, arm_pull_tracker,
-                    avg_reward_tracker, var_reward_tracker,
-                    type_of_pull='single'):
+                    avg_reward_tracker):
     ucb = [0 for i in range(num_arms)]
     for arm in range(num_arms):
         conf_interval = sqrt((2*log(num_rounds))/(arm_pull_tracker[arm]))
         ucb[arm] = avg_reward_tracker[arm] + conf_interval
     chosen_arm = np.argmax(ucb)
-    if type_of_pull == 'single':
-        return chosen_arm
-    winning_arm_lis = [chosen_arm]
-    if type_of_pull == 'monte_carlo':
-        num_pulls = 3000
-        conf_interval_arms = np.sqrt((2 * log(num_rounds)) / np.array(arm_pull_tracker))
-        for pull in range(num_pulls):
-            sample = []
-            for arm in range(num_arms):
-                current_mean = avg_reward_tracker[arm]
-                current_var = var_reward_tracker[arm]
-                random_sample_mean = np.random.normal(current_mean, sqrt(current_var/arm_pull_tracker[arm]), 1)
-                ucb_local = random_sample_mean[0] + conf_interval_arms[arm]
-                sample.append(ucb_local)
-            # the arm that has the highest value of draw is selected
-            winning_arm_lis.append(np.argmax(sample))
-        arm_counter = Counter(winning_arm_lis)
-        prop_score_lis = []
-        for arm in range(num_arms):
-            prop_score_lis.append(float(arm_counter[arm] / len(winning_arm_lis)))
-        return chosen_arm, prop_score_lis
+    return chosen_arm
+
 
 
 def lcb_value_naive(num_arms, num_rounds, arm_pull_tracker,
@@ -151,7 +131,7 @@ def thompson_arm_pull(mean_lis, var_lis, type_of_pull='single'):
         return chosen_arm
 
     if type_of_pull == 'monte_carlo':
-        num_pulls = 2000
+        num_pulls = 20000
         for pull in range(num_pulls):
             sample = []
             for arm in range(len(mean_lis)):
@@ -164,7 +144,6 @@ def thompson_arm_pull(mean_lis, var_lis, type_of_pull='single'):
         prop_score_lis = []
         for arm in range(len(mean_lis)):
             prop_score_lis.append(float(arm_counter[arm]/len(winning_arm)))
-
         return chosen_arm, prop_score_lis
 
 

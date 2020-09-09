@@ -72,6 +72,7 @@ class BanditSimulation:
         :param ite: number of ite so it can be stored in the output
         :return: the output of the iteration
         """
+        # we do this so that each process spawns at different random seed
         np.random.seed(ite)
         # list of outputs of all algorithms for a given iteration
         output_df_lis = []
