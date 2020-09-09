@@ -93,10 +93,6 @@ class BanditSimulation:
                     for est in self.estimator_list:
                         df = self.run_estimator(alg, est, bandit_dict[alg], ite)
                         output_prop_lis.append(df)
-                if 'ucb' in alg:
-                    for est in self.estimator_list:
-                        df = self.run_estimator(alg, est, bandit_dict[alg], ite)
-                        output_prop_lis.append(df)
         output_df = pd.concat(output_df_lis)
         if output_prop_lis:
             prop_df = pd.concat(output_prop_lis)
