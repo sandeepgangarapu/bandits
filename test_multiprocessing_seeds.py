@@ -1,11 +1,16 @@
-import multiprocessing
+import multiprocessing as mp
 import random
-import numpy as np
+import numpy
 
-def run_simulation(ite):
-    local_state = np.random.RandomState(ite)
-    print(np.random.normal(0,1,5))
+def child(n):
+    numpy.random.seed(n)  # <-- comment this out to get the fright of your life.
+    m = numpy.random.randn(6)
+    return m
+
 
 if __name__ == '__main__':
-    a_pool = multiprocessing.Pool()
-    result = a_pool.map(run_simulation, range(30))
+    N = 20
+    pool = mp.Pool()
+    results = pool.map(child, range(N))
+    for res in results:
+        print(res)
