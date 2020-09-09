@@ -67,13 +67,12 @@ class BanditSimulation:
         else:
             return final_output
 
-    def run_simulation(self, ite=1):
+    def run_simulation(self, ite):
         """
         each simulation is run in this method
         :param ite: number of ite so it can be stored in the output
         :return: the output of the iteration
         """
-        random.seed(ite)
         # list of outputs of all algorithms for a given iteration
         output_df_lis = []
         # list of outputs of estimators of all algs for a given iteration

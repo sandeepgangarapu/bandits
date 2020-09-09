@@ -1,4 +1,3 @@
-import sys
 from bandit_comparison_simulation_raw import BanditSimulation
 import numpy as np
 

@@ -6,7 +6,7 @@ from utils import ucb_value_naive
 def ucb(bandit, num_rounds, type_of_pull='single'):
     """Function that reproduces the steps involved in ucb_naive
     algorithm"""
-    #print("---------------Running UCB ---------------")
+    print("---------------Running UCB ---------------")
     # choose each action once:
     for ite in range(2):
         for arm in range(bandit.num_arms):
