@@ -11,7 +11,7 @@ alg_list=['ab', 'ucb', 'thomp', 'thomp_inf']
 #
 # estimator_list=['aipw', 'eval_aipw', 'ipw'],
 
-sim = BanditSimulation(seed=12412, num_ite=20, arm_means=true_means,
+sim = BanditSimulation(num_ite=20, arm_means=true_means,
                        arm_vars=true_vars,
                        eps_inf=0.2,
                        horizon=2000,

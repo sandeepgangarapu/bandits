@@ -10,10 +10,12 @@ from utils import mse_outcome, prop_mse
 from algorithms.weighed_estimators import weighed_estimators
 import pandas as pd
 import multiprocessing
+import random
+
 
 class BanditSimulation:
 
-    def __init__(self, seed, num_ite, arm_means, arm_vars, eps_inf, horizon, alg_list, mse_calc=True,
+    def __init__(self, num_ite, arm_means, arm_vars, eps_inf, horizon, alg_list, mse_calc=True,
                  agg=False, estimator_list=None, type_of_eval_weight=None, xi=1, dist_type='Normal',
                  output_file_path=None):
         """This class is to run bandits simulation for given params and give simulation output.
@@ -32,7 +34,6 @@ class BanditSimulation:
         :param dist_type: type of outcome distribution
         :param output_file_path: path of file where output needs to be stored
         """
-        self.seed = seed
         self.num_ite = num_ite
         self.arm_means = arm_means
         self.arm_vars = arm_vars
@@ -72,6 +73,7 @@ class BanditSimulation:
         :param ite: number of ite so it can be stored in the output
         :return: the output of the iteration
         """
+        random.seed(ite)
         # list of outputs of all algorithms for a given iteration
         output_df_lis = []
         # list of outputs of estimators of all algs for a given iteration

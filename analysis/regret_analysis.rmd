@@ -11,7 +11,7 @@ suppressPackageStartupMessages(
     library(ggplot2)
     library(dplyr)
     library(tidyr)
-   # library(directlabels)
+   library(directlabels)
     #library(gganimate)
    # library(cumstats)
   })
@@ -29,9 +29,9 @@ We see from the below true values that ARM-8 should the winning arm as it has th
 
 ```{r echo=TRUE}
 
-true_means = c(0.25, 2.82, 1.48, 4.95, 3)
 
-true_vars = c(3.84,  1.97, 2.62, 1, 4.06)
+true_means = c(0.25, 1.82, 1.48, 2.25, 2)
+true_vars = c(2.84,  1.97, 2.62, 1, 2.06)
 
 grp = c(0:(length(true_means)-1))
 true_df <- data.frame(grp, true_means, true_vars)
@@ -51,14 +51,14 @@ setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")
 
 
 # data <- read.csv("sim_3_20000.csv")
-data <- read.csv("bias_1_2000.csv")
+data <- read.csv("sim_default.csv")
 
 
 seed_algs <- c("ab", "ucb", "thomp", "eps_greedy")
-inf_algs <- c("ucb_inf_eps", "thomp_inf_eps")
-est_algs <- c("thomp_ipw", "thomp_aipw", "thomp_inf_eps_ipw", "thomp_inf_eps_aipw", "thomp_eval_aipw", "thomp_inf_eps_eval_aipw")
-thomp_algs = c( "thomp", "thomp_inf_eps")
-ucb_algs <- c("ucb_inf_eps", "ucb")
+inf_algs <- c("ucb_inf", "thomp_inf")
+est_algs <- c("thomp_ipw", "thomp_aipw", "thomp_inf_ipw", "thomp_inf_aipw")
+thomp_algs = c( "thomp", "thomp_inf")
+ucb_algs <- c("ucb_inf", "ucb")
 adv_algs <- c(thomp_algs, ucb_algs)
 
 
@@ -103,18 +103,14 @@ df_regret <- regret_mse %>% filter(ite==0)
 
 main_algs <- c("ab", "ucb", "thomp", "eps_greedy")
 
-regret_plot <- ggplot(df %>% filter(alg == main_algs)) + geom_point(aes(x=x, y=factor(group)), shape=1, alpha=0.6) +
+group_plot <- ggplot(df %>% filter(alg == main_algs)) + geom_point(aes(x=x, y=factor(group)), shape=1, alpha=0.6) +
   facet_grid(alg ~.) +
   theme_bw() +
   labs(x='Time Period', y = 'Group') +
   theme(axis.text.y = element_text(size = rel(0.7))) 
 
-regret_plot 
-
+group_plot
 ```
-
-UCB is the most efficient. Looks like Thompson sampling is not as efficient as perceived. In this case, it is hovering between 8, 4, 0
-
 
 
 ## Group allocations for Inference based allocation algorithms.
@@ -144,7 +140,7 @@ df1 <- df %>% filter(x<30) %>% group_by(alg, group) %>% summarise(mn = mean(outc
 ```
 
 
-"_inf_eps" suffix suggests that the algorithms makes inference based allocation with some probability. In these algorithms, the allocations are not as concentrated around few arms as those of the main algorithms (UCB, Thompson Sampling).
+"_inf" suffix suggests that the algorithms makes inference based allocation with some probability. In these algorithms, the allocations are not as concentrated around few arms as those of the main algorithms (UCB, Thompson Sampling).
 
 
 
@@ -159,7 +155,7 @@ ggplot(df_regret, aes(x=x, y=regret)) + geom_line(aes(color=alg)) +
 
 ```
 
-UCB algorithm is the most efficient. One interesting observation is that ucb_inf_eps performs better than Thompson Sampling. This could be because of a bad seed (one random bad simulation). So, we check to see if this the same case for other iterations (other random seeds).
+UCB algorithm is the most efficient. One interesting observation is that ucb_inf performs better than Thompson Sampling. This could be because of a bad seed (one random bad simulation). So, we check to see if this the same case for other iterations (other random seeds).
 
 
 

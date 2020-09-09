@@ -37,15 +37,13 @@ true_df <- true_df %>% mutate(grp=factor(grp))
 data <- read.csv("sim_thomp_ucb_300_1000.csv")
 
 
-seed_algs <- c("ab", "ucb", "thomp", "eps_greedy", "thomp_honda")
-inf_algs <- c("ucb_inf_eps", "thomp_inf_eps", "thomp_inf_eps_honda")
-est_algs <- c("thomp_ipw", "thomp_aipw", "thomp_honda_ipw", "thomp_honda_aipw",
-              "thomp_inf_eps_ipw", "thomp_inf_eps_aipw", "thomp_inf_eps_honda_ipw",
-              "thomp_inf_eps_honda_aipw", "thomp_eval_aipw", "thomp_inf_eps_eval_aipw")
-thomp_algs <- c( "thomp", "thomp_inf_eps", "thomp_honda", "thomp_inf_eps_honda")
-thomp_est_algs <- c( "thomp_ipw", "thomp_aipw", "thomp_eval_aipw", "thomp_inf_eps_ipw",
-                "thomp_inf_eps_aipw", 'thomp_inf_eps_eval_aipw', "thomp_honda_ipw", "thomp_honda_aipw",  "thomp_inf_eps_honda_ipw",
-              "thomp_inf_eps_honda_aipw")
+seed_algs <- c("ab", "ucb", "thomp")
+inf_algs <- c("ucb_inf_eps", "thomp_inf")
+est_algs <- c("thomp_ipw", "thomp_aipw",
+              "thomp_inf_ipw", "thomp_inf_aipw")
+thomp_algs <- c( "thomp", "thomp_inf")
+thomp_est_algs <- c( "thomp_ipw", "thomp_aipw", "thomp_inf_ipw",
+                "thomp_inf_aipw")
 ucb_algs <- c("ucb_inf_eps", "ucb")
 ucb_est_algs <- c("ucb_aipw", "ucb_ipw",  "ucb_inf_eps_aipw", "ucb_inf_eps_ipw")
 adv_algs <- c(thomp_algs, ucb_algs)
