@@ -12,7 +12,7 @@ def calc_eps_n(bandit, xi):
     return eps_n
 
 
-def thomp_inf_eps_honda(bandit, num_rounds, xi=0.5, type_of_pull='single'):
+def thomp_inf(bandit, num_rounds, xi=0.5, type_of_pull='single'):
     print("---------------Running Thompson Sampling INF EPS ---------------")
 
     # allocate one subject to each arm (We can remove this later rules)
@@ -98,5 +98,5 @@ if __name__ == '__main__':
                              arm_means=[1,2,3],
                              arm_vars=[1,1,1]
                              )
-    thomp_inf_eps_honda(thompson_inf_eps_bandit, num_rounds=num_rounds)
+    thomp_inf(thompson_inf_eps_bandit, num_rounds=num_rounds)
     print("hello")

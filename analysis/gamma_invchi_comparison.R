@@ -13,13 +13,13 @@ data <- read.csv("thomp_honda.csv")
 #data <- read.csv("bias_1_2000.csv")
 
 
-seed_algs <- c("ab", "ucb", "thomp", "eps_greedy", "thomp_honda")
-inf_algs <- c("ucb_inf_eps", "thomp_inf_eps", "thomp_inf_eps_honda")
+seed_algs <- c( "ucb", "thomp", "thomp_honda")
+inf_algs <- c("thomp_inf_eps", "thomp_inf_eps_honda")
 est_algs <- c("thomp_ipw", "thomp_aipw", "thomp_honda_ipw", "thomp_honda_aipw",
               "thomp_inf_eps_ipw", "thomp_inf_eps_aipw", "thomp_inf_eps_honda_ipw",
               "thomp_inf_eps_honda_aipw", "thomp_eval_aipw", "thomp_inf_eps_eval_aipw")
-thomp_algs = c( "thomp", "thomp_inf_eps")
-ucb_algs <- c("ucb_inf_eps", "ucb")
+thomp_algs = c("thomp", "thomp_inf_eps")
+ucb_algs <- c("ucb")
 adv_algs <- c(thomp_algs, ucb_algs)
 
 
@@ -28,7 +28,7 @@ group_outcome <- data %>% filter(alg %in% c(seed_algs, inf_algs, est_algs)) %>%
   group_by(ite,alg) %>% mutate(x=row_number())  %>% 
   ungroup()
 
-regret_mse <- data %>% filter(alg %in% c(seed_algs, inf_algs, est_algs)) %>%
+regret_mse <- data %>% filter(alg %in% c(seed_algs, inf_algs)) %>%
   select(alg, regret, ite, mean_mse, var_mse) %>%
   group_by(ite,alg) %>% mutate(x=row_number()) %>% 
   ungroup()
@@ -58,7 +58,7 @@ df_mse <- regret_mse %>% select(-c(regret, var_mse)) %>% rename(mse = mean_mse)
 
 
 ggplot(df_mse %>% filter(ite==0),aes(x=x, y=mse)) +
-geom_line(aes(color=alg)) + 
-#geom_ribbon(aes(ymin=mn_mse-(1.96*se_mse), ymax=mn_mse+(1.96*se_mse),group=alg), alpha=0.4,  fill="grey70") +
-labs(title = "MSE of Mean") +  xlim(0,xlimit) + 
- theme_bw() 
+  geom_line(aes(color=alg)) + 
+  #geom_ribbon(aes(ymin=mn_mse-(1.96*se_mse), ymax=mn_mse+(1.96*se_mse),group=alg), alpha=0.4,  fill="grey70") +
+  labs(title = "MSE of Mean") +  xlim(0,xlimit) + 
+  theme_bw() 

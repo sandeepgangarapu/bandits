@@ -7,7 +7,7 @@ import numpy as np
 true_means = [0.25, 1.82, 1.48, 2.25, 2]
 true_vars = [2.84,  1.97, 2.62, 1, 2.06]
 
-alg_list=['ab', 'ucb', 'thomp', 'thomp_inf_eps', 'thomp_honda', 'thomp_inf_eps_honda']
+alg_list=['ab', 'ucb', 'thomp', 'thomp_inf']
 #
 # estimator_list=['aipw', 'eval_aipw', 'ipw'],
 

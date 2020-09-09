@@ -1,8 +1,7 @@
 from algorithms.ab_testing import ab_testing
-from algorithms.thomp_inf_eps import thomp_inf_eps
+from algorithms.thomp_inf_invchi import thomp_inf
 from algorithms.thompson_sampling import thompson_sampling
-from algorithms.thompson_sampling_honda import thompson_sampling_honda
-from algorithms.thompson_inf_eps_honda import thomp_inf_eps_honda
+from algorithms.thompson_inf import thomp_inf
 from algorithms.ucb_inf_eps import ucb_inf_eps
 from algorithms.ucb import ucb
 from algorithms.epsilongreedy import epsilon_greedy
@@ -152,12 +151,8 @@ class BanditSimulation:
             ucb_inf_eps(bandit, self.horizon, xi=self.xi, type_of_pull=self.type_of_pull)
         if alg == 'thomp':
             thompson_sampling(bandit, self.horizon, type_of_pull=self.type_of_pull)
-        if alg == 'thomp_inf_eps':
-            thomp_inf_eps(bandit, self.horizon, xi=self.xi, type_of_pull=self.type_of_pull)
-        if alg == 'thomp_honda':
-            thompson_sampling_honda(bandit, self.horizon, type_of_pull=self.type_of_pull)
-        if alg == 'thomp_inf_eps_honda':
-            thomp_inf_eps_honda(bandit, self.horizon, xi=self.xi, type_of_pull=self.type_of_pull)
+        if alg == 'thomp_inf':
+            thomp_inf(bandit, self.horizon, xi=self.xi, type_of_pull=self.type_of_pull)
 
     def create_output_df(self, bandit, ite, mse_calc):
         """

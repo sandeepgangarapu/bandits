@@ -10,7 +10,7 @@ def calc_eps_n(bandit, xi):
     return eps_n
 
 
-def thomp_inf_eps(bandit, num_rounds, xi=1, type_of_pull='single'):
+def thomp_inf(bandit, num_rounds, xi=1, type_of_pull='single'):
     print("---------------Running Thompson Sampling INF EPS ---------------")
 
     # allocate one subject to each arm (We can remove this later rules)
@@ -79,14 +79,3 @@ def thomp_inf_eps(bandit, num_rounds, xi=1, type_of_pull='single'):
             prior_params[chosen_arm] = bayesian_update_normal_inv_gamma(prior_params[chosen_arm],
                                                                         lis_x=[reward_1, reward_2])
     return bandit
-
-
-if __name__ == '__main__':
-    # Define bandit
-    num_arms = 1
-    num_rounds = 50
-    trt_dist_lis_th = trt_dist_list[:num_arms]
-    thompson_bandit = Bandit(name='thompson_sampling',
-                            num_arms=num_arms,
-                            trt_dist_list=trt_dist_lis_th)
-    thomp_inf_eps(thompson_bandit, num_rounds=num_rounds)
