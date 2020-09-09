@@ -13,7 +13,7 @@ def calc_eps_n(bandit, xi):
 
 
 def thomp_inf(bandit, num_rounds, xi=0.5, type_of_pull='single'):
-    print("---------------Running Thompson Sampling INF EPS ---------------")
+    print("---------------Running Thompson Sampling INF ---------------")
 
     # allocate one subject to each arm (We can remove this later rules)
     # we use 2 in order to calculate sample variance

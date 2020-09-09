@@ -7,7 +7,7 @@ from math import sqrt
 def thompson_sampling(bandit, num_rounds, type_of_pull='single'):
     """Function that reproduces the steps involved in Thompson sampling
     algorithm"""
-    print("---------------Running Thompson Sampling Honda ---------------")
+    print("---------------Running Thompson Sampling ---------------")
 
     # allocate one subject to each arm (We can remove this later rules)
     # we use 2 in order to calculate sample variance

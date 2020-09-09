@@ -62,3 +62,10 @@ ggplot(df_mse %>% filter(ite==0),aes(x=x, y=mse)) +
   #geom_ribbon(aes(ymin=mn_mse-(1.96*se_mse), ymax=mn_mse+(1.96*se_mse),group=alg), alpha=0.4,  fill="grey70") +
   labs(title = "MSE of Mean") +  xlim(0,xlimit) + 
   theme_bw() 
+
+
+ggplot(df_mse %>% filter(ite==0, x <250),aes(x=x, y=mse)) +
+  geom_line(aes(color=alg)) + 
+  #geom_ribbon(aes(ymin=mn_mse-(1.96*se_mse), ymax=mn_mse+(1.96*se_mse),group=alg), alpha=0.4,  fill="grey70") +
+  labs(title = "MSE of Mean") +  xlim(0,300) + 
+  theme_bw() 
