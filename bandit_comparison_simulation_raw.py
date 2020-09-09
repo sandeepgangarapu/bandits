@@ -1,5 +1,4 @@
 from algorithms.ab_testing import ab_testing
-from algorithms.thomp_inf_invchi import thomp_inf
 from algorithms.thompson_sampling import thompson_sampling
 from algorithms.thompson_inf import thomp_inf
 from algorithms.ucb_inf_eps import ucb_inf_eps
