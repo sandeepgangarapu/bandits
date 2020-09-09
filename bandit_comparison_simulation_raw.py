@@ -9,7 +9,7 @@ from utils import mse_outcome, prop_mse
 from algorithms.weighed_estimators import weighed_estimators
 import pandas as pd
 import multiprocessing
-import random
+import numpy as np
 
 
 class BanditSimulation:
@@ -72,6 +72,7 @@ class BanditSimulation:
         :param ite: number of ite so it can be stored in the output
         :return: the output of the iteration
         """
+        local_state = np.random.RandomState(ite)
         # list of outputs of all algorithms for a given iteration
         output_df_lis = []
         # list of outputs of estimators of all algs for a given iteration
