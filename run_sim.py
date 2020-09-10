@@ -18,7 +18,8 @@ if __name__ == '__main__':
                            alg_list=alg_list,
                            estimator_list=['aipw', 'ipw'],
                            mse_calc=False,
-                           output_file_path='analysis/output/sim_ipw_100_500'
+                           agg=True,
+                           output_file_path='analysis/output/sim_ipw_3_500'
                                             '.csv')
 
     sim.run_simulation_multiprocessing()
