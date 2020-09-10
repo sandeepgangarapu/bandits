@@ -129,22 +129,21 @@ def thompson_arm_pull(mean_lis, var_lis, type_of_pull='single'):
     winning_arm.append(chosen_arm)
     if type_of_pull == 'single':
         return chosen_arm
-
     if type_of_pull == 'monte_carlo':
         num_pulls = 20000
-        for pull in range(num_pulls):
-            sample = []
-            for arm in range(len(mean_lis)):
-                current_mean = mean_lis[arm]
-                current_var = var_lis[arm]
-                sample.append(np.random.normal(current_mean, sqrt(current_var)))
-            # the arm that has the highest value of draw is selected
-            winning_arm.append(np.argmax(sample))
-        arm_counter = Counter(winning_arm)
+        sample = []
+        for arm in range(len(mean_lis)):
+            current_mean = mean_lis[arm]
+            current_var = var_lis[arm]
+            sample.append(np.random.normal(current_mean, sqrt(current_var), num_pulls))
+        # the arm that has the highest value of draw is selected
+        winning_arm_lis = np.argmax(sample, axis=0)
+        arm_counter = Counter(winning_arm_lis)
         prop_score_lis = []
         for arm in range(len(mean_lis)):
-            prop_score_lis.append(float(arm_counter[arm]/len(winning_arm)))
+            prop_score_lis.append(float(arm_counter[arm]/len(winning_arm_lis)))
         return chosen_arm, prop_score_lis
+
 
 
 def bayesian_update(prior_params, x):
