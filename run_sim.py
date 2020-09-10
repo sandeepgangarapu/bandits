@@ -14,11 +14,11 @@ if __name__ == '__main__':
     sim = BanditSimulation(num_ite=100, arm_means=true_means,
                            arm_vars=true_vars,
                            eps_inf=0.2,
-                           horizon=2000,
+                           horizon=500,
                            alg_list=alg_list,
                            estimator_list=['aipw', 'ipw'],
-                           mse_calc=True,
-                           output_file_path='analysis/output/sim_ipw_100'
+                           mse_calc=False,
+                           output_file_path='analysis/output/sim_ipw_100_500'
                                             '.csv')
 
     sim.run_simulation_multiprocessing()
