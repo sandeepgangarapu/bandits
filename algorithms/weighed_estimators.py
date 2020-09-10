@@ -14,7 +14,7 @@ def get_final_mean(num_arms, arm_lis, mean_est_t):
     num_updates = 0
     for arm_lis_ind in range(len(arm_lis) - 1, -1, -1):
         # we only update null array num_arm times, after that the ipw_mean_est_2 is full
-        if num_updates <= num_arms:
+        if num_updates >= num_arms:
             break
         else:
             arm_no = arm_lis[arm_lis_ind]
@@ -118,3 +118,9 @@ def weighed_estimators(type, arm_lis, reward_lis, weight_lis, type_of_eval_weigh
         if final_means:
             eval_aipw_mean_est = get_final_mean(num_arms, arm_lis, eval_aipw_mean_est)
         return eval_aipw_mean_est
+
+
+if __name__ == '__main__':
+    a = weighed_estimators(type='ipw', arm_lis=[1,0,1,0,1,0,1,0, 1,0,1,0], reward_lis=[1,1,1,1,1,1,1,1,1,1,1,1],
+                           weight_lis=[0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5], final_means=True)
+    print(a)

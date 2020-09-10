@@ -73,7 +73,7 @@ all_means <- rbind(means, weighed_means)
 
 ## Thompson Sampling based algorithms
 
-In thompson sampling we can accurately calculate propensities using monte carlo simulation during posterior calculation process. In this analysis we calculate bias of both thompson sampling algorithm and inference version of it (thomp_inf_eps)
+In thompson sampling we can accurately calculate propensities using monte carlo simulation during posterior calculation process. In this analysis we calculate bias of both thompson sampling algorithm and inference version of it (thomp_inf)
 
 
 ### Bias of the Best arm
@@ -83,7 +83,7 @@ In thompson sampling we can accurately calculate propensities using monte carlo 
 # Bias of the Best arm
 
 
-best <- means %>% filter(alg %in% thomp_algs) %>% filter(group==which.max(true_means)-1) %>% 
+best <- means %>% filter(alg %in% adv_algs) %>% filter(group==which.max(true_means)-1) %>% 
   mutate(bias = mn-max(true_means)) %>% group_by(alg) %>%
   summarise(Bias = mean(bias), se = sd(bias)/sqrt(n()))
 
@@ -104,7 +104,7 @@ ggplot(best, aes(x=reorder(alg, abs(Bias)), y=Bias)) + geom_bar(stat="identity")
 ```{r echo=FALSE, cache=FALSE, warning=FALSE}
 
 
-worst <- means %>% filter(alg %in% thomp_algs) %>% filter(group==which.min(true_means)-1) %>% 
+worst <- means %>% filter(alg %in% adv_algs) %>% filter(group==which.min(true_means)-1) %>% 
   mutate(bias = mn-min(true_means)) %>% group_by(alg) %>%
   summarise(Bias = mean(bias), se = sd(bias)/sqrt(n()))
 
