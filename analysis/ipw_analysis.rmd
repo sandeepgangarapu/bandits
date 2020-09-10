@@ -32,12 +32,13 @@ true_df <- data.frame(grp, true_means, true_vars)
 true_df <- true_df %>% mutate(grp=factor(grp))
 
 
-data <- read.csv("sim_ipw_3_500.csv")
+data <- read.csv("sim_weighed_250_500.csv") %>% drop_na()
 
 
 seed_algs <- c("ab", "ucb", "thomp")
 inf_algs <- c("thomp_inf")
-est_algs <- c("thomp_ipw", "thomp_aipw", "thomp_eval_aipw", "thomp_inf_ipw", "thomp_inf_aipw", "thomp_inf_eval_aipw")
+est_algs <- c("thomp_ipw", "thomp_aipw", "thomp_eval_aipw",
+              "thomp_inf_ipw", "thomp_inf_aipw", "thomp_inf_eval_aipw")
 thomp_algs <- c( "thomp", "thomp_inf")
 thomp_est_algs <- est_algs
 ucb_algs <- c("ucb")
