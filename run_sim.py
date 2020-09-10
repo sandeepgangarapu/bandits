@@ -11,7 +11,7 @@ if __name__ == '__main__':
 
     estimator_list=['aipw', 'eval_aipw', 'ipw']
 
-    sim = BanditSimulation(num_ite=250, arm_means=true_means,
+    sim = BanditSimulation(num_ite=400, arm_means=true_means,
                            arm_vars=true_vars,
                            eps_inf=0.2,
                            horizon=500,
@@ -21,7 +21,7 @@ if __name__ == '__main__':
                            mse_calc=False,
                            agg=True,
                            xi=0.8,
-                           output_file_path='analysis/output/sim_weighed_250_500'
+                           output_file_path='analysis/output/sim_weighed_400_500'
                                             '.csv')
 
     sim.run_simulation_multiprocessing()
