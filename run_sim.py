@@ -4,9 +4,10 @@ import time
 
 if __name__ == '__main__':
     start_time = time.time()
-    true_means = [0.25, 1.82, 1.48, 2.25, 2]
-    true_vars = [2.84,  1.97, 2.62, 1, 2.06]
-
+    true_means = np.random.uniform(0,3,5)
+    true_vars = np.random.uniform(0,3,5)
+    print(true_means)
+    print(true_vars)
     alg_list=['thomp', 'thomp_inf']
 
     estimator_list=['aipw', 'eval_aipw', 'ipw']
@@ -21,7 +22,7 @@ if __name__ == '__main__':
                            mse_calc=False,
                            agg=True,
                            xi=0.8,
-                           output_file_path='analysis/output/sim_weighed_1000_500'
+                           output_file_path='analysis/output/sim_weighed_1000_500_2'
                                             '.csv')
 
     sim.run_simulation_multiprocessing()

@@ -32,7 +32,8 @@ true_df <- data.frame(grp, true_means, true_vars)
 true_df <- true_df %>% mutate(grp=factor(grp))
 
 
-data <- read.csv("sim_weighed_250_500.csv") %>% drop_na()
+data <- read.csv("sim_weighed_1000_500.csv") %>% drop_na() %>%
+  filter(mean_est != -Inf) %>% filter(mean_est != Inf)
 
 
 seed_algs <- c("ab", "ucb", "thomp")
@@ -41,6 +42,7 @@ est_algs <- c("thomp_ipw", "thomp_aipw", "thomp_eval_aipw",
               "thomp_inf_ipw", "thomp_inf_aipw", "thomp_inf_eval_aipw")
 thomp_algs <- c( "thomp", "thomp_inf")
 thomp_est_algs <- est_algs
+all_thomp <- c(thomp_est_algs, thomp_algs)
 ucb_algs <- c("ucb")
 adv_algs <- c(thomp_algs, ucb_algs)
 
@@ -162,7 +164,7 @@ We now empirically check whether Bias is 0 for these estimates
 # Bias of the Best arm
 
 
-best <- means %>% filter(alg %in% thomp_est_algs) %>% filter(group==which.max(true_means)-1) %>% 
+best <- means %>% filter(alg %in% all_thomp) %>% filter(group==which.max(true_means)-1) %>% 
   mutate(bias = mn-max(true_means)) %>% group_by(alg) %>%
   summarise(Bias = mean(bias), se = sd(bias)/sqrt(n()))
 
@@ -176,7 +178,7 @@ ggplot(best, aes(x=reorder(alg, abs(Bias)), y=Bias)) + geom_bar(stat="identity")
   theme(axis.text.x = element_text(angle = 90)) 
 
 
-best <- means %>% filter(alg %in% thomp_est_algs) %>% filter(group==which.max(true_means)-1) %>% 
+best <- means %>% filter(alg %in% all_thomp) %>% filter(group==which.max(true_means)-1) %>% 
   group_by(alg) %>%  summarise(var = var(mn))
 
 ylimit <- max(best$var)
@@ -196,7 +198,7 @@ ggplot(best, aes(x=reorder(alg, abs(var)), y=var)) + geom_bar(stat="identity") +
 ```{r echo=FALSE, cache=FALSE, warning=FALSE}
 
 
-worst <- means %>% filter(alg %in% thomp_est_algs) %>% filter(group==which.min(true_means)-1) %>% 
+worst <- means %>% filter(alg %in% all_thomp) %>% filter(group==which.min(true_means)-1) %>% 
   mutate(bias = mn-min(true_means)) %>% group_by(alg) %>%
   summarise(Bias = mean(bias), se = sd(bias)/sqrt(n()))
 
@@ -210,7 +212,7 @@ ggplot(worst, aes(x=reorder(alg, abs(Bias)), y=Bias)) + geom_bar(stat="identity"
 
 
 
-worst <- means %>% filter(alg %in% thomp_est_algs) %>% filter(group==which.min(true_means)-1) %>% 
+worst <- means %>% filter(alg %in% all_thomp) %>% filter(group==which.min(true_means)-1) %>% 
   group_by(alg) %>%  summarise(var = var(mn))
 
 ylimit <- max(worst$var)

@@ -9,7 +9,6 @@ def thompson_sampling(bandit, num_rounds, type_of_pull='single'):
     algorithm"""
     print("---------------Running Thompson Sampling ---------------")
 
-    # allocate one subject to each arm (We can remove this later rules)
     # we use 2 in order to calculate sample variance
     num_arms = bandit.num_arms
     alpha = -1

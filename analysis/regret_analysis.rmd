@@ -103,13 +103,13 @@ df_regret <- regret_mse %>% filter(ite==0)
 
 main_algs <- c("ab", "ucb", "thomp", "eps_greedy")
 
-group_plot <- ggplot(df %>% filter(alg == main_algs)) + geom_point(aes(x=x, y=factor(group)), shape=1, alpha=0.6) +
+ ggplot(df %>% filter(alg == main_algs)) + geom_point(aes(x=x, y=factor(group)), shape=1, alpha=0.6) +
   facet_grid(alg ~.) +
-  theme_bw() +
-  labs(x='Time Period', y = 'Group') +
-  theme(axis.text.y = element_text(size = rel(0.7))) 
+  labs(x='Time Period', y = 'Arm') +
+  theme(axis.text.y = element_text(size = rel(0.7)))  +
+  ggsave("grp.png", dpi=400, height = 5, width=10)
 
-group_plot
+
 ```
 
 
@@ -148,10 +148,12 @@ df1 <- df %>% filter(x<30) %>% group_by(alg, group) %>% summarise(mn = mean(outc
 
 
 ```{r echo=FALSE, warning=FALSE}
-ggplot(df_regret, aes(x=x, y=regret)) + geom_line(aes(color=alg)) +
-  labs(title = "Regret") + xlim(0,xlimit) +
+ggplot(df_regret %>% filter(alg %in% c('ucb', 'thomp', 'ab')), aes(x=x, y=regret)) + geom_line(aes(color=alg)) +
+  xlim(0,2050) +
   geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) +
-  theme_bw() 
+  theme(legend.position = "none") + 
+  labs(x='Time Period', y = 'Regret') +
+  ggsave("reg_3.png", dpi=400, height = 5, width=10)
 
 ```
 
