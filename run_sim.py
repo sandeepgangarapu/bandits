@@ -22,8 +22,7 @@ if __name__ == '__main__':
                            mse_calc=False,
                            agg=True,
                            xi=0.8,
-                           output_file_path='analysis/output/sim_weighed_1000_500_2'
+                           output_file_path='analysis/output/sim_weighed_1000_500_3'
                                             '.csv')
-
     sim.run_simulation_multiprocessing()
     print("--- %s seconds ---" % (time.time() - start_time))
