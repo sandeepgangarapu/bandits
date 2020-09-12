@@ -34,7 +34,7 @@ if __name__ == '__main__':
     for i in range(num_meta_ite):
         file_path = 'analysis/output/sim_weighed_1000_500_' + str(i) + '.csv'
         mn, vr = run_sim(file_path)
-        ref = pd.Dataframe({'mn':mn, 'vr':vr})
+        ref = pd.Dataframe({'mn':mn, 'vr':vr, 'ite': np.repeat(i, 5)})
         ref_lis.append(ref)
         final_out = pd.concat(ref_lis)
         final_out.csv("ref.csv")
