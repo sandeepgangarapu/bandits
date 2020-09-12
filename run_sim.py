@@ -37,4 +37,4 @@ if __name__ == '__main__':
         ref = pd.DataFrame({'mn':mn, 'vr':vr, 'ite': np.repeat(i, 5)})
         ref_lis.append(ref)
         final_out = pd.concat(ref_lis)
-        final_out.to_csv("ref.csv")
+        final_out.to_csv("analysis/output/ref.csv", index=False)
