@@ -2,7 +2,7 @@ from bandit_comparison_simulation_raw import BanditSimulation
 import numpy as np
 import time
 
-if __name__ == '__main__':
+def run_sim(file_path):
     start_time = time.time()
     true_means = np.random.uniform(0,3,5)
     true_vars = np.random.uniform(0,3,5)
@@ -22,7 +22,13 @@ if __name__ == '__main__':
                            mse_calc=False,
                            agg=True,
                            xi=0.8,
-                           output_file_path='analysis/output/sim_weighed_1000_500_3'
-                                            '.csv')
+                           output_file_path=file_path)
     sim.run_simulation_multiprocessing()
     print("--- %s seconds ---" % (time.time() - start_time))
+    return true_means, true_vars
+
+if __name__ == '__main__':
+    num_meta_ite = 100
+    for i in range(num_meta_ite):
+        file_path = 'analysis/output/sim_weighed_1000_500_' + str(i) + '.csv'
+        run_sim(file_path)
