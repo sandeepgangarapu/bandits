@@ -13,7 +13,7 @@ def run_sim(file_path):
 
     estimator_list=['aipw', 'eval_aipw', 'ipw']
 
-    sim = BanditSimulation(num_ite=10, arm_means=true_means,
+    sim = BanditSimulation(num_ite=2, arm_means=true_means,
                            arm_vars=true_vars,
                            eps_inf=0.2,
                            horizon=500,
@@ -29,12 +29,12 @@ def run_sim(file_path):
     return true_means, true_vars
 
 if __name__ == '__main__':
-    num_meta_ite = 3
+    num_meta_ite = 2
     ref_lis = []
     for i in range(num_meta_ite):
         file_path = 'analysis/output/sim_weighed_1000_500_' + str(i) + '.csv'
         mn, vr = run_sim(file_path)
-        ref = pd.Dataframe({'mn':mn, 'vr':vr, 'ite': np.repeat(i, 5)})
+        ref = pd.DataFrame({'mn':mn, 'vr':vr, 'ite': np.repeat(i, 5)})
         ref_lis.append(ref)
         final_out = pd.concat(ref_lis)
         final_out.csv("ref.csv")
