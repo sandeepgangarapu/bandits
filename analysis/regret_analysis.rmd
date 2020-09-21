@@ -12,6 +12,7 @@ suppressPackageStartupMessages(
     library(dplyr)
     library(tidyr)
    library(directlabels)
+    library(ggthemes)
     #library(gganimate)
    # library(cumstats)
   })
@@ -106,8 +107,8 @@ main_algs <- c("ab", "ucb", "thomp", "eps_greedy")
  ggplot(df %>% filter(alg == main_algs)) + geom_point(aes(x=x, y=factor(group)), shape=1, alpha=0.6) +
   facet_grid(alg ~.) +
   labs(x='Time Period', y = 'Arm') +
-  theme(axis.text.y = element_text(size = rel(0.7)))  +
-  ggsave("grp.png", dpi=400, height = 5, width=10)
+  theme(axis.text.y = element_text(size = rel(0.7)))  +  theme_bw() + 
+  ggsave("grp.png", dpi=400, height = 5, width=10, scale = 0.8)
 
 
 ```
@@ -148,12 +149,12 @@ df1 <- df %>% filter(x<30) %>% group_by(alg, group) %>% summarise(mn = mean(outc
 
 
 ```{r echo=FALSE, warning=FALSE}
-ggplot(df_regret %>% filter(alg %in% c('ucb', 'thomp', 'ab')), aes(x=x, y=regret)) + geom_line(aes(color=alg)) +
+ggplot(df_regret %>% filter(alg %in% c('ucb', 'thomp')), aes(x=x, y=regret)) + geom_line(aes(color=alg)) +
   xlim(0,2050) +
-  geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) +
+  geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) + theme_minimal() + 
   theme(legend.position = "none") + 
-  labs(x='Time Period', y = 'Regret') +
-  ggsave("reg_3.png", dpi=400, height = 5, width=10)
+  labs(x='Time Period', y = 'Regret') + 
+  ggsave("reg_2.png", dpi=400, height = 5, width=10, scale = 0.8)
 
 ```
 

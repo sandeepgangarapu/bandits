@@ -16,7 +16,7 @@ class BanditSimulation:
 
     def __init__(self, num_ite, arm_means, arm_vars, eps_inf, horizon, alg_list, mse_calc=True,
                  agg=False, estimator_list=None, type_of_eval_weight=None, xi=1, dist_type='Normal',
-                 output_file_path=None):
+                 cap_prop=True, output_file_path=None):
         """This class is to run bandits simulation for given params and give simulation output.
         :param seed: seed for randomization
         :param num_ite: number of iterations
@@ -31,6 +31,7 @@ class BanditSimulation:
         :param type_of_eval_weight: type of evaluation weight for weighed estimator
         :param xi: xi value for inf eps
         :param dist_type: type of outcome distribution
+        :param cap_prop: capping the propensity in thompson based algs
         :param output_file_path: path of file where output needs to be stored
         """
         self.num_ite = num_ite
@@ -47,6 +48,7 @@ class BanditSimulation:
         self.xi = xi
         self.dist_type = dist_type
         self.output_file_path = output_file_path
+        self.cap_prop = cap_prop
         self.type_of_pull = 'monte_carlo' if self.estimator_list else 'single'
         # self.outcome_lis_of_lis = self.generate_empirical_arm_outcome_dist()
 
@@ -148,7 +150,7 @@ class BanditSimulation:
         if alg == 'ucb_inf_eps':
             ucb_inf_eps(bandit, self.horizon, xi=self.xi, type_of_pull=self.type_of_pull)
         if alg == 'thomp':
-            thompson_sampling(bandit, self.horizon, type_of_pull=self.type_of_pull)
+            thompson_sampling(bandit, self.horizon, type_of_pull=self.type_of_pull, cap_prop=self.cap_prop)
         if alg == 'thomp_inf':
             thomp_inf(bandit, self.horizon, xi=self.xi, type_of_pull=self.type_of_pull)
 

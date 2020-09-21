@@ -4,7 +4,7 @@ import numpy as np
 from math import sqrt
 
 
-def thompson_sampling(bandit, num_rounds, type_of_pull='single'):
+def thompson_sampling(bandit, num_rounds, type_of_pull='single', cap_prop=False):
     """Function that reproduces the steps involved in Thompson sampling
     algorithm"""
     print("---------------Running Thompson Sampling ---------------")
@@ -42,6 +42,15 @@ def thompson_sampling(bandit, num_rounds, type_of_pull='single'):
         if type_of_pull == 'monte_carlo':
             chosen_arm, prop_lis = thompson_arm_pull(mean_lis=mu_prior, var_lis=1/np.array(tau_prior),
                                                      type_of_pull=type_of_pull)
+            # this is to cap probility of allocation as per Athey's algortihm
+            if cap_prop:
+                # the cap is defined in the paper
+                cap = 0.1/sqrt(rnd+1)
+                if np.min(prop_lis) < cap:
+                    # every arm gets cap propensity at the start, the remaining propensity is shared proportional to the
+                    # true propensity
+                    remaining_prop = 1 - cap*bandit.num_arms
+                    prop_lis = cap + np.array(prop_lis)*remaining_prop
             bandit.pull_arm(chosen_arm, prop_lis=prop_lis)
         else:
             chosen_arm = thompson_arm_pull(mean_lis=mu_prior, var_lis=1/np.array(tau_prior),
@@ -64,7 +73,5 @@ if __name__ == '__main__':
     num_rounds = 100
     thompson_bandit = Bandit(name='thompson_sampling',
                              arm_means=[1,2,3],
-                             arm_vars=[1,1,1]
-                             )
-    thompson_sampling(thompson_bandit, num_rounds=num_rounds)
-    print("Hwllp")
+                             arm_vars=[1,1,1]                             )
+    thompson_sampling(thompson_bandit, num_rounds=num_rounds, type_of_pull="monte_carlo", cap_prop=True)

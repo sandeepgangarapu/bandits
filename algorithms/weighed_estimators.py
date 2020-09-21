@@ -1,4 +1,6 @@
 import numpy as np
+import pandas as pd
+
 
 def get_final_mean(num_arms, arm_lis, mean_est_t):
     """
@@ -26,7 +28,7 @@ def get_final_mean(num_arms, arm_lis, mean_est_t):
 
 
 def weighed_estimators(type, arm_lis, reward_lis, weight_lis, type_of_eval_weight='constant_allocation',
-                       weight_lis_of_lis=None, final_means=False):
+                       weight_lis_of_lis=None, final_means=False, num_arms=None):
     """
     This is a function for inverse propensity score weighed estimator
     :param type: type of weighed estimator (ex: "ipw")
@@ -36,7 +38,8 @@ def weighed_estimators(type, arm_lis, reward_lis, weight_lis, type_of_eval_weigh
     :param final_means: BOOL - whether the final estimated means of each arm to be returned
     :return: Either list of estimated arm means at that time or final means
     """
-    num_arms = max(arm_lis) + 1
+    if not num_arms:
+        num_arms = max(arm_lis) + 1
     # binary indicator of whether an arm is pulled at time t for all arms
     ind_arm = []
     inv_prop = 1/np.array(weight_lis)
@@ -121,6 +124,31 @@ def weighed_estimators(type, arm_lis, reward_lis, weight_lis, type_of_eval_weigh
 
 
 if __name__ == '__main__':
-    a = weighed_estimators(type='eval_aipw', arm_lis=[1,0,1,0,1,0,1,0, 1,0,1,0], reward_lis=[1,1,1,1,1,1,1,1,1,1,1,1],
-                           weight_lis=[0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5], final_means=True)
-    print(a)
+    dt_lis = []
+    for j in range(100):
+        print(j)
+        means = np.random.uniform(0,1,4)
+        vars = np.random.uniform(0,1,4)
+        weights = np.random.uniform(0, 1, 4)
+        weight_lis_true = weights / np.sum(weights)
+        arm_lis = np.random.choice([0, 1, 2, 3], 1000, p=weight_lis_true)
+        weight_lis = [weight_lis_true[k] for k in list(arm_lis)]
+        for i in range(100):
+            reward_lis = [np.random.normal(means[i], vars[i]) for i in arm_lis]
+            for alg in ['ipw', 'aipw', 'eval_aipw']:
+                a = weighed_estimators(type=alg, arm_lis=arm_lis,
+                                       reward_lis=reward_lis,
+                                       weight_lis=weight_lis,
+                                       final_means=True,
+                                       num_arms=4)
+                dt_sub = pd.DataFrame({'ite': np.repeat([i], 4),
+                                       'main_ite': np.repeat([j], 4),
+                                       'alg': np.repeat([alg], 4),
+                                       'grp': [0, 1, 2, 3],
+                                       'true_mean': means,
+                                       'weight_lis': weight_lis_true,
+                                       'mn': a})
+                dt_lis.append(dt_sub)
+
+    dt_final = pd.concat(dt_lis)
+    dt_final.to_csv("test_weighed.csv", index=False)
