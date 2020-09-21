@@ -20,6 +20,7 @@ def run_sim(file_path, true_means, true_vars):
                            mse_calc=False,
                            agg=True,
                            xi=0.8,
+                           cap_prop=True,
                            output_file_path=file_path)
     sim.run_simulation_multiprocessing()
     print("--- %s seconds ---" % (time.time() - start_time))

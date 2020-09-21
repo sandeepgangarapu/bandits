@@ -152,7 +152,7 @@ class BanditSimulation:
         if alg == 'thomp':
             thompson_sampling(bandit, self.horizon, type_of_pull=self.type_of_pull, cap_prop=self.cap_prop)
         if alg == 'thomp_inf':
-            thomp_inf(bandit, self.horizon, xi=self.xi, type_of_pull=self.type_of_pull)
+            thomp_inf(bandit, self.horizon, xi=self.xi, type_of_pull=self.type_of_pull, cap_prop=self.cap_prop)
 
     def create_output_df(self, bandit, ite, mse_calc):
         """
