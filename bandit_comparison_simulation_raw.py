@@ -14,7 +14,7 @@ import numpy as np
 
 class BanditSimulation:
 
-    def __init__(self, num_ite, arm_means, arm_vars, eps_inf, horizon, alg_list, mse_calc=True,
+    def __init__(self, num_ite, arm_means, eps_inf, horizon, alg_list, arm_vars=None, mse_calc=True,
                  agg=False, estimator_list=None, type_of_eval_weight=None, xi=1, dist_type='Normal',
                  cap_prop=True, output_file_path=None):
         """This class is to run bandits simulation for given params and give simulation output.
@@ -131,7 +131,8 @@ class BanditSimulation:
         bandit_dict = {}
         for alg in self.alg_list:
             bandit_name = alg
-            bandit_dict[bandit_name] = Bandit(name=alg, arm_means=self.arm_means, arm_vars=self.arm_vars)
+            bandit_dict[bandit_name] = Bandit(name=alg, arm_means=self.arm_means, arm_vars=self.arm_vars,
+                                              dist_type=self.dist_type)
         return bandit_dict
 
     def simulate_bandit(self, alg, bandit):

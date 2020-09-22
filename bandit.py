@@ -3,7 +3,7 @@ from math import sqrt
 
 class Bandit:
     
-    def __init__(self, name, arm_means, arm_vars):
+    def __init__(self, name, arm_means, arm_vars=None, dist_type='Normal'):
         '''
         :param name: name of the bandit
         :param arm_means: list of arm means
@@ -12,6 +12,7 @@ class Bandit:
         self.name = name
         self.arm_means = arm_means
         self.arm_vars = arm_vars
+        self.dist_type = dist_type
         # number of arms in bandit
         self.num_arms = len(arm_means)
         # tracker that tracks all the arm numbers that are pulled
@@ -39,9 +40,14 @@ class Bandit:
     
     def pull_arm(self, arm_num, prop_lis=None):
         """pulling an just generated reward"""
-        
-        # Generate reward from that arm
-        reward = np.random.normal(self.arm_means[arm_num], sqrt(self.arm_vars[arm_num]))
+        global reward
+        if self.dist_type == "Normal":
+            # Generate reward from that arm
+            reward = np.random.normal(self.arm_means[arm_num], sqrt(self.arm_vars[arm_num]))
+        if self.dist_type == "HSN":
+            reward = 0.5 * self.arm_means[arm_num] + 0.5 + np.random.uniform(-1, 1)
+        if self.dist_type == "LSN":
+            reward = 0.1 * self.arm_means[arm_num] + 0.9 + np.random.uniform(-1, 1)
         # Do all updates after the arm is pulled
 
         if prop_lis is not None:

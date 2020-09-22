@@ -23,23 +23,21 @@ suppressPackageStartupMessages(
 
 setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")
 
-true_means = c(0.25, 1.82, 1.48, 2.25, 2)
 
-true_vars = c(2.84,  1.97, 2.62, 1, 2.06) 
-true_means = c(0.20406366, 0.21184502, 0.47583012, 0.84073235, 1.93738865)
-true_vars = c(2.60873608, 2.88666865, 1.65337827, 0.97743931, 2.93147711)
-true_means = c(2.11541457, 0.09559634, 1.2740962,  1.62994705, 2.70046039)
-true_vars = c(2.8742258,  2.92638506, 1.791231,   0.22407182, 1.69318285)
-
+true_means = c(1, 2, 3)
+true_vars = c(1, 1, 1)
+        
 grp = c(0:(length(true_means)-1))
 true_df <- data.frame(grp, true_means, true_vars)
 true_df <- true_df %>% mutate(grp=factor(grp))
 
 
-data <- read.csv("sim_weighed_1000_500_3.csv") %>% drop_na() %>%
+data <- read.csv("athey_ite_310_t_20000.csv") %>% drop_na() %>%
+  filter(mean_est != -Inf) %>% filter(mean_est != Inf)
+data2 <- read.csv("athey_ite_1000_t_20000.csv") %>% drop_na() %>%
   filter(mean_est != -Inf) %>% filter(mean_est != Inf)
 
-
+data <- rbind(data, data2)
 seed_algs <- c("ab", "ucb", "thomp")
 inf_algs <- c("thomp_inf")
 est_algs <- c("thomp_ipw", "thomp_aipw", "thomp_eval_aipw",
