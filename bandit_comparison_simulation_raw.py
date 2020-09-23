@@ -166,6 +166,7 @@ class BanditSimulation:
         if self.agg:
             dict_df = {'group': list(range(self.num_arms)),
                        'mean_est': bandit.avg_reward_tracker,
+                       'arm_pull_tracker': bandit.arm_pull_tracker,
                        'alg': bandit.name,
                        'ite': ite}
             df = pd.DataFrame(dict_df)
