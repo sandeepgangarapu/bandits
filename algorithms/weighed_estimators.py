@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-
+from math import sqrt
 
 def get_final_mean(num_arms, arm_lis, mean_est_t):
     """
@@ -38,14 +38,16 @@ def weighed_estimators(type, arm_lis, reward_lis, weight_lis, type_of_eval_weigh
     :param final_means: BOOL - whether the final estimated means of each arm to be returned
     :return: Either list of estimated arm means at that time or final means
     """
+    weight_lis = np.array(weight_lis)
+    reward_lis = np.array(reward_lis)
     if not num_arms:
         num_arms = max(arm_lis) + 1
     # binary indicator of whether an arm is pulled at time t for all arms
     ind_arm = []
-    inv_prop = 1/np.array(weight_lis)
+    inv_prop = 1/weight_lis
     for arm in range(num_arms):
         ind_arm.append(np.array([1 if j == arm else 0 for j in arm_lis]))
-    weighed_reward_lis = np.array(reward_lis) / np.array(weight_lis)
+    weighed_reward_lis = reward_lis / weight_lis
 
     if type == "ipw":
         ipw_mean_est = []
@@ -89,7 +91,7 @@ def weighed_estimators(type, arm_lis, reward_lis, weight_lis, type_of_eval_weigh
             alpha = 0.5
             eval_weights = 1 / (np.array(list(range(1, len(arm_lis) + 1))) ** alpha)
         if type_of_eval_weight == 'propensity_score':
-            eval_weights = np.array(weight_lis)
+            eval_weights = weight_lis
         if type_of_eval_weight == 'variance_stabilizing':
             eval_weights = []
             for j in range(len(arm_lis)):
@@ -97,7 +99,7 @@ def weighed_estimators(type, arm_lis, reward_lis, weight_lis, type_of_eval_weigh
                 eval_weights.append(eval_wt)
             eval_weights = np.array(eval_weights)
         if type_of_eval_weight == 'constant_allocation':
-            eval_weights = np.sqrt(np.array(weight_lis)/len(arm_lis))
+            eval_weights = np.sqrt(weight_lis/len(arm_lis))
         eval_aipw_mean_est = []
         # this will initialize arm means of all arms to 0
         mean_snapshot = {key: [0] for key in np.unique(arm_lis)}
@@ -134,7 +136,7 @@ if __name__ == '__main__':
         arm_lis = np.random.choice([0, 1, 2, 3], 1000, p=weight_lis_true)
         weight_lis = [weight_lis_true[k] for k in list(arm_lis)]
         for i in range(100):
-            reward_lis = [np.random.normal(means[i], vars[i]) for i in arm_lis]
+            reward_lis = [np.random.normal(means[i], sqrt(vars[i])) for i in arm_lis]
             for alg in ['ipw', 'aipw', 'eval_aipw']:
                 a = weighed_estimators(type=alg, arm_lis=arm_lis,
                                        reward_lis=reward_lis,

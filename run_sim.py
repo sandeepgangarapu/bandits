@@ -41,6 +41,6 @@ if __name__ == '__main__':
     #         final_out = pd.concat(ref_lis)
     #         final_out.to_csv("analysis/output/ref.csv", index=False)
     if normal_analysis:
-        true_means = [1, 2, 3]
-        #true_vars = [1, 1, 1]
-        a = run_sim('analysis/output/athey_hsn_ite_310_t_20000.csv', true_means, dist_type='HSN')
+        true_means = [0.9, 1, 1.1]
+        true_vars = [1, 1, 1]
+        a = run_sim('analysis/output/athey_ite_310_t_20000_close_means.csv', true_means, dist_type='Normal')

@@ -11,7 +11,7 @@ df_sub <- df %>% mutate(bias = true_mean-mn) %>% group_by(main_ite, alg, grp, we
             diff_sign = !xor(upr_greater, lwr_lesser)) %>% ungroup()
 
 
-df_sign <- df_sub %>% group_by(alg, diff_sign) %>% summarise(cnt = n()) %>% ungroup()
+df_sign <- df_sub %>% group_by(alg, diff_sign) %>% summarise(cnt = n(), diff_val_mn = mean(upr-lwr)) %>% ungroup()
 
 detective_df <- df_sub %>% group_by(alg, diff_sign) %>% summarise(avg_weight = mean(weight_lis))
 

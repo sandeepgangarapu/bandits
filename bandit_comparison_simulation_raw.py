@@ -197,6 +197,7 @@ class BanditSimulation:
             dict_df = {'alg': alg_name,
                        'ite': ite,
                        'group': list(range(self.num_arms)),
+                       'arm_pull_tracker': bandit.arm_pull_tracker,
                        'mean_est': mean_est}
             df = pd.DataFrame(dict_df)
             # TODO add mse calc when aggregation is true

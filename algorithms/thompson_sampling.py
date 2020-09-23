@@ -73,5 +73,5 @@ if __name__ == '__main__':
     num_rounds = 100
     thompson_bandit = Bandit(name='thompson_sampling',
                              arm_means=[1,2,3],
-                             arm_vars=[1,1,1]                             )
+                             arm_vars=[1,1,1])
     thompson_sampling(thompson_bandit, num_rounds=num_rounds, type_of_pull="monte_carlo", cap_prop=True)

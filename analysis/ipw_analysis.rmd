@@ -25,10 +25,9 @@ setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")
 
 
 true_means = c(1, 2, 3)
-true_vars = c(1, 1, 1)
-        
+
 grp = c(0:(length(true_means)-1))
-true_df <- data.frame(grp, true_means, true_vars)
+true_df <- data.frame(grp, true_means)
 true_df <- true_df %>% mutate(grp=factor(grp))
 
 
