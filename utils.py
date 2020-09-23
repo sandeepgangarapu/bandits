@@ -108,19 +108,21 @@ def treatment_outcome_grouping(group, outcome, group_outcome=False,
         return outcome_lis_of_lis
 
 
-def thompson_arm_pull(mean_lis, var_lis, type_of_pull='single'):
+def thompson_arm_pull(mean_lis, var_lis, type_of_pull='single', cap_prop=None):
     """
     :param mean_lis: mean list of all arms
     :param var_lis: variance list of all arms
     :param type_of_pull: either single pull or monte carlo pull
+    :param cap_prop: the value at which the propensity is capped
     :return: if single pull, gives out only winning arm
              if monte carlo pull, gives out winning arm and prop_scores
     """
+    num_arms = len(mean_lis)
     winning_arm = []
     # we store all sampled values in this list
     sample = []
     # we sample each arm from the prior distribution
-    for arm in range(len(mean_lis)):
+    for arm in range(num_arms):
         current_mean = mean_lis[arm]
         current_var = var_lis[arm]
         sample.append(np.random.normal(current_mean, sqrt(current_var)))
@@ -132,7 +134,7 @@ def thompson_arm_pull(mean_lis, var_lis, type_of_pull='single'):
     if type_of_pull == 'monte_carlo':
         num_pulls = 20000
         sample = []
-        for arm in range(len(mean_lis)):
+        for arm in range(num_arms):
             current_mean = mean_lis[arm]
             current_var = var_lis[arm]
             sample.append(np.random.normal(current_mean, sqrt(current_var), num_pulls))
@@ -140,8 +142,15 @@ def thompson_arm_pull(mean_lis, var_lis, type_of_pull='single'):
         winning_arm_lis = np.argmax(sample, axis=0)
         arm_counter = Counter(winning_arm_lis)
         prop_score_lis = []
-        for arm in range(len(mean_lis)):
+        for arm in range(num_arms):
             prop_score_lis.append(float(arm_counter[arm]/len(winning_arm_lis)))
+        if cap_prop:
+            if np.min(prop_score_lis) < cap_prop:
+                # every arm gets cap propensity at the start, the remaining propensity is shared proportional to the
+                # true propensity
+                remaining_prop = 1 - (cap_prop * len(prop_score_lis))
+                prop_score_lis = cap_prop + (np.array(prop_score_lis) * remaining_prop)
+                chosen_arm = np.random.choice(range(num_arms), p=prop_score_lis)
         return chosen_arm, prop_score_lis
 
 

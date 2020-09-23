@@ -59,6 +59,8 @@ def thomp_inf(bandit, num_rounds, xi=0.5, type_of_pull='single', cap_prop=False)
                         # true propensity
                         remaining_prop = 1 - cap * bandit.num_arms
                         norm_prob = cap + np.array(norm_prob) * remaining_prop
+                        arm_var = np.random.choice(range(bandit.num_arms),
+                                                   p=norm_prob)
                 bandit.pull_arm(arm_var, prop_lis=norm_prob)
             else:
                 bandit.pull_arm(arm_var)
@@ -85,13 +87,9 @@ def thomp_inf(bandit, num_rounds, xi=0.5, type_of_pull='single', cap_prop=False)
                                                          type_of_pull=type_of_pull)
                 # this is to cap probility of allocation as per Athey's algortihm
                 if cap_prop:
-                    # the cap is defined in the paper
                     cap = 0.1 / sqrt(rnd + 1)
-                    if np.min(prop_lis) < cap:
-                        # every arm gets cap propensity at the start, the remaining propensity is shared proportional to the
-                        # true propensity
-                        remaining_prop = 1 - cap * bandit.num_arms
-                        prop_lis = cap + np.array(prop_lis) * remaining_prop
+                    chosen_arm, prop_lis = thompson_arm_pull(mean_lis=mu_prior, var_lis=1 / np.array(tau_prior),
+                                                             type_of_pull=type_of_pull, cap_prop=cap)
                 bandit.pull_arm(chosen_arm, prop_lis=prop_lis)
             else:
                 chosen_arm = thompson_arm_pull(mean_lis=mu_prior, var_lis=1/np.array(tau_prior),

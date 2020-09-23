@@ -40,17 +40,13 @@ def thompson_sampling(bandit, num_rounds, type_of_pull='single', cap_prop=False)
         mu_prior = [np.random.normal(prior_params[i][0], 1 / sqrt(prior_params[i][1] * tau_prior[i])) for i in
                     range(num_arms)]
         if type_of_pull == 'monte_carlo':
-            chosen_arm, prop_lis = thompson_arm_pull(mean_lis=mu_prior, var_lis=1/np.array(tau_prior),
+            chosen_arm, prop_lis = thompson_arm_pull(mean_lis=mu_prior, var_lis=1 / np.array(tau_prior),
                                                      type_of_pull=type_of_pull)
             # this is to cap probility of allocation as per Athey's algortihm
             if cap_prop:
-                # the cap is defined in the paper
-                cap = 0.1/sqrt(rnd+1)
-                if np.min(prop_lis) < cap:
-                    # every arm gets cap propensity at the start, the remaining propensity is shared proportional to the
-                    # true propensity
-                    remaining_prop = 1 - cap*bandit.num_arms
-                    prop_lis = cap + np.array(prop_lis)*remaining_prop
+                cap = 0.1 / sqrt(rnd + 1)
+                chosen_arm, prop_lis = thompson_arm_pull(mean_lis=mu_prior, var_lis=1 / np.array(tau_prior),
+                                                         type_of_pull=type_of_pull, cap_prop=cap)
             bandit.pull_arm(chosen_arm, prop_lis=prop_lis)
         else:
             chosen_arm = thompson_arm_pull(mean_lis=mu_prior, var_lis=1/np.array(tau_prior),

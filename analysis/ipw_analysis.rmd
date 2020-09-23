@@ -32,7 +32,7 @@ true_df <- true_df %>% mutate(grp=factor(grp))
 
 
 data <- read.csv("athey_ite_31_t_20000_close_means.csv") %>% drop_na() %>%
-  filter(mean_est != -Inf) %>% filter(mean_est != Inf) %>% filter(ite < 30)
+  filter(mean_est != -Inf) %>% filter(mean_est != Inf) 
 # data2 <- read.csv("athey_ite_1000_t_20000.csv") %>% drop_na() %>%
 #   filter(mean_est != -Inf) %>% filter(mean_est != Inf)
 # 
