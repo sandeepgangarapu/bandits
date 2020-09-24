@@ -99,7 +99,7 @@ def weighed_estimators(type, arm_lis, reward_lis, weight_lis, type_of_eval_weigh
                 mean_snapshot = rew_arm_cum_sum/denom
                 # we now insert 0 at the start of this array so that we get the sample mean until that time and not
                 # including that time. This is as per eq 5 of athey
-                mean_snapshot_final = np.insert(mean_snapshot, 0, 0)
+                mean_snapshot_final = np.insert(mean_snapshot, 0, 0)[:-1]
                 aipw_est = np.sum(
                     (weighed_reward_lis * ind_arm[i]) + mean_snapshot_final - (mean_snapshot_final * ind_arm[i] * inv_prop)) / (len(arm_lis))
                 aipw_mean_est.append(aipw_est)
