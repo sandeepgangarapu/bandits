@@ -88,7 +88,7 @@ def weighed_estimators(type, arm_lis, reward_lis, weight_lis, type_of_eval_weigh
                 # reward of a particular arm
                 rew_arm = reward_lis * ind_arm[i]
                 # now we find sample mean at any point of time
-                rew_arm_cum_sum = np.cumsum[rew_arm]
+                rew_arm_cum_sum = np.cumsum(rew_arm)
                 denom = np.arange(1, len(arm_lis)+1)
                 mean_snapshot = rew_arm_cum_sum/denom
                 # we now insert 0 at the start of this array so that we get the sample mean until that time and not
@@ -142,7 +142,7 @@ def weighed_estimators(type, arm_lis, reward_lis, weight_lis, type_of_eval_weigh
                 # reward of a particular arm
                 rew_arm = reward_lis * ind_arm[i]
                 # now we find sample mean at any point of time
-                rew_arm_cum_sum = np.cumsum[rew_arm]
+                rew_arm_cum_sum = np.cumsum(rew_arm)
                 denom = np.arange(1, len(arm_lis) + 1)
                 mean_snapshot = rew_arm_cum_sum / denom
                 # we now insert 0 at the start of this array so that we get the sample mean until that time and not

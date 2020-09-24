@@ -24,14 +24,14 @@ suppressPackageStartupMessages(
 setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")
 
 
-true_means = c(0.8, 1, 1.2)
+true_means = c(1,2,3)
 
 grp = c(0:(length(true_means)-1))
 true_df <- data.frame(grp, true_means)
 true_df <- true_df %>% mutate(grp=factor(grp))
 
 
-data <- read.csv("athey_ite_31_t_20000_0_8.csv") %>% drop_na() %>%
+data <- read.csv("athey_ite_10000_t_500_normal.csv") %>% drop_na() %>%
   filter(mean_est != -Inf) %>% filter(mean_est != Inf) 
 # data2 <- read.csv("athey_ite_1000_t_20000.csv") %>% drop_na() %>%
 #   filter(mean_est != -Inf) %>% filter(mean_est != Inf)
