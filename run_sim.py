@@ -42,5 +42,5 @@ if __name__ == '__main__':
     #         final_out.to_csv("analysis/output/ref.csv", index=False)
     if normal_analysis:
         true_means = [0.9, 1, 1.1]
-        # true_vars = [1, 1, 1]
-        a = run_sim('analysis/output/athey_ite_31_t_20000_0_9.csv', true_means, true_vars=None, dist_type='Normal')
+        true_vars = [1, 1, 1]
+        a = run_sim('analysis/output/athey_ite_31_t_20000_0_9.csv', true_means, true_vars=true_vars, dist_type='Normal')
