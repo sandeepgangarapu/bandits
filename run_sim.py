@@ -10,7 +10,7 @@ def run_sim(file_path, true_means, true_vars=None, dist_type='Normal'):
 
     estimator_list=['aipw', 'eval_aipw', 'ipw']
 
-    sim = BanditSimulation(num_ite=10000, arm_means=true_means,
+    sim = BanditSimulation(num_ite=120, arm_means=true_means,
                            arm_vars=true_vars,
                            eps_inf=0.2,
                            horizon=500,
@@ -20,7 +20,7 @@ def run_sim(file_path, true_means, true_vars=None, dist_type='Normal'):
                            mse_calc=False,
                            agg=True,
                            xi=0.8,
-                           cap_prop=False,
+                           cap_prop=True,
                            dist_type=dist_type,
                            output_file_path=file_path)
     sim.run_simulation_multiprocessing()
@@ -43,4 +43,4 @@ if __name__ == '__main__':
     if normal_analysis:
         true_means = [1,2,3]
         true_vars = [1, 1, 1]
-        a = run_sim('analysis/output/athey_ite_10000_t_500_normal.csv', true_means, true_vars=true_vars, dist_type='Normal')
+        a = run_sim('analysis/output/athey_ite_120_t_500_normal.csv', true_means, true_vars=true_vars, dist_type='Normal')

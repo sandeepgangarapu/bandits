@@ -6,7 +6,7 @@ from algorithms.ucb import ucb
 from algorithms.epsilongreedy import epsilon_greedy
 from bandit import Bandit
 from utils import mse_outcome, prop_mse
-from algorithms.weighed_estimators import weighed_estimators
+from algorithms.weighed_estimators_new import weighed_estimators
 import pandas as pd
 import multiprocessing
 import numpy as np
