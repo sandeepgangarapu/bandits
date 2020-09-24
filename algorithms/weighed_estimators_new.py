@@ -89,7 +89,13 @@ def weighed_estimators(type, arm_lis, reward_lis, weight_lis, type_of_eval_weigh
                 rew_arm = reward_lis * ind_arm[i]
                 # now we find sample mean at any point of time
                 rew_arm_cum_sum = np.cumsum(rew_arm)
-                denom = np.arange(1, len(arm_lis)+1)
+                denom = np.arange(1, len(arm_lis)+1) * ind_arm[i]
+                placeholder = 1
+                for m in range(len(denom)):
+                    if denom[m]==0:
+                        denom[m] = placeholder
+                    else:
+                        placeholder = denom[m]
                 mean_snapshot = rew_arm_cum_sum/denom
                 # we now insert 0 at the start of this array so that we get the sample mean until that time and not
                 # including that time. This is as per eq 5 of athey
@@ -144,6 +150,12 @@ def weighed_estimators(type, arm_lis, reward_lis, weight_lis, type_of_eval_weigh
                 # now we find sample mean at any point of time
                 rew_arm_cum_sum = np.cumsum(rew_arm)
                 denom = np.arange(1, len(arm_lis) + 1)
+                placeholder = 1
+                for m in range(len(denom)):
+                    if denom[m] == 0:
+                        denom[m] = placeholder
+                    else:
+                        placeholder = denom[m]
                 mean_snapshot = rew_arm_cum_sum / denom
                 # we now insert 0 at the start of this array so that we get the sample mean until that time and not
                 # including that time. This is as per eq 5 of athey
