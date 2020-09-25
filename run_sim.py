@@ -40,6 +40,6 @@ if __name__ == '__main__':
     #         final_out = pd.concat(ref_lis)
     #         final_out.to_csv("analysis/output/ref.csv", index=False)
     if normal_analysis:
-        true_means = [1, 2, 3]
+        true_means = [0, 3, 4]
         true_vars = [1, 1, 1]
-        a = run_sim('analysis/output/athey_ite_620_t_2000_normal.csv', true_means, true_vars=true_vars, dist_type='Normal')
+        a = run_sim('analysis/output/athey_ite_620_t_2000_normal_0.csv', true_means, true_vars=true_vars, dist_type='Normal')
