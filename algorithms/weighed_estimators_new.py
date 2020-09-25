@@ -101,7 +101,7 @@ def weighed_estimators(type, arm_lis, reward_lis, weight_lis, type_of_eval_weigh
             mean_snapshot_final = np.insert(mean_snapshot, 0, 0)[:-1]
             aipw_array = (weighed_reward_lis * ind_arm[i]) + mean_snapshot_final - (
                             mean_snapshot_final * ind_arm[i] * inv_prop)
-            eval_array = np.sqrt((np.array(weight_lis_of_lis)[:, 0]/horizon))
+            eval_array = np.sqrt((np.array(weight_lis_of_lis)[:, i]/horizon))
             eval_aipw_est = np.sum(aipw_array * eval_array) / np.sum(eval_array)
             eval_aipw_mean_est.append(eval_aipw_est)
         return eval_aipw_mean_est

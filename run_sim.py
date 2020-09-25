@@ -10,7 +10,7 @@ def run_sim(file_path, true_means, true_vars=None, dist_type='Normal'):
 
     estimator_list=['aipw', 'eval_aipw', 'ipw']
 
-    sim = BanditSimulation(num_ite=31, arm_means=true_means,
+    sim = BanditSimulation(num_ite=310, arm_means=true_means,
                            arm_vars=true_vars,
                            eps_inf=0.2,
                            horizon=1000,
@@ -43,4 +43,4 @@ if __name__ == '__main__':
     if normal_analysis:
         true_means = [1, 2, 3]
         true_vars = [1, 1, 1]
-        a = run_sim('analysis/output/athey_ite_310_t_100_normal.csv', true_means, true_vars=true_vars, dist_type='Normal')
+        a = run_sim('analysis/output/athey_ite_310_t_1000_normal.csv', true_means, true_vars=true_vars, dist_type='Normal')
