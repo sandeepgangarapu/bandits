@@ -6,7 +6,7 @@ from algorithms.ucb import ucb
 from algorithms.epsilongreedy import epsilon_greedy
 from bandit import Bandit
 from utils import mse_outcome, prop_mse
-from algorithms.weighed_estimators_new import weighed_estimators
+from algorithms.weighed_estimators import weighed_estimators
 import pandas as pd
 import multiprocessing
 import numpy as np
@@ -15,7 +15,7 @@ import numpy as np
 class BanditSimulation:
 
     def __init__(self, num_ite, arm_means, eps_inf, horizon, alg_list, arm_vars=None, mse_calc=True,
-                 agg=False, estimator_list=None, type_of_eval_weight=None, xi=1, dist_type='Normal',
+                 agg=False, estimator_list=None, xi=1, dist_type='Normal',
                  cap_prop=True, output_file_path=None):
         """This class is to run bandits simulation for given params and give simulation output.
         :param seed: seed for randomization
@@ -28,7 +28,6 @@ class BanditSimulation:
         :param mse_calc: whether to calculate MSE
         :param agg: output aggregated values like mean etc instead of raw values of rewards
         :param estimator_list: list of estimators like ipw, aipw etc
-        :param type_of_eval_weight: type of evaluation weight for weighed estimator
         :param xi: xi value for inf eps
         :param dist_type: type of outcome distribution
         :param cap_prop: capping the propensity in thompson based algs
@@ -44,7 +43,6 @@ class BanditSimulation:
         self.mse_calc = mse_calc
         self.agg = agg
         self.estimator_list = estimator_list
-        self.type_of_eval_weight = type_of_eval_weight
         self.xi = xi
         self.dist_type = dist_type
         self.output_file_path = output_file_path
@@ -117,7 +115,6 @@ class BanditSimulation:
                                        bandit.arm_tracker,
                                        bandit.reward_tracker,
                                        bandit.propensity_tracker,
-                                       type_of_eval_weight=self.type_of_eval_weight,
                                        weight_lis_of_lis=bandit.prop_lis_tracker)
         df = self.create_prop_df(bandit, ite, est_value, alg_name, self.mse_calc)
         return df

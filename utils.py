@@ -344,3 +344,30 @@ def var_stats(group, outcome):
         var_lis = [np.var(lis) for lis in outcome_lis_of_lis]
         var_lis_of_lis.append(var_lis)
     return np.array(var_lis_of_lis).flatten()
+
+
+def get_final_mean(num_arms, arm_lis, mean_est_t):
+    """
+    This is a sub function that will give the final estimated means if a list of means of different arms at different
+    points of time is given
+    :param num_arms: total number of arms
+    :param arm_lis: list of arm pulls
+    :param mean_est_t: list of mean estimates of different arms at different t
+    :return: final estimates of mean, one for each arm
+    """
+    # initializing empty array with num_arms elements
+    mean_est_arm = [None] * num_arms
+    num_updates = 0
+    horizon = len(arm_lis)
+    for arm_lis_ind in range(horizon - 1, -1, -1):
+        # we only update null array num_arm times, after that the ipw_mean_est_2 is full
+        if num_updates >= num_arms:
+            break
+        else:
+            arm_no = arm_lis[arm_lis_ind]
+            # if the placeholder for the arm in empty, we replace, else we don't do anything
+            if not mean_est_arm[arm_no]:
+                mean_est_arm[arm_no] = mean_est_t[arm_lis_ind]
+                num_updates = num_updates + 1
+    return mean_est_arm
+

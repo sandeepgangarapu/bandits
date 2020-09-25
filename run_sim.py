@@ -16,7 +16,6 @@ def run_sim(file_path, true_means, true_vars=None, dist_type='Normal'):
                            horizon=2000,
                            alg_list=alg_list,
                            estimator_list=estimator_list,
-                           type_of_eval_weight='constant_allocation',
                            mse_calc=False,
                            agg=True,
                            xi=0.8,
