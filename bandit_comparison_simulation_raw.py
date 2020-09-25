@@ -117,7 +117,6 @@ class BanditSimulation:
                                        bandit.arm_tracker,
                                        bandit.reward_tracker,
                                        bandit.propensity_tracker,
-                                       final_means=self.agg,
                                        type_of_eval_weight=self.type_of_eval_weight,
                                        weight_lis_of_lis=bandit.prop_lis_tracker)
         df = self.create_prop_df(bandit, ite, est_value, alg_name, self.mse_calc)
