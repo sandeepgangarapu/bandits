@@ -21,7 +21,8 @@ def run_sim(file_path, true_means, true_vars=None, horizon=None, num_ite=31, dis
                            xi=0.8,
                            cap_prop=True,
                            dist_type=dist_type,
-                           output_file_path=file_path)
+                           output_file_path=file_path,
+                           post_allocation=False)
     sim.run_simulation_multiprocessing()
     print("--- %s seconds ---" % (time.time() - start_time))
     return true_means, true_vars
@@ -33,11 +34,11 @@ if __name__ == '__main__':
     sample_sizes = []
     for effect in effect_sizes:
         sample_size = TTestIndPower().solve_power(effect_size=effect, power=1-beta, alpha=alpha)
-        sample_sizes.append(sample_size)
+        sample_sizes.append(int(sample_size))
     true_vars = [1, 1]
     for i in range(len(sample_sizes)):
         true_means = [0]
         true_means.append(effect_sizes[i])
         horizon = len(true_means) * sample_sizes[i]
         file_name = 'analysis/output/hyp_ite_31_t_'+ str(horizon) + '.csv'
-        a = run_sim(file_name, true_means, true_vars=true_vars, num_ite=31, horizon=horizon)
+        a = run_sim(file_name, true_means, true_vars=true_vars, num_ite=1, horizon=horizon)

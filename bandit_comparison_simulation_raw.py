@@ -16,7 +16,7 @@ class BanditSimulation:
 
     def __init__(self, num_ite, arm_means, eps_inf, horizon, alg_list, arm_vars=None, mse_calc=True,
                  agg=False, estimator_list=None, xi=1, dist_type='Normal',
-                 cap_prop=True, output_file_path=None):
+                 cap_prop=True, output_file_path=None, post_allocation=True):
         """This class is to run bandits simulation for given params and give simulation output.
         :param seed: seed for randomization
         :param num_ite: number of iterations
@@ -48,6 +48,7 @@ class BanditSimulation:
         self.output_file_path = output_file_path
         self.cap_prop = cap_prop
         self.type_of_pull = 'monte_carlo' if self.estimator_list else 'single'
+        self.post_allocation = post_allocation
         # self.outcome_lis_of_lis = self.generate_empirical_arm_outcome_dist()
 
     def run_simulation_multiprocessing(self):
@@ -139,7 +140,8 @@ class BanditSimulation:
         :return: None
         """
         if alg == 'ab':
-            ab_testing(bandit, self.horizon, sample_size=None, post_allocation=True)
+            sample_size = int(self.horizon/self.num_arms) if not self.post_allocation else None
+            ab_testing(bandit, self.horizon, sample_size=sample_size, post_allocation=self.post_allocation)
         if alg == 'ucb':
             ucb(bandit, self.horizon, type_of_pull=self.type_of_pull)
         if alg == 'eps_greedy':
