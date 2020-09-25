@@ -102,7 +102,9 @@ def weighed_estimators(type, arm_lis, reward_lis, weight_lis,
                             mean_snapshot_final * ind_arm[i] * inv_prop)
             eval_array = np.sqrt((np.array(weight_lis_of_lis)[:, i]/horizon))
             eval_aipw_mean_est = np.sum(aipw_array * eval_array) / np.sum(eval_array)
-            var_est = np.sum(np.square(eval_array)*np.square(aipw_array - eval_aipw_mean_est)) / (np.sum(eval_array)**2)
+            var_est = np.sum(np.square(eval_array)*np.square(aipw_array - eval_aipw_mean_est)) / ((np.sum(eval_array))**2)
+            if var_est<0:
+                print("hello")
             eval_aipw_var_est.append(var_est)
         return eval_aipw_var_est
 
