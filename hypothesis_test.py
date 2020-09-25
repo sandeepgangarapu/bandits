@@ -41,4 +41,4 @@ if __name__ == '__main__':
         true_means.append(effect_sizes[i])
         horizon = len(true_means) * sample_sizes[i]
         file_name = 'analysis/output/hyp_ite_31_t_'+ str(horizon) + '.csv'
-        a = run_sim(file_name, true_means, true_vars=true_vars, num_ite=1, horizon=horizon)
+        a = run_sim(file_name, true_means, true_vars=true_vars, num_ite=31, horizon=horizon)
