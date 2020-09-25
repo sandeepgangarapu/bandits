@@ -80,6 +80,31 @@ def weighed_estimators(type, arm_lis, reward_lis, weight_lis,
             eval_aipw_mean_est.append(eval_aipw_est)
         return eval_aipw_mean_est
 
+    if type == "eval_aipw_var":
+        eval_aipw_var_est = []
+        for i in range(num_arms):
+            # reward of a particular arm
+            rew_arm = reward_lis * ind_arm[i]
+            # now we find sample mean at any point of time
+            rew_arm_cum_sum = np.cumsum(rew_arm)
+            denom = np.arange(1, horizon + 1)
+            placeholder = 1
+            for m in range(len(denom)):
+                if denom[m] == 0:
+                    denom[m] = placeholder
+                else:
+                    placeholder = denom[m]
+            mean_snapshot = rew_arm_cum_sum / denom
+            # we now insert 0 at the start of this array so that we get the sample mean until that time and not
+            # including that time. This is as per eq 5 of athey
+            mean_snapshot_final = np.insert(mean_snapshot, 0, 0)[:-1]
+            aipw_array = (weighed_reward_lis * ind_arm[i]) + mean_snapshot_final - (
+                            mean_snapshot_final * ind_arm[i] * inv_prop)
+            eval_array = np.sqrt((np.array(weight_lis_of_lis)[:, i]/horizon))
+            eval_aipw_mean_est = np.sum(aipw_array * eval_array) / np.sum(eval_array)
+            var_est = np.sum(np.square(eval_array)*np.square(aipw_array - eval_aipw_mean_est)) / (np.sum(eval_array)**2)
+            eval_aipw_var_est.append(var_est)
+        return eval_aipw_var_est
 
 if __name__ == '__main__':
     dt_lis = []

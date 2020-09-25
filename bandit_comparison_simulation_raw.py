@@ -162,6 +162,7 @@ class BanditSimulation:
         if self.agg:
             dict_df = {'group': list(range(self.num_arms)),
                        'mean_est': bandit.avg_reward_tracker,
+                       'var_est' : bandit.var_est_tracker,
                        'arm_pull_tracker': bandit.arm_pull_tracker,
                        'alg': bandit.name,
                        'ite': ite}
@@ -190,12 +191,14 @@ class BanditSimulation:
         :param mse_calc: Bool to calculate MSE
         :return: output df
         """
+        # var est here is just a dummy to enable the rowbinding of normal and prop df's
         if self.agg:
             dict_df = {'alg': alg_name,
                        'ite': ite,
                        'group': list(range(self.num_arms)),
                        'arm_pull_tracker': bandit.arm_pull_tracker,
-                       'mean_est': mean_est}
+                       'mean_est': mean_est,
+                       'var_est': mean_est}
             df = pd.DataFrame(dict_df)
             # TODO add mse calc when aggregation is true
         else:

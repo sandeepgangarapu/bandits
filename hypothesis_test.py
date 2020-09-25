@@ -1,37 +1,43 @@
 from bandit_comparison_simulation_raw import BanditSimulation
 import numpy as np
 import pandas as pd
+import time
+from statsmodels.stats.power import TTestIndPower
 
-num_sims = 10
-num_groups = 5
-horizon = 1000
-max_mean = 2
-max_var = 3
-main_df_list = []
-mean_var_df_list = []
-arm_means = np.random.uniform(0, max_mean, num_groups)
-arm_vars = np.random.uniform(0, max_var, num_groups)
-print(arm_means, arm_vars)
 
-for subsim in range(num_sims):
-    
-    sim = BanditSimulation(seed=subsim, num_ite=1, arm_means=arm_means,
-                           arm_vars=arm_vars,
+def run_sim(file_path, true_means, true_vars=None, horizon=None, num_ite=31, dist_type='Normal'):
+    start_time = time.time()
+    alg_list=['ab', 'thomp', 'thomp_inf']
+    estimator_list=['eval_aipw', 'eval_aipw_var']
+    sim = BanditSimulation(num_ite=num_ite,
+                           arm_means=true_means,
+                           arm_vars=true_vars,
                            eps_inf=0.2,
                            horizon=horizon,
-                           alg_list=['ab', 'eps_greedy', 'ucb', 'ucb_inf_eps',
-                                     'thomp', 'thomp_inf_eps'],
-                          # estimator_list=['ipw', 'aipw', 'eval_aipw'],
-                           mse_calc=False)
-    df = sim.run_simulation()
-    df['sim'] = np.repeat(subsim, df.shape[0])
-    main_df_list.append(df)
-    mean_df = pd.DataFrame({'mean':arm_means, 'vars':arm_vars,
-                            'group': [i for i in range(num_groups)]})
-    mean_df['sim'] = np.repeat(subsim, mean_df.shape[0])
-    mean_var_df_list.append(mean_df)
+                           alg_list=alg_list,
+                           estimator_list=estimator_list,
+                           mse_calc=False,
+                           agg=True,
+                           xi=0.8,
+                           cap_prop=True,
+                           dist_type=dist_type,
+                           output_file_path=file_path)
+    sim.run_simulation_multiprocessing()
+    print("--- %s seconds ---" % (time.time() - start_time))
+    return true_means, true_vars
 
-main_output = pd.concat(main_df_list, axis=0, ignore_index=True).to_csv(
-    'analysis/output/hypo.csv', index=False)
-mean_output = pd.concat(mean_var_df_list, axis=0, ignore_index=True).to_csv(
-    'analysis/output/hypo_mean.csv', index=False)
+if __name__ == '__main__':
+    effect_sizes = [0.2, 0.5, 0.8]
+    alpha = 0.05
+    beta = 0.1
+    sample_sizes = []
+    for effect in effect_sizes:
+        sample_size = TTestIndPower().solve_power(effect_size=effect, power=1-beta, alpha=alpha)
+        sample_sizes.append(sample_size)
+    true_vars = [1, 1]
+    for i in range(len(sample_sizes)):
+        true_means = [0]
+        true_means.append(effect_sizes[i])
+        horizon = len(true_means) * sample_sizes[i]
+        file_name = 'analysis/output/hyp_ite_31_t_'+ str(horizon) + '.csv'
+        a = run_sim(file_name, true_means, true_vars=true_vars, num_ite=31, horizon=horizon)

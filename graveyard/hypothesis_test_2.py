@@ -16,8 +16,7 @@ sim = BanditSimulation(seed=583257, num_ite=50, arm_means=true_means,
                        alg_list=['ab', 'eps_greedy', 'ucb', 'ucb_inf_eps',
                                      'thomp', 'thomp_inf_eps'],
                        estimator_list=['aipw', 'eval_aipw', 'ipw'],
-                       output_file_path='analysis/output/sim_hypo_same_mean_diff_var'
-                                        '.csv')
+                       output_file_path='../analysis/output/sim_hypo_same_mean_diff_var.csv')
 sim.run_simulation()
 
 
@@ -32,7 +31,6 @@ sim = BanditSimulation(seed=583257, num_ite=50, arm_means=true_means,
                        alg_list=['ab', 'eps_greedy', 'ucb', 'ucb_inf_eps',
                                      'thomp', 'thomp_inf_eps'],
                        estimator_list=['aipw', 'eval_aipw', 'ipw'],
-                       output_file_path='analysis/output/sim_hypo_same_mean_same_var'
-                                        '.csv')
+                       output_file_path='../analysis/output/sim_hypo_same_mean_same_var.csv')
 sim.run_simulation()
 
