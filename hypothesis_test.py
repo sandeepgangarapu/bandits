@@ -35,14 +35,14 @@ if __name__ == '__main__':
     for effect in effect_sizes:
         sample_size = TTestIndPower().solve_power(effect_size=effect, power=1-beta, alpha=alpha)
         sample_sizes.append(int(sample_size))
-    true_vars = [1, 1]
-    for i in range(len(sample_sizes)):
+    # true_vars = [1, 1]
+    # for i in range(len(sample_sizes)):
         # true_means = [0]
         # true_means.append(effect_sizes[i])
-        true_means = [0.25, 1.82, 1.48, 2.25, 2]
-        true_vars = [2.84, 1.97, 2.62, 1, 2.06]
-        # horizon = len(true_means) * sample_sizes[i]
-        horizon = 2000
-        num_ite = 1000
-        file_name = 'analysis/output/hyp_ite_'+ str(num_ite) + '_t_'+ str(horizon) + '.csv'
-        a = run_sim(file_name, true_means, true_vars=true_vars, num_ite=num_ite, horizon=horizon)
+    true_means = [0.25, 1.82, 1.48, 2.25, 2]
+    true_vars = [2.84, 1.97, 2.62, 1, 2.06]
+    # horizon = len(true_means) * sample_sizes[i]
+    horizon = 2000
+    num_ite = 1000
+    file_name = 'analysis/output/hyp_ite_'+ str(num_ite) + '_t_'+ str(horizon) + '.csv'
+    a = run_sim(file_name, true_means, true_vars=true_vars, num_ite=num_ite, horizon=horizon)
