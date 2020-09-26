@@ -6,18 +6,18 @@ import pandas as pd
 
 def run_sim(file_path, true_means, true_vars=None, dist_type='Normal'):
     start_time = time.time()
-    alg_list=['thomp', 'thomp_inf']
+    alg_list=['ab', 'thomp', 'thomp_inf']
 
     estimator_list=['aipw', 'eval_aipw', 'ipw']
 
-    sim = BanditSimulation(num_ite=620, arm_means=true_means,
+    sim = BanditSimulation(num_ite=1, arm_means=true_means,
                            arm_vars=true_vars,
                            eps_inf=0.2,
                            horizon=2000,
                            alg_list=alg_list,
-                           estimator_list=estimator_list,
-                           mse_calc=False,
-                           agg=True,
+                           estimator_list=None,
+                           mse_calc=True,
+                           agg=False,
                            xi=0.8,
                            cap_prop=True,
                            dist_type=dist_type,
@@ -40,6 +40,6 @@ if __name__ == '__main__':
     #         final_out = pd.concat(ref_lis)
     #         final_out.to_csv("analysis/output/ref.csv", index=False)
     if normal_analysis:
-        true_means = [0, 3, 4]
-        true_vars = [1, 1, 1]
-        a = run_sim('analysis/output/athey_ite_620_t_2000_normal_0.csv', true_means, true_vars=true_vars, dist_type='Normal')
+        true_means = [0, 1,2,3,4]
+        true_vars = [1, 1, 1,1,1]
+        a = run_sim('analysis/output/wise_mse_graph.csv', true_means, true_vars=true_vars, dist_type='Normal')
