@@ -10,7 +10,7 @@ def run_sim(file_path, true_means, true_vars=None, dist_type='Normal'):
 
     estimator_list=['aipw', 'eval_aipw', 'ipw']
 
-    sim = BanditSimulation(num_ite=1, arm_means=true_means,
+    sim = BanditSimulation(num_ite=31, arm_means=true_means,
                            arm_vars=true_vars,
                            eps_inf=0.2,
                            horizon=2000,
@@ -40,6 +40,6 @@ if __name__ == '__main__':
     #         final_out = pd.concat(ref_lis)
     #         final_out.to_csv("analysis/output/ref.csv", index=False)
     if normal_analysis:
-        true_means = [0, 1,2,3,4]
-        true_vars = [1, 1, 1,1,1]
+        true_means = [0.25, 1.82, 1.48, 2.25, 2]
+        true_vars = [2.84, 1.97, 2.62, 1, 2.06]
         a = run_sim('analysis/output/wise_mse_graph.csv', true_means, true_vars=true_vars, dist_type='Normal')
