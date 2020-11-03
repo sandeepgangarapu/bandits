@@ -29,9 +29,9 @@ We see from the below true values that ARM-8 should the winning arm as it has th
 
 ```{r echo=TRUE}
 
-true_means = c(0.25, 1.82, 1.48, 2.25, 2)
+true_means = c(0,1,2,3,4)
 
-true_vars = c(2.84,  1.97, 2.62, 1, 2.06)
+true_vars = c(1,1,1,1,1)
 
 grp = c(0:(length(true_means)-1))
 true_df <- data.frame(grp, true_means, true_vars)
@@ -50,11 +50,11 @@ We run this simulation for 20 different times using various seeds.
 setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")
 
 
-data <- read.csv("sim_ucb.csv")
+data <- read.csv("wise_mse_graph.csv")
 
 
 seed_algs <- c("ab", "ucb", "thomp", "eps_greedy")
-inf_algs <- c("ucb_inf_eps", "thomp_inf_eps")
+inf_algs <- c("ucb_inf_eps", "thomp_inf_eps", 'thomp_inf')
 est_algs <- c("thomp_ipw", "thomp_aipw", "thomp_inf_eps_ipw", "thomp_inf_eps_aipw", "thomp_eval_aipw", "thomp_inf_eps_eval_aipw", "ucb_aipw", "ucb_ipw",  "ucb_inf_eps_aipw", "ucb_inf_eps_ipw", "ucb_eval_aipw", "ucb_inf_eps_eval_aipw" )
 thomp_algs = c( "thomp", "thomp_inf_eps")
 ucb_algs <- c("ucb_inf_eps", "ucb")
@@ -71,10 +71,10 @@ regret_mse <- data %>% filter(alg %in% c(seed_algs, inf_algs)) %>%
   group_by(ite,alg) %>% mutate(x=row_number()) %>%
   ungroup()
 
-prop_mse <- data %>% filter(alg %in% est_algs) %>% select(alg, ite, group, mse, mean_est) %>% 
-  group_by(ite,alg) %>% mutate(x=row_number()) %>% ungroup()
+# prop_mse <- data %>% filter(alg %in% est_algs) %>% select(alg, ite, group, mse, mean_est) %>% 
+#   group_by(ite,alg) %>% mutate(x=row_number()) %>% ungroup()
 
-xlimit <- max(group_outcome$x) + 1000
+xlimit <- max(group_outcome$x) + 300
  
 
 # Setting new WD so that results are saved in different folder
@@ -85,141 +85,147 @@ setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\results")
 
 
 
-<!-- # Mean Squared error of mean estimates -->
+# Mean Squared error of mean estimates
 
-<!-- At each time horizon we use sample mean to estimate mean of each arm and calculate error = est.mean-true.mean. -->
+At each time horizon we use sample mean to estimate mean of each arm and calculate error = est.mean-true.mean.
 
-<!-- $MSE = \sum_{k} (error_k)^2$ -->
-
-
-<!-- ```{r echo=FALSE, warning=FALSE} -->
-<!-- df_prop <- prop_mse %>% select(-c(mean_est, group)) -->
-<!-- df_mse <- regret_mse %>% select(-c(regret, var_mse)) %>% rename(mse = mean_mse) -->
-<!-- total_mse <- rbind(df_prop, df_mse) %>% group_by(x, alg) %>% summarise(mn_mse = mean(mse), se_mse = sd(mse)/sqrt(n())) -->
-
-<!-- dt <- total_mse %>% filter(alg %in% seed_algs) -->
-
-<!-- ggplot(dt,aes(x=x, y=mn_mse)) + -->
-<!--   geom_line(aes(color=alg)) + -->
-<!--   geom_ribbon(aes(ymin=mn_mse-(1.96*se_mse), ymax=mn_mse+(1.96*se_mse), -->
-<!--                   group=alg), alpha=0.4,  fill="grey70") + -->
-<!--   labs(title = "MSE of Mean") +  xlim(0,xlimit) + -->
-<!--   geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) + -->
-<!--   theme_bw() -->
-
-<!-- ``` -->
+$MSE = \sum_{k} (error_k)^2$
 
 
-<!-- UCB and Thompson Sampling have higher MSE compared to AB or Epsilon Greedy. This means that the estimates of AB and Epsilon-Greedy are more accurate. -->
+```{r echo=FALSE, warning=FALSE}
+# df_prop <- prop_mse %>% select(-c(mean_est, group))
+df_mse <- regret_mse %>% select(-c(regret, var_mse)) %>% rename(mse = mean_mse)
+# total_mse <- rbind(df_prop, df_mse) %>% group_by(x, alg) %>% summarise(mn_mse = mean(mse), se_mse = sd(mse)/sqrt(n()))
+# 
+# dt <- total_mse %>% filter(alg %in% seed_algs)
+# 
+# ggplot(df_mse,aes(x=x, y=mn_mse)) +
+#   geom_line(aes(color=alg)) +
+#   geom_ribbon(aes(ymin=mn_mse-(1.96*se_mse), ymax=mn_mse+(1.96*se_mse),
+#                   group=alg), alpha=0.4,  fill="grey70") +
+#   labs(title = "MSE of Mean") +  xlim(0,xlimit) +
+#   geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) +
+#   theme_bw()
+
+plot_mse <- ggplot(df_mse,aes(x=x, y=mse)) +
+  geom_line(aes(color=alg)) +
+  labs(title = "MSE of Mean") +  xlim(0,xlimit) +
+  geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) +
+  theme_bw()
+
+```
 
 
-<!-- ```{r echo=FALSE, warning=FALSE} -->
-
-<!-- less_mse_algs = c("ab", "eps_greedy", "ucb_inf_eps", "thomp_inf_eps") -->
-<!-- this_algs <- c('ucb', 'thomp', less_mse_algs) -->
-
-<!-- dt <- total_mse %>% filter(alg %in% this_algs) -->
+UCB and Thompson Sampling have higher MSE compared to AB or Epsilon Greedy. This means that the estimates of AB and Epsilon-Greedy are more accurate.
 
 
-<!-- plot_mse <- ggplot(dt,aes(x=x, y=mn_mse)) + -->
-<!--   geom_line(aes(color=alg)) + -->
-<!--   geom_ribbon(aes(ymin=mn_mse-(1.96*se_mse), ymax=mn_mse+(1.96*se_mse), -->
-<!--                   group=alg), alpha=0.4,  fill="grey70") + -->
-<!--   labs(title = "MSE of Mean") +  xlim(0,xlimit) + -->
-<!--   geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) + -->
-<!--   theme_bw() -->
+```{r echo=FALSE, warning=FALSE}
 
-<!-- plot_mse -->
+less_mse_algs = c("ab", "eps_greedy", "ucb_inf_eps", "thomp_inf_eps")
+this_algs <- c('ucb', 'thomp', less_mse_algs)
 
-<!-- ``` -->
-<!-- The Inference based algorithms are performing much better than Bandit algorithms in terms if MSE and are comparable to traditional algorithms. -->
-
-<!-- Difference between the above algorithms is clear during later allocations. So we limit the Y axis to see these differences. -->
-
-<!-- ```{r echo=FALSE, warning=FALSE} -->
-
-<!-- plot_mse + labs(title = "MSE of Mean Zoomed") +    ylim(0,2.3) -->
-
-<!-- plot_mse + labs(title = "MSE of Mean Zoomed") +    ylim(0,0.3) -->
-
-<!-- ``` -->
-
-<!-- AB, UCB_INF_EPS, THOMP_INF_EPS perform the best and almost indistingushable. However, INF_EPS algorithms perform as good as AB. -->
-
-<!-- ## MSE of Weighed estimators. -->
-
-<!-- We also want to see how the weighed estimators perform wrt original MAB algorithms and their INF versions. We use two weighed estimators. -->
-
-<!-- * ipw - Inverse propensity weighing -->
-<!-- * aipw - Augmented inverse propensity weighing -->
-
-<!-- These are not new MAB algorithms. The are only estimators to calculate mean of already existing algorithm. The main reason to use these estimators is for their unbiasedness properties. Theoretically, IPW is unbiased but had high variance and AIPW is unbiased and has lower variance.  -->
-
-<!-- In order to use IPW and AIPW, we need to know the propensity of choosing an arm at every allocation. Propensity of every arm at every time period can be calculated for Thompson Sampling using Monte Carlo simulations but it cannot be calculated for UCB. So we only use weighed estimators for TS. -->
+dt <- total_mse %>% filter(alg %in% this_algs)
 
 
-<!-- ```{r echo=FALSE, warning=FALSE} -->
+plot_mse <- ggplot(dt,aes(x=x, y=mn_mse)) +
+  geom_line(aes(color=alg)) +
+  geom_ribbon(aes(ymin=mn_mse-(1.96*se_mse), ymax=mn_mse+(1.96*se_mse),
+                  group=alg), alpha=0.4,  fill="grey70") +
+  labs(title = "MSE of Mean") +  xlim(0,xlimit) +
+  geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) +
+  theme_bw()
+
+plot_mse
+
+```
+The Inference based algorithms are performing much better than Bandit algorithms in terms if MSE and are comparable to traditional algorithms.
+
+Difference between the above algorithms is clear during later allocations. So we limit the Y axis to see these differences.
+
+```{r echo=FALSE, warning=FALSE}
+
+plot_mse + labs(title = "MSE of Mean Zoomed") +    ylim(0,2.3)
+
+plot_mse + labs(title = "MSE of Mean Zoomed") +    ylim(0,0.3)
+
+```
+
+AB, UCB_INF_EPS, THOMP_INF_EPS perform the best and almost indistingushable. However, INF_EPS algorithms perform as good as AB.
+
+## MSE of Weighed estimators.
+
+We also want to see how the weighed estimators perform wrt original MAB algorithms and their INF versions. We use two weighed estimators.
+
+* ipw - Inverse propensity weighing
+* aipw - Augmented inverse propensity weighing
+
+These are not new MAB algorithms. The are only estimators to calculate mean of already existing algorithm. The main reason to use these estimators is for their unbiasedness properties. Theoretically, IPW is unbiased but had high variance and AIPW is unbiased and has lower variance.
+
+In order to use IPW and AIPW, we need to know the propensity of choosing an arm at every allocation. Propensity of every arm at every time period can be calculated for Thompson Sampling using Monte Carlo simulations but it cannot be calculated for UCB. So we only use weighed estimators for TS.
 
 
-<!-- dt <- total_mse %>% filter(alg %in% est_algs) -->
+```{r echo=FALSE, warning=FALSE}
 
 
-<!-- plot_mse <- ggplot(dt,aes(x=x, y=mn_mse)) + -->
-<!--   geom_line(aes(color=alg)) + -->
-<!--   geom_ribbon(aes(ymin=mn_mse-(1.96*se_mse), ymax=mn_mse+(1.96*se_mse), -->
-<!--                   group=alg), alpha=0.4,  fill="grey70") + -->
-<!--   labs(title = "MSE of Mean") +  xlim(0,xlimit) + -->
-<!--   geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) + -->
-<!--   theme_bw() -->
-
-<!-- plot_mse -->
-
-<!-- plot_mse + labs(title = "MSE of Mean Zoomed") +    ylim(0,10) -->
-
-<!-- plot_mse + labs(title = "MSE of Mean Zoomed") +    ylim(0,1.5) -->
-
-<!-- plot_mse + labs(title = "MSE of Mean Zoomed") +    ylim(0,0.2) -->
+dt <- total_mse %>% filter(alg %in% est_algs)
 
 
-<!-- ``` -->
+plot_mse <- ggplot(dt,aes(x=x, y=mn_mse)) +
+  geom_line(aes(color=alg)) +
+  geom_ribbon(aes(ymin=mn_mse-(1.96*se_mse), ymax=mn_mse+(1.96*se_mse),
+                  group=alg), alpha=0.4,  fill="grey70") +
+  labs(title = "MSE of Mean") +  xlim(0,xlimit) +
+  geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) +
+  theme_bw()
 
-<!-- MSE of weighed estimators is very high at the start owing to lower propensity of arm selctions increasing the variance of estimate. This slowly goes down as we gather more data (horizon increase). -->
+plot_mse
 
-<!-- Also, the MSE of weighed estimators seems to be *higher* than the non-weighed counterparts. This is interesting. -->
+plot_mse + labs(title = "MSE of Mean Zoomed") +    ylim(0,10)
 
-<!-- The main property of these algorithms is that their estimators are unbiased (in expectation). But, for one single iteration, the MSE seems to be worse than un-weighed counterpart. -->
+plot_mse + labs(title = "MSE of Mean Zoomed") +    ylim(0,1.5)
 
-
-<!-- ### Compare MSE of Weighed estimators with UCB_INF_EPS. -->
-
-<!-- We also want to see how the weighed estimators perform wrt original MAB algorithms and their INF versions. -->
-
-
-<!-- ```{r echo=FALSE, warning=FALSE} -->
-
-<!-- compare_est_algs = c("ucb_inf_eps", est_algs) -->
-
-<!-- dt <- total_mse %>% filter(alg %in% compare_est_algs) -->
+plot_mse + labs(title = "MSE of Mean Zoomed") +    ylim(0,0.2)
 
 
-<!-- plot_mse <- ggplot(dt,aes(x=x, y=mn_mse)) + -->
-<!--   geom_line(aes(color=alg)) + -->
-<!--   geom_ribbon(aes(ymin=mn_mse-(1.96*se_mse), ymax=mn_mse+(1.96*se_mse), -->
-<!--                   group=alg), alpha=0.4,  fill="grey70") + -->
-<!--   labs(title = "MSE of Mean") +  xlim(0,xlimit) + -->
-<!--   geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) + -->
-<!--   theme_bw() -->
+```
 
-<!-- plot_mse -->
+MSE of weighed estimators is very high at the start owing to lower propensity of arm selctions increasing the variance of estimate. This slowly goes down as we gather more data (horizon increase).
 
-<!-- plot_mse + labs(title = "MSE of Mean Zoomed") +    ylim(0,5) -->
+Also, the MSE of weighed estimators seems to be *higher* than the non-weighed counterparts. This is interesting.
 
-<!-- plot_mse + labs(title = "MSE of Mean Zoomed") +    ylim(0,0.5) -->
+The main property of these algorithms is that their estimators are unbiased (in expectation). But, for one single iteration, the MSE seems to be worse than un-weighed counterpart.
 
 
-<!-- ``` -->
+### Compare MSE of Weighed estimators with UCB_INF_EPS.
 
-<!-- UCB_INF_EPS, THOMP_INF_EPS performs better than even Weighed algorithms. -->
+We also want to see how the weighed estimators perform wrt original MAB algorithms and their INF versions.
+
+
+```{r echo=FALSE, warning=FALSE}
+
+compare_est_algs = c("ucb_inf_eps", est_algs)
+
+dt <- total_mse %>% filter(alg %in% compare_est_algs)
+
+
+plot_mse <- ggplot(dt,aes(x=x, y=mn_mse)) +
+  geom_line(aes(color=alg)) +
+  geom_ribbon(aes(ymin=mn_mse-(1.96*se_mse), ymax=mn_mse+(1.96*se_mse),
+                  group=alg), alpha=0.4,  fill="grey70") +
+  labs(title = "MSE of Mean") +  xlim(0,xlimit) +
+  geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) +
+  theme_bw()
+
+plot_mse
+
+plot_mse + labs(title = "MSE of Mean Zoomed") +    ylim(0,5)
+
+plot_mse + labs(title = "MSE of Mean Zoomed") +    ylim(0,0.5)
+
+
+```
+
+UCB_INF_EPS, THOMP_INF_EPS performs better than even Weighed algorithms.
 
 
 
