@@ -70,7 +70,7 @@ def model_building(model_name, X, y):
     if model_name == 'knn':
         knn = KNeighborsClassifier()
         param_grid = {'n_neighbors': np.arange(1, 10)}
-        knn_cv = GridSearchCV(knn, param_grid, scoring='roc_auc_score', n_jobs=31, cv=5)
+        knn_cv = GridSearchCV(knn, param_grid, scoring='roc_auc', n_jobs=31, cv=5)
         knn_cv.fit(X, y)
         print("best_parameters", knn_cv.best_params_)
         print("best_score", knn_cv.best_score_)
@@ -79,7 +79,7 @@ def model_building(model_name, X, y):
     if model_name == 'rf':
         rf = RandomForestClassifier()
         param_grid = {'n_estimators': np.arange(100, 1000, 100), 'max_depth': np.arange(3, 8, 1), 'max_features':['auto', 'sqrt', 'log2']}
-        rf_cv = GridSearchCV(rf, param_grid, scoring='roc_auc_score', n_jobs=31, cv=5)
+        rf_cv = GridSearchCV(rf, param_grid, scoring='roc_auc', n_jobs=31, cv=5)
         rf_cv.fit(X, y)
         print("best_parameters", rf_cv.best_params_)
         print("best_score", rf_cv.best_score_)
@@ -88,7 +88,7 @@ def model_building(model_name, X, y):
     if model_name == 'LGBM':
         param_grid = {'n_estimators':[500], 'learning_rate':[0.01], 'max_depth':[3,4,5]}
         lgbm = LGBMClassifier(boosting_type='gbdt', objective='binary', random_state=42)
-        lgbm_cv = GridSearchCV(lgbm, param_grid, cv=5, scoring='roc_auc_score')
+        lgbm_cv = GridSearchCV(lgbm, param_grid, cv=5, scoring='roc_auc')
         lgbm_cv.fit(X, y)
         print("best_parameters", lgbm_cv.best_params_)
         print("best_score", lgbm_cv.best_score_)
