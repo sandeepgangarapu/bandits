@@ -1,13 +1,10 @@
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import cross_val_score, train_test_split, RandomizedSearchCV
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.metrics import classification_report,auc, accuracy_score, confusion_matrix, roc_curve, roc_auc_score
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.feature_extraction import DictVectorizer
 from sklearn.decomposition import PCA
-from sklearn.utils import resample
 from imblearn.over_sampling import SMOTE
 from lightgbm import LGBMClassifier
 from sklearn.model_selection import GridSearchCV
@@ -97,7 +94,7 @@ def model_building(model_name, X, y):
         print("best_score", lgbm_cv.best_score_)
         return lgbm_cv.best_estimator_
 
- if __name__ == "__main__":
+if __name__ == "__main__":
      model_list = ['knn', 'rf', 'xgboost', 'lightgbm']
      preprocessing_ind = True
      feature_selection_ind = True
