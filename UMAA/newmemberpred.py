@@ -74,6 +74,8 @@ def model_building(model_name, X, y):
         knn_cv.fit(X, y)
         print("best_parameters", knn_cv.best_params_)
         print("best_score", knn_cv.best_score_)
+        print("scoring", knn_cv.scorer_)
+        print("prob", knn_cv.predict_proba)
         return knn_cv.best_estimator_
 
     if model_name == 'rf':
@@ -109,6 +111,6 @@ if __name__ == "__main__":
          X_train = feature_selection(X_train)
      if imbalance_ind:
          X_train, y_train = imbalance(X_train, y_train)
-     est = model_building(model_name = 'LGBM', X = X_train, y = y_train)
+     #est = model_building(model_name = 'LGBM', X = X_train, y = y_train)
      est_1 = model_building(model_name = 'knn', X = X_train, y = y_train)
-     est_2 = model_building(model_name = 'rf',  X = X_train, y = y_train)
+     #est_2 = model_building(model_name = 'rf',  X = X_train, y = y_train)
