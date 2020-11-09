@@ -51,32 +51,29 @@ def preprocessing(df):
     scaled_features = df[columns_to_scale]
     ss = StandardScaler()
     scaled_data = ss.fit_transform(scaled_features)
-    df[columns_to_scale] = df
+    df[columns_to_scale] = scaled_data
     df['target'] = df['target'].astype('category')
 
     return df
 
-def feature_selection(df):
-
-    # principal component analysis
-    y = df['target']
-    x = df.drop(['target'], axis = 1)
+def feature_selection(X):
     pca = PCA()
-    x_pca = pca.fit_transform(x)
+    x_pca = pca.fit_transform(X)
     x_pca = x_pca[:, :12]
 
-    return x_pca, y
+    return x_pca
 
-def imbalence(X, y):
+def imbalance(X, y):
     sm = SMOTE(random_state = 42, sampling_strategy= 0.50)
     X, y = sm.fit_sample(X, y.ravel())
+    return X, y
 
-def model_building(model_name, X, y)
+def model_building(model_name, X, y):
 
     if model_name == 'knn':
         knn = KNeighborsClassifier()
-        param_grid = {n_neighbors: np.arange(1, 10)}
-        knn_cv = GridSearchCV(knn, scoring='roc_auc_score', n_jobs=31, cv=5)
+        param_grid = {'n_neighbors': np.arange(1, 10)}
+        knn_cv = GridSearchCV(knn, param_grid, scoring='roc_auc_score', n_jobs=31, cv=5)
         knn_cv.fit(X, y)
         print("best_parameters", knn_cv.best_params_)
         print("best_score", knn_cv.best_score_)
@@ -84,8 +81,8 @@ def model_building(model_name, X, y)
 
     if model_name == 'rf':
         rf = RandomForestClassifier()
-        param_grid = {n_estimators= np.arange(100, 1000, 100), max_depth = np.arange(3, 8, 1), max_features=['auto', 'sqrt', 'log2']}
-        rf_cv = GridSearchCV(knn, scoring='roc_auc_score', n_jobs=31, cv=5)
+        param_grid = {'n_estimators': np.arange(100, 1000, 100), 'max_depth': np.arange(3, 8, 1), 'max_features':['auto', 'sqrt', 'log2']}
+        rf_cv = GridSearchCV(rf, param_grid, scoring='roc_auc_score', n_jobs=31, cv=5)
         rf_cv.fit(X, y)
         print("best_parameters", rf_cv.best_params_)
         print("best_score", rf_cv.best_score_)
@@ -94,29 +91,27 @@ def model_building(model_name, X, y)
     if model_name == 'LGBM':
         param_grid = {'n_estimators':[500], 'learning_rate':[0.01], 'max_depth':[3,4,5]}
         lgbm = LGBMClassifier(boosting_type='gbdt', objective='binary', random_state=42)
-        lgbm = GridSearchCV(lgbm, param_grid, cv=5, scoring='roc_auc_score')
-        lgbm.fit(X, y)
-        print("best_parameters", lgbm.best_params_)
-        print("best_score", lgbm.best_score_)
-        return lgbm.best_estimator_
-
-
+        lgbm_cv = GridSearchCV(lgbm, param_grid, cv=5, scoring='roc_auc_score')
+        lgbm_cv.fit(X, y)
+        print("best_parameters", lgbm_cv.best_params_)
+        print("best_score", lgbm_cv.best_score_)
+        return lgbm_cv.best_estimator_
 
  if __name__ == "__main__":
      model_list = ['knn', 'rf', 'xgboost', 'lightgbm']
-     preprocessing = True
-     feature_selection = True
-     imbalence = True
+     preprocessing_ind = True
+     feature_selection_ind = True
+     imbalance_ind = True
      data = pd.read_csv("data_for_model.csv")
      if preprocessing:
          data = preprocessing(data)
-     if feature_selection:
-         data = feature_selection(data)
      y = data['target']
-     X = data.drop(['target'], axis = 1)
-     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.33, random_state = 42, stratify = y)
-     if imbalence:
-         X, y = imbalence(X_train, y_train)
-     est = model_building(model_name = 'LGBM', X, y)
-     est = model_building(model_name = 'knn', X, y)
-     est = model_building(model_name = 'rf', X, y)
+     X = data.drop(['target'], axis=1)
+     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42, stratify=y)
+     if feature_selection_ind:
+         X_train = feature_selection(X_train)
+     if imbalance_ind:
+         X_train, y_train = imbalance(X_train, y_train)
+     est = model_building(model_name = 'LGBM', X = X_train, y = y_train)
+     est_1 = model_building(model_name = 'knn', X = X_train, y = y_train)
+     est_2 = model_building(model_name = 'rf',  X = X_train, y = y_train)
