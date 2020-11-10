@@ -1,12 +1,12 @@
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, StratifiedShuffleSplit
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.decomposition import PCA
 from imblearn.over_sampling import SMOTE
-from lightgbm import LGBMClassifier
+#from lightgbm import LGBMClassifier
 from sklearn.model_selection import GridSearchCV
 
 
@@ -32,7 +32,11 @@ def preprocessing(df):
     df = df.drop(['MARITAL_STATUS_O'], axis = 1)
     df['MARITAL_STATUS_U'] = df['MARITAL_STATUS_U'].astype('category')
     df['MARITAL_STATUS_M'] = df['MARITAL_STATUS_M'].astype('category')
+    df['target'] = df['target'].astype('category')
+    return df
 
+
+def Normalization(X_train, X_test):
     # Normalization
     # except age everything has low variance, no need for log normalization
     # but we can do scalar tranformation on the rest of the columns
@@ -45,32 +49,39 @@ def preprocessing(df):
            'Learning_events', 'Legislature_events', 'Networking_events',
            'Other_events', 'Social_events', 'Sports_events',
            'total_type_person_events']
-    scaled_features = df[columns_to_scale]
+    scaled_features_train = X_train[columns_to_scale]
     ss = StandardScaler()
-    scaled_data = ss.fit_transform(scaled_features)
-    df[columns_to_scale] = scaled_data
-    df['target'] = df['target'].astype('category')
+    scaled_data_train = ss.fit_transform(scaled_features_train)
+    X_train[columns_to_scale] = scaled_data_train
+    scaled_features_test = X_test[columns_to_scale]
+    scaled_data_test = ss.transform(scaled_features_test)
+    X_test[columns_to_scale] = scaled_data_test
+    return X_train, X_test
 
-    return df
 
-def feature_selection(X):
+def feature_selection(X_train, X_test):
     pca = PCA()
-    x_pca = pca.fit_transform(X)
-    x_pca = x_pca[:, :12]
+    x_pca_train = pca.fit_transform(X_train)
+    x_pca_train = x_pca_train[:, :12]
 
-    return x_pca
+    x_pca_test = pca.transform(X_test)
+    x_pca_test = x_pca_test[:, :12]
+
+    return x_pca_train, x_pca_test
 
 def imbalance(X, y):
-    sm = SMOTE(random_state = 42, sampling_strategy= 0.50)
+    sm = SMOTE(random_state=42, sampling_strategy=1)
     X, y = sm.fit_sample(X, y.ravel())
+    # print(np.unique(y, return_counts=True))
     return X, y
 
 def model_building(model_name, X, y):
 
     if model_name == 'knn':
-        knn = KNeighborsClassifier()
-        param_grid = {'n_neighbors': np.arange(1, 10)}
-        knn_cv = GridSearchCV(knn, param_grid, scoring='roc_auc', n_jobs=31, cv=5)
+        knn = KNeighborsClassifier(weights='distance')
+        param_grid = {'n_neighbors': np.arange(3, 10)}
+        knn_cv = GridSearchCV(knn, param_grid, scoring='roc_auc', cv=5)
+        print(X.dtype, y.dtype)
         knn_cv.fit(X, y)
         print("best_parameters", knn_cv.best_params_)
         print("best_score", knn_cv.best_score_)
@@ -81,16 +92,18 @@ def model_building(model_name, X, y):
     if model_name == 'rf':
         rf = RandomForestClassifier()
         param_grid = {'n_estimators': np.arange(100, 1000, 100), 'max_depth': np.arange(3, 8, 1), 'max_features':['auto', 'sqrt', 'log2']}
-        rf_cv = GridSearchCV(rf, param_grid, scoring='roc_auc', n_jobs=31, cv=5)
+        rf_cv = GridSearchCV(rf, param_grid, scoring='roc_auc', cv=5)
         rf_cv.fit(X, y)
         print("best_parameters", rf_cv.best_params_)
         print("best_score", rf_cv.best_score_)
+        print("scoring", rf_cv.scorer_)
+        print("prob", rf_cv.predict_proba)
         return rf_cv.best_estimator_
 
     if model_name == 'LGBM':
         param_grid = {'n_estimators':[500], 'learning_rate':[0.01], 'max_depth':[3,4,5]}
         lgbm = LGBMClassifier(boosting_type='gbdt', objective='binary', random_state=42)
-        lgbm_cv = GridSearchCV(lgbm, param_grid, cv=5, scoring='roc_auc')
+        lgbm_cv = GridSearchCV(lgbm, param_grid, n_jobs=31, cv=5, scoring='roc_auc')
         lgbm_cv.fit(X, y)
         print("best_parameters", lgbm_cv.best_params_)
         print("best_score", lgbm_cv.best_score_)
@@ -99,18 +112,21 @@ def model_building(model_name, X, y):
 if __name__ == "__main__":
      model_list = ['knn', 'rf', 'xgboost', 'lightgbm']
      preprocessing_ind = True
+     normalization = True
      feature_selection_ind = True
      imbalance_ind = True
      data = pd.read_csv("data_for_model.csv")
      if preprocessing:
          data = preprocessing(data)
-     y = data['target']
+     y = data.target
      X = data.drop(['target'], axis=1)
-     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42, stratify=y)
+     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.10, random_state=42, shuffle=True)
+     if normalization:
+         X_train, X_test = Normalization(X_train, X_test)
      if feature_selection_ind:
-         X_train = feature_selection(X_train)
+         X_train, X_test = feature_selection(X_train, X_test)
      if imbalance_ind:
          X_train, y_train = imbalance(X_train, y_train)
-     #est = model_building(model_name = 'LGBM', X = X_train, y = y_train)
-     est_1 = model_building(model_name = 'knn', X = X_train, y = y_train)
-     #est_2 = model_building(model_name = 'rf',  X = X_train, y = y_train)
+     est = model_building(model_name = 'LGBM', X = X_train, y = y_train)
+     est_1 = model_building(model_name = 'knn', X=X_train, y=y_train)
+     est_2 = model_building(model_name='rf', X=X_train, y=y_train)
