@@ -113,21 +113,19 @@ def model_building(model_name, X, y):
             'subsample_freq': [20]
         }
         lgbm = LGBMClassifier(boosting_type='gbdt', objective='binary', random_state=42)
-        lgbm_cv = GridSearchCV(lgbm, param_grid, n_jobs=31, cv=5, scoring='roc_auc')
+        lgbm_cv = GridSearchCV(lgbm, param_grid, n_jobs=-1, cv=5, scoring='roc_auc')
         lgbm_cv.fit(X, y)
         print("best_parameters", lgbm_cv.best_params_)
         print("best_score", lgbm_cv.best_score_)
         return lgbm_cv.best_estimator_
 
     if model_name == 'tpot':
-        pipeline_optimizer = tpot.TPOTClassifier(generations=5,  # number of iterations to run the training
-                                                 population_size=50,  # number of individuals to train
-                                                 cv=5)  # number of folds in StratifiedKFold
+        pipeline_optimizer = tpot.TPOTClassifier(cv=5, n_jobs=-1, scoring='roc_auc', verbosity=2)
         pipeline_optimizer.fit(X_train, y_train)  # fit the pipeline optimizer - can take a long time
         print(pipeline_optimizer.score(X_test, y_test))  # print scoring for the pipeline
         pipeline_optimizer.export('tpot_exported_pipeline.py')  # export the pipeline - in Python code!
-        return pipeline_optimizer.best_estimator_
-
+        return None
+    
 if __name__ == "__main__":
      model_list = ['knn', 'rf', 'xgboost', 'lightgbm']
      preprocessing_ind = True
