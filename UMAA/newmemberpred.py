@@ -6,9 +6,9 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.decomposition import PCA
 from imblearn.over_sampling import SMOTE
-#from lightgbm import LGBMClassifier
+from lightgbm import LGBMClassifier
 from sklearn.model_selection import GridSearchCV
-
+import tpot
 
 def preprocessing(df):
     """# Preprocessing
@@ -32,7 +32,7 @@ def preprocessing(df):
     df = df.drop(['MARITAL_STATUS_O'], axis = 1)
     df['MARITAL_STATUS_U'] = df['MARITAL_STATUS_U'].astype('category')
     df['MARITAL_STATUS_M'] = df['MARITAL_STATUS_M'].astype('category')
-    df['target'] = df['target'].astype('category')
+    # df['target'] = df['target'].astype('category')
     return df
 
 
@@ -101,13 +101,32 @@ def model_building(model_name, X, y):
         return rf_cv.best_estimator_
 
     if model_name == 'LGBM':
-        param_grid = {'n_estimators':[500], 'learning_rate':[0.01], 'max_depth':[3,4,5]}
+        param_grid = {
+            'n_estimators': [400, 700, 1000],
+            'colsample_bytree': [0.7, 0.8],
+            'max_depth': [15,20,25],
+            'num_leaves': [50, 100, 200],
+            'reg_alpha': [1.1, 1.2, 1.3],
+            'reg_lambda': [1.1, 1.2, 1.3],
+            'min_split_gain': [0.3, 0.4],
+            'subsample': [0.7, 0.8, 0.9],
+            'subsample_freq': [20]
+        }
         lgbm = LGBMClassifier(boosting_type='gbdt', objective='binary', random_state=42)
         lgbm_cv = GridSearchCV(lgbm, param_grid, n_jobs=31, cv=5, scoring='roc_auc')
         lgbm_cv.fit(X, y)
         print("best_parameters", lgbm_cv.best_params_)
         print("best_score", lgbm_cv.best_score_)
         return lgbm_cv.best_estimator_
+
+    if model_name == 'tpot':
+        pipeline_optimizer = tpot.TPOTClassifier(generations=5,  # number of iterations to run the training
+                                                 population_size=50,  # number of individuals to train
+                                                 cv=5)  # number of folds in StratifiedKFold
+        pipeline_optimizer.fit(X_train, y_train)  # fit the pipeline optimizer - can take a long time
+        print(pipeline_optimizer.score(X_test, y_test))  # print scoring for the pipeline
+        pipeline_optimizer.export('tpot_exported_pipeline.py')  # export the pipeline - in Python code!
+        return pipeline_optimizer.best_estimator_
 
 if __name__ == "__main__":
      model_list = ['knn', 'rf', 'xgboost', 'lightgbm']
@@ -118,9 +137,11 @@ if __name__ == "__main__":
      data = pd.read_csv("data_for_model.csv")
      if preprocessing:
          data = preprocessing(data)
-     y = data.target
+     y = data.target.ravel()
      X = data.drop(['target'], axis=1)
-     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.10, random_state=42, shuffle=True)
+     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.10, random_state=42)
+     print(np.unique(y_train, return_counts=True))
+     print(np.unique(y_test, return_counts=True))
      if normalization:
          X_train, X_test = Normalization(X_train, X_test)
      if feature_selection_ind:
@@ -128,5 +149,5 @@ if __name__ == "__main__":
      if imbalance_ind:
          X_train, y_train = imbalance(X_train, y_train)
      est = model_building(model_name = 'LGBM', X = X_train, y = y_train)
-     est_1 = model_building(model_name = 'knn', X=X_train, y=y_train)
-     est_2 = model_building(model_name='rf', X=X_train, y=y_train)
+     #est_1 = model_building(model_name = 'knn', X=X_train, y=y_train)
+     est_2 = model_building(model_name='tpot', X=X_train, y=y_train)
