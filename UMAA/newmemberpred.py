@@ -105,12 +105,7 @@ def model_building(model_name, X, y):
             'n_estimators': [400, 700, 1000],
             'colsample_bytree': [0.7, 0.8],
             'max_depth': [15,20,25],
-            'num_leaves': [50, 100, 200],
-            'reg_alpha': [1.1, 1.2, 1.3],
-            'reg_lambda': [1.1, 1.2, 1.3],
-            'min_split_gain': [0.3, 0.4],
-            'subsample': [0.7, 0.8, 0.9],
-            'subsample_freq': [20]
+            'num_leaves': [50, 100, 200]
         }
         lgbm = LGBMClassifier(boosting_type='gbdt', objective='binary', random_state=42)
         lgbm_cv = GridSearchCV(lgbm, param_grid, n_jobs=-1, cv=5, scoring='roc_auc')
@@ -125,7 +120,7 @@ def model_building(model_name, X, y):
         print(pipeline_optimizer.score(X_test, y_test))  # print scoring for the pipeline
         pipeline_optimizer.export('tpot_exported_pipeline.py')  # export the pipeline - in Python code!
         return None
-    
+
 if __name__ == "__main__":
      model_list = ['knn', 'rf', 'xgboost', 'lightgbm']
      preprocessing_ind = True
