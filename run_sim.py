@@ -10,10 +10,10 @@ def run_sim(file_path, true_means, true_vars=None, dist_type='Normal', xi=0.8):
 
     estimator_list=['aipw', 'eval_aipw', 'ipw']
 
-    sim = BanditSimulation(num_ite=1, arm_means=true_means,
+    sim = BanditSimulation(num_ite=100, arm_means=true_means,
                            arm_vars=true_vars,
                            eps_inf=0.2,
-                           horizon=20000,
+                           horizon=23000,
                            alg_list=alg_list,
                            estimator_list=None,
                            mse_calc=False,
@@ -29,8 +29,8 @@ def run_sim(file_path, true_means, true_vars=None, dist_type='Normal', xi=0.8):
 if __name__ == '__main__':
     meta_analysis = False
     normal_analysis = False
-    regret_order = False
-    xi_analysis = True
+    regret_order = True
+    xi_analysis = False
     if meta_analysis:
         num_meta_ite = 100
         ref_lis = []
@@ -48,7 +48,7 @@ if __name__ == '__main__':
     if regret_order:
         true_means = [0.25, 1.82, 1.48, 2.25, 2]
         true_vars = [2.84, 1.97, 2.62, 1, 2.06]
-        a = run_sim('analysis/output/wise_regret_analysis.csv', true_means, true_vars=true_vars, dist_type='Normal')
+        a = run_sim('analysis/output/wise_regret_analysis_100.csv', true_means, true_vars=true_vars, dist_type='Normal')
     if xi_analysis:
         true_means = [0.25, 1.82, 1.48, 2.25, 2]
         true_vars = [2.84, 1.97, 2.62, 1, 2.06]
