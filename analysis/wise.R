@@ -39,10 +39,10 @@ df <- group_outcome %>% filter(ite==0)
 
 
 
-grp = ggplot(df) + geom_point(aes(x=x, y=factor(group)), shape=1, alpha=0.6) +
+grp <- ggplot(df) + geom_point(aes(x=x, y=factor(group)), shape=1, alpha=0.6) +
   facet_grid(alg ~.) +
   labs(x='Time Period', y = 'Arm') +
-  theme(axis.text.y = element_text(size = rel(0.7)))  +  theme_bw() + 
+  theme(axis.text.y = element_text(size = rel(0.7)))  +  theme_bw() 
   #ggsave("grp.png", dpi=400, height = 4, width=8, scale = 0.8)
 
 
@@ -50,11 +50,11 @@ df_regret = regret_mse %>% filter(ite==0)
 
 
 reg <- ggplot(df_regret, aes(x=x, y=regret)) + geom_line(aes(color=alg)) +
-  xlim(0,2300) +
+  xlim(0,2400) +
   geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) + theme_minimal() + 
   theme(legend.position = "none") + 
-  labs(x='Time Period', y = 'Regret') 
-  #ggsave("wise_reg.png", dpi=400, height = 4, width=8, scale = 0.8)
+  labs(x='Time Period', y = 'Regret') +
+  ggsave("wise_reg.png", dpi=400, height = 4, width=8, scale = 0.8)
 
 
 

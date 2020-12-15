@@ -4,21 +4,21 @@ import time
 import pandas as pd
 
 
-def run_sim(file_path, true_means, true_vars=None, dist_type='Normal'):
+def run_sim(file_path, true_means, true_vars=None, dist_type='Normal', xi=0.8):
     start_time = time.time()
-    alg_list=['thomp', 'thomp_inf']
+    alg_list=['thomp_inf']
 
     estimator_list=['aipw', 'eval_aipw', 'ipw']
 
     sim = BanditSimulation(num_ite=1, arm_means=true_means,
                            arm_vars=true_vars,
                            eps_inf=0.2,
-                           horizon=2000000,
+                           horizon=20000,
                            alg_list=alg_list,
                            estimator_list=None,
                            mse_calc=False,
                            agg=False,
-                           xi=0.8,
+                           xi=xi,
                            cap_prop=True,
                            dist_type=dist_type,
                            output_file_path=file_path)
@@ -29,7 +29,8 @@ def run_sim(file_path, true_means, true_vars=None, dist_type='Normal'):
 if __name__ == '__main__':
     meta_analysis = False
     normal_analysis = False
-    regret_order = True
+    regret_order = False
+    xi_analysis = True
     if meta_analysis:
         num_meta_ite = 100
         ref_lis = []
@@ -48,3 +49,10 @@ if __name__ == '__main__':
         true_means = [0.25, 1.82, 1.48, 2.25, 2]
         true_vars = [2.84, 1.97, 2.62, 1, 2.06]
         a = run_sim('analysis/output/wise_regret_analysis.csv', true_means, true_vars=true_vars, dist_type='Normal')
+    if xi_analysis:
+        true_means = [0.25, 1.82, 1.48, 2.25, 2]
+        true_vars = [2.84, 1.97, 2.62, 1, 2.06]
+        xi = [0.6, 0.8, 1, 1.2, 1.4]
+        for x in xi:
+            f_path = 'analysis/output/xi_analysis' + str(x) + '.csv'
+            a = run_sim(f_path, true_means, true_vars=true_vars, dist_type='Normal', xi=x)
