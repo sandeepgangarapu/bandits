@@ -46,7 +46,7 @@ grp = ggplot(df) + geom_point(aes(x=x, y=factor(group)), shape=1, alpha=0.6) +
   #ggsave("grp.png", dpi=400, height = 4, width=8, scale = 0.8)
 
 
-df_regret <- regret_mse %>% filter(ite==0)
+df_regret = regret_mse %>% filter(ite==0)
 
 
 reg <- ggplot(df_regret, aes(x=x, y=regret)) + geom_line(aes(color=alg)) +
