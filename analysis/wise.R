@@ -5,6 +5,7 @@ suppressPackageStartupMessages(
     library(tidyr)
   })
 require(gridExtra)
+require(directlabels)
 
 
 setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")

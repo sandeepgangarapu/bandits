@@ -25,8 +25,8 @@ df5[, `:=`(xi=1.4, x= seq_len(.N))]
 main_df <- rbind(df1, df2, df3, df4, df5)
 
 ggplot(main_df, aes(x=x, y=regret)) + geom_line(aes(color=factor(xi))) +
-  xlim(0,2400) +
-  geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) + theme_minimal() + 
+  xlim(0,22000) +
+  geom_dl(aes(label=xi), method=list('last.points', cex=0.5)) + theme_minimal() + 
   theme(legend.position = "none") + 
   labs(x='Time Period', y = 'Regret') +
   ggsave("xi_analysis.png", dpi=400, height = 4, width=8, scale = 0.8)

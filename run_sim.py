@@ -6,18 +6,18 @@ import pandas as pd
 
 def run_sim(file_path, true_means, true_vars=None, dist_type='Normal', xi=0.8):
     start_time = time.time()
-    alg_list=['thomp_inf']
+    alg_list=['ab', 'thomp', 'thomp_inf']
 
     estimator_list=['aipw', 'eval_aipw', 'ipw']
 
     sim = BanditSimulation(num_ite=100, arm_means=true_means,
                            arm_vars=true_vars,
                            eps_inf=0.2,
-                           horizon=23000,
+                           horizon=20000,
                            alg_list=alg_list,
-                           estimator_list=None,
+                           estimator_list=estimator_list,
                            mse_calc=False,
-                           agg=False,
+                           agg=True,
                            xi=xi,
                            cap_prop=True,
                            dist_type=dist_type,
@@ -27,9 +27,9 @@ def run_sim(file_path, true_means, true_vars=None, dist_type='Normal', xi=0.8):
     return true_means, true_vars
 
 if __name__ == '__main__':
-    meta_analysis = False
+    meta_analysis = True
     normal_analysis = False
-    regret_order = True
+    regret_order = False
     xi_analysis = False
     if meta_analysis:
         num_meta_ite = 100
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     if normal_analysis:
         true_means = [0.25, 1.82, 1.48, 2.25, 2]
         true_vars = [2.84, 1.97, 2.62, 1, 2.06]
-        a = run_sim('analysis/output/wise_mse_graph.csv', true_means, true_vars=true_vars, dist_type='Normal')
+        a = run_sim('analysis/output/agg_analysis_default_100_20000.csv', true_means, true_vars=true_vars, dist_type='Normal')
     if regret_order:
         true_means = [0.25, 1.82, 1.48, 2.25, 2]
         true_vars = [2.84, 1.97, 2.62, 1, 2.06]
