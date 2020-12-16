@@ -27,8 +27,8 @@ def run_sim(file_path, true_means, true_vars=None, dist_type='Normal', xi=0.8):
     return true_means, true_vars
 
 if __name__ == '__main__':
-    meta_analysis = True
-    normal_analysis = False
+    meta_analysis = False
+    normal_analysis = True
     regret_order = False
     xi_analysis = False
     if meta_analysis:

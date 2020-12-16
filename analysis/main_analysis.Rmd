@@ -10,13 +10,14 @@ output: html_document
 suppressPackageStartupMessages(
   {
     library(ggplot2)
-    library(dplyr)
-    library(tidyr)
+    library(data.table)
+    require(gridExtra)
+    require(directlabels)
   })
 ```
 
 
-# Load
+# Load data
 
 ```{r echo=FALSE, cache=FALSE, warning=FALSE}
 
@@ -24,203 +25,16 @@ setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")
 
 
 
-data <- read.csv("sim_weighed_1000_500_3.csv") %>% drop_na() %>%
-  filter(mean_est != -Inf) %>% filter(mean_est != Inf)
-
-
-seed_algs <- c("ab", "ucb", "thomp")
-inf_algs <- c("thomp_inf")
+seed_algs <- c("ab", "thomp", "thomp_inf")
 est_algs <- c("thomp_ipw", "thomp_aipw", "thomp_eval_aipw",
               "thomp_inf_ipw", "thomp_inf_aipw", "thomp_inf_eval_aipw")
-thomp_algs <- c( "thomp", "thomp_inf")
-thomp_est_algs <- est_algs
-all_thomp <- c(thomp_est_algs, thomp_algs)
-ucb_algs <- c("ucb")
-adv_algs <- c(thomp_algs, ucb_algs)
 
 
-# group_outcome <- data  %>%  filter(alg %in% c(seed_algs, inf_algs)) %>%
-#   select(alg, group, ite, outcome) %>%
-#   group_by(ite,alg) %>% mutate(x=row_number()) %>%
-#   ungroup()
 
-# 
-# weighed_means <- data %>%  filter(alg %in% est_algs) %>%
-#   select(alg, ite, group, mean_est) %>% 
-#   group_by(ite,alg, group) %>%
-#   mutate(x=row_number(), y= max(row_number())) %>%
-#   ungroup() %>% filter(x==y) %>% select(-c(x,y)) %>% rename(mn = mean_est)
-# 
-#  means <- group_outcome  %>% group_by(group, alg, ite) %>%
-#   summarise(mn = mean(outcome)) %>% ungroup()
-# 
-# 
-# all_means <- rbind(means, weighed_means)
+data <- fread("wise_regret_analysis_100.csv")
+data <- data[complete.cases(data),]
 
-means <- data %>% mutate(mn = mean_est)
+
 
 
 ```
-
-## Thompson Sampling based algorithms
-
-In thompson sampling we can accurately calculate propensities using monte carlo simulation during posterior calculation process. In this analysis we calculate bias of both thompson sampling algorithm and inference version of it (thomp_inf)
-
-
-### Bias and variance of the Best arm
-
-```{r echo=FALSE, cache=FALSE, warning=FALSE}
-
-# Bias of the Best arm
-
-
-best <- means %>% filter(alg %in% adv_algs) %>% filter(group==which.max(true_means)-1) %>% 
-  mutate(bias = mn-max(true_means)) %>% group_by(alg) %>%
-  summarise(Bias = mean(bias), se = sd(bias)/sqrt(n()))
-
-ylimit <- max(abs(c(best$Bias + qnorm(0.975)*best$se, best$Bias - qnorm(0.975)*best$se)))
-ylimit <- 1.5*ylimit
-
-ggplot(best, aes(x=reorder(alg, abs(Bias)), y=Bias)) + geom_bar(stat="identity") +
-  geom_errorbar(aes(ymin=Bias-qnorm(0.975)*se, ymax=Bias+qnorm(0.975)*se), width=0.2) +
-  theme_bw()  + ylim(-ylimit, ylimit) + theme(axis.title.x=element_blank()) +
-  geom_hline(yintercept = 0) + labs(title = "Bias of best arm") +
-  theme(axis.text.x = element_text(angle = 90)) 
-
-best <- means %>% filter(alg %in% adv_algs) %>% filter(group==which.max(true_means)-1) %>% 
-  group_by(alg) %>%  summarise(var = var(mn))
-
-ylimit <- max(best$var)
-ylimit <- 1.5*ylimit
-
-ggplot(best, aes(x=reorder(alg, abs(var)), y=var)) + geom_bar(stat="identity") +
-  theme_bw()  + ylim(-ylimit, ylimit) + theme(axis.title.x=element_blank()) +
-  geom_hline(yintercept = 0) + labs(title = "Var of best arm") +
-  theme(axis.text.x = element_text(angle = 90)) 
-
-
-```
-
-
-
-### Bias and Variance of the Worst arm
-
-```{r echo=FALSE, cache=FALSE, warning=FALSE}
-
-
-worst <- means %>% filter(alg %in% adv_algs) %>% filter(group==which.min(true_means)-1) %>% 
-  mutate(bias = mn-min(true_means)) %>% group_by(alg) %>%
-  summarise(Bias = mean(bias), se = sd(bias)/sqrt(n()))
-
-ylimit <- max(abs(c(worst$Bias + qnorm(0.975)*worst$se, worst$Bias - qnorm(0.975)*worst$se)))
-ylimit <- 1.5*ylimit
-
-ggplot(worst, aes(x=reorder(alg, abs(Bias)), y=Bias)) + geom_bar(stat="identity") +
-  geom_errorbar(aes(ymin=Bias-qnorm(0.975)*se, ymax=Bias+qnorm(0.975)*se), width=0.2) +
-  theme_bw()  + ylim(-ylimit, ylimit) + theme(axis.title.x=element_blank()) +
-  geom_hline(yintercept = 0) + labs(title = "Bias of Worst arm") + theme(axis.text.x = element_text(angle = 90)) 
-
-
-
-worst <- means %>% filter(alg %in% adv_algs) %>% filter(group==which.min(true_means)-1) %>% 
-  group_by(alg) %>%  summarise(var = var(mn))
-
-ylimit <- max(worst$var)
-ylimit <- 1.5*ylimit
-
-ggplot(worst, aes(x=reorder(alg, abs(var)), y=var)) + geom_bar(stat="identity") +
-  theme_bw()  + ylim(-ylimit, ylimit) + theme(axis.title.x=element_blank()) +
-  geom_hline(yintercept = 0) + labs(title = "Var of Worst arm") +
-  theme(axis.text.x = element_text(angle = 90)) 
-
-```
-
-
-
-thomp_inf_eps reduces the bias of the worst arm but thompson sampling algorithm is still biased
-
-
-
-## Weighing algorithms
-
-Weighing algorithms like IPW (Inverse propensity weighed) and AIPW (Augmented Inverse propensity weighed) correct for this bias by inversely weighing the outcome estimate with propensity of picking the arm.
-
-We now empirically check whether Bias is 0 for these estimates
-
-
-
-### Bias and Variance of the Best arm
-
-```{r echo=FALSE, cache=FALSE, warning=FALSE}
-
-# Bias of the Best arm
-
-
-best <- means %>% filter(alg %in% all_thomp) %>% filter(group==which.max(true_means)-1) %>% 
-  mutate(bias = mn-max(true_means)) %>% group_by(alg) %>%
-  summarise(Bias = mean(bias), se = sd(bias)/sqrt(n()))
-
-ylimit <- max(abs(c(best$Bias + qnorm(0.975)*best$se, best$Bias - qnorm(0.975)*best$se)))
-ylimit <- 1.5*ylimit
-
-ggplot(best, aes(x=reorder(alg, abs(Bias)), y=Bias)) + geom_bar(stat="identity") +
-  geom_errorbar(aes(ymin=Bias-qnorm(0.975)*se, ymax=Bias+qnorm(0.975)*se), width=0.2) +
-  theme_bw()  + ylim(-ylimit, ylimit) + theme(axis.title.x=element_blank()) +
-  geom_hline(yintercept = 0) + labs(title = "Bias of best arm") +
-  theme(axis.text.x = element_text(angle = 90)) 
-
-
-best <- means %>% filter(alg %in% all_thomp) %>% filter(group==which.max(true_means)-1) %>% 
-  group_by(alg) %>%  summarise(var = var(mn))
-
-ylimit <- max(best$var)
-ylimit <- 1.5*ylimit
-
-ggplot(best, aes(x=reorder(alg, abs(var)), y=var)) + geom_bar(stat="identity") +
-  theme_bw()  + ylim(-ylimit, ylimit) + theme(axis.title.x=element_blank()) +
-  geom_hline(yintercept = 0) + labs(title = "Var of best arm") +
-  theme(axis.text.x = element_text(angle = 90)) 
-
-```
-
-
-
-### Bias of the Worst arm
-
-```{r echo=FALSE, cache=FALSE, warning=FALSE}
-
-
-worst <- means %>% filter(alg %in% all_thomp) %>% filter(group==which.min(true_means)-1) %>% 
-  mutate(bias = mn-min(true_means)) %>% group_by(alg) %>%
-  summarise(Bias = mean(bias), se = sd(bias)/sqrt(n()))
-
-ylimit <- max(abs(c(worst$Bias + qnorm(0.975)*worst$se, worst$Bias - qnorm(0.975)*worst$se)))
-ylimit <- 1.5*ylimit
-
-ggplot(worst, aes(x=reorder(alg, abs(Bias)), y=Bias)) + geom_bar(stat="identity") +
-  geom_errorbar(aes(ymin=Bias-qnorm(0.975)*se, ymax=Bias+qnorm(0.975)*se), width=0.2) +
-  theme_bw()  + ylim(-ylimit, ylimit) + theme(axis.title.x=element_blank()) +
-  geom_hline(yintercept = 0) + labs(title = "Bias of Worst arm") + theme(axis.text.x = element_text(angle = 90)) 
-
-
-
-worst <- means %>% filter(alg %in% all_thomp) %>% filter(group==which.min(true_means)-1) %>% 
-  group_by(alg) %>%  summarise(var = var(mn))
-
-ylimit <- max(worst$var)
-ylimit <- 1.5*ylimit
-
-ggplot(worst, aes(x=reorder(alg, abs(var)), y=var)) + geom_bar(stat="identity") +
-  theme_bw()  + ylim(-ylimit, ylimit) + theme(axis.title.x=element_blank()) +
-  geom_hline(yintercept = 0) + labs(title = "Var of Worst arm") +
-  theme(axis.text.x = element_text(angle = 90)) 
-
-
-
-```
-
-
-IPW and AIPW estimates correct for the bias but increase variance. This is as intended due to theoretical properties of those estimates.
-
-
-
