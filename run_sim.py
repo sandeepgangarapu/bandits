@@ -10,10 +10,10 @@ def run_sim(file_path, true_means, true_vars=None, dist_type='Normal', xi=0.8):
 
     estimator_list=['aipw', 'eval_aipw', 'ipw']
 
-    sim = BanditSimulation(num_ite=10, arm_means=true_means,
+    sim = BanditSimulation(num_ite=100, arm_means=true_means,
                            arm_vars=true_vars,
                            eps_inf=0.2,
-                           horizon=200,
+                           horizon=2000,
                            alg_list=alg_list,
                            estimator_list=None,
                            mse_calc=True,
@@ -48,11 +48,11 @@ if __name__ == '__main__':
         true_vars = [2.84, 1.97, 2.62, 1, 2.06]
         a = run_sim('analysis/output/agg_analysis_default_100_20000.csv', true_means, true_vars=true_vars, dist_type='Normal')
     if hsn:
-        true_means = [1, 2, 3]
+        true_means = [1, 1.1, 1.2]
         true_vars = [1/3, 1/3, 1/3]
         run_sim('analysis/output/non_agg_hsn_100_2000.csv', true_means, true_vars=true_vars, dist_type='HSN')
     if lsn:
-        true_means = [1, 2, 3]
+        true_means = [1, 1.5, 2]
         true_vars = [1/3, 1/3, 1/3]
         run_sim('analysis/output/non_agg_lsn_100_2000.csv', true_means, true_vars=true_vars, dist_type='LSN')
     if regret_order:

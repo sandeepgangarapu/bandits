@@ -44,10 +44,8 @@ class Bandit:
         if self.dist_type == "Normal":
             # Generate reward from that arm
             reward = np.random.normal(self.arm_means[arm_num], sqrt(self.arm_vars[arm_num]))
-        if self.dist_type == "HSN":
-            reward = 0.5 * self.arm_means[arm_num] + 0.5 + np.random.uniform(-1, 1)
-        if self.dist_type == "LSN":
-            reward = 0.1 * self.arm_means[arm_num] + 0.9 + np.random.uniform(-1, 1)
+        if self.dist_type == "HSN" or self.dist_type == "LSN":
+            reward = self.arm_means[arm_num]+ np.random.uniform(-1, 1)
         # Do all updates after the arm is pulled
 
         if prop_lis is not None:
