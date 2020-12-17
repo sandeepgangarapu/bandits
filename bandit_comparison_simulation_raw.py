@@ -149,6 +149,8 @@ class BanditSimulation:
         if alg == 'ucb_inf_eps':
             ucb_inf_eps(bandit, self.horizon, xi=self.xi, type_of_pull=self.type_of_pull)
         if alg == 'thomp':
+            thompson_sampling(bandit, self.horizon, type_of_pull=self.type_of_pull, cap_prop=False)
+        if alg == 'thomp_athey':
             thompson_sampling(bandit, self.horizon, type_of_pull=self.type_of_pull, cap_prop=self.cap_prop)
         if alg == 'thomp_inf':
             thomp_inf(bandit, self.horizon, xi=self.xi, type_of_pull=self.type_of_pull, cap_prop=self.cap_prop)

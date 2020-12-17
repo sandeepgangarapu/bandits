@@ -16,14 +16,17 @@ suppressPackageStartupMessages(
   })
 ```
 
+# Setting global variables
 
-# Load data
 
 ```{r echo=FALSE, cache=FALSE, warning=FALSE}
 
-setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")
 
-
+# knobs for analysis
+group_allocations<-TRUE
+single_ite_reg <- TRUE
+xi_analysis <- TRUE
+reg_order_analysis <- TRUE
 
 seed_algs <- c("ab", "thomp", "thomp_inf")
 est_algs <- c("thomp_ipw", "thomp_aipw", "thomp_eval_aipw",
@@ -31,10 +34,338 @@ est_algs <- c("thomp_ipw", "thomp_aipw", "thomp_eval_aipw",
 
 
 
-data <- fread("wise_regret_analysis_100.csv")
-data <- data[complete.cases(data),]
-
-
+true_means <- c(0.25, 1.82, 1.48, 2.25, 2)
+true_vars = c(2.84, 1.97, 2.62, 1, 2.06)
+grp = c(0:(length(true_means)-1))
+true_df <- data.frame(grp, true_means, true_vars)
+true_df <- true_df %>% mutate(grp=factor(grp))
 
 
 ```
+
+# Loading data
+
+## Load non aggregate data data
+
+```{r echo=FALSE, cache=FALSE, warning=FALSE}
+
+setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")
+non_agg_data <- fread("non_agg_analysis_default_100_20000.csv")
+# remove NA's
+non_agg_data <- non_agg_data[complete.cases(non_agg_data),]
+non_agg_data <- non_agg_data[, alg := ifelse(alg=="ab", "ABTesting", ifelse(alg=="thomp","THOMP", ifelse(alg=="thomp_inf", "THOMP_INF", NA)))]
+
+group_outcome <- copy(non_agg_data)[, x:= seq_len(.N),.(ite,alg)][, .(alg, group, x, ite)]
+regret_mse <- copy(non_agg_data)[, x:= seq_len(.N),.(ite,alg)][, .(alg, regret, ite, mean_mse, var_mse, x)]
+
+```
+
+## Load aggregate data data
+
+```{r echo=FALSE, cache=FALSE, warning=FALSE}
+
+setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")
+agg_data <- fread("agg_analysis_default_100_20000.csv")
+agg_data <- agg_data[complete.cases(agg_data),][mean_est != -Inf | mean_est != Inf][, mn := mean_est]
+
+
+```
+
+
+
+# Group allocations
+
+
+```{r echo=FALSE, cache=FALSE, warning=FALSE, eval=group_allocations}
+
+
+xlimit <- max(group_outcome$x) + 500
+
+
+df <- copy(group_outcome)[ite==0,] 
+
+
+
+grp <- ggplot(df) + geom_point(aes(x=x, y=factor(group)), shape=1, alpha=0.6) +
+  facet_grid(alg ~.) +
+  labs(x='Time Period', y = 'Arm') +
+  theme(axis.text.y = element_text(size = rel(0.7)))  +  theme_bw() 
+  ggsave("grp.png", dpi=400, height = 4, width=8, scale = 0.8)
+
+
+```
+
+
+
+
+
+
+# Regret & MSE
+
+## Single ITE analysis
+```{r echo=FALSE, cache=FALSE, warning=FALSE, eval=single_ite_reg}
+
+df_regret =  copy(regret_mse)[ite==0,] 
+
+
+reg <- ggplot(df_regret, aes(x=x, y=regret)) + geom_line(aes(color=alg)) +
+  xlim(0,2400) +
+  geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) + theme_minimal() + 
+  theme(legend.position = "none") + 
+  labs(x='Time Period', y = 'Regret') +
+  ggsave("wise_reg.png", dpi=400, height = 4, width=8, scale = 0.8)
+
+
+df_mse <- copy(regret_mse)[, mse := mean_mse][, c('regret', 'var_mse', 'mean_mse'):=NULL][ite==0]
+
+
+mn <- ggplot(df_mse, aes(x=x, y=mse)) + geom_line(aes(color=alg)) +
+  xlim(0,2500) + ylim(0,1.15) +
+  geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) + theme_minimal() + 
+  theme(legend.position = "none") + 
+  labs(x='Time Period', y = 'MSE of Mean') 
+
+# ggsave("wise_mn.png", dpi=400, height = 5, width=10, scale = 0.8)
+
+
+df_mse <- copy(regret_mse)[, mse := var_mse][, c('regret', 'var_mse', 'mean_mse'):=NULL][ite==0]
+
+
+
+var <- ggplot(df_mse, aes(x=x, y=mse)) + geom_line(aes(color=alg)) +
+  xlim(0,2500) + ylim(0,1.8) +
+  geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) + theme_minimal() + 
+  theme(legend.position = "none") + 
+  labs(x='Time Period', y = 'MSE of Variance') 
+
+# ggsave("wise_mn.png", dpi=400, height = 5, width=10, scale = 0.8)
+
+par(mfrow = c(1,2))
+
+ggsave("wise_mn_var.png", arrangeGrob(mn, var, nrow = 1, ncol=2),
+       dpi=400, height = 4, width=10, scale = 0.8)
+
+
+```
+
+
+
+
+
+
+## Multiple ITE analysis
+```{r echo=FALSE, cache=FALSE, warning=FALSE, eval=single_ite_reg}
+
+df_regret = copy(regret_mse)[, .(regret = mean(regret), se = sd(regret)/sqrt(.N)),.(x, alg)]
+
+
+reg <- ggplot(df_regret, aes(x=x, y=regret)) + geom_line(aes(color=alg)) +
+  xlim(0,2400) + geom_ribbon(aes(ymin=regret-(1.96*se), ymax=regret+(1.96*se), group=alg), alpha=0.4,  fill="grey70") +
+  geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) + theme_minimal() + 
+  theme(legend.position = "none") + 
+  labs(x='Time Period', y = 'Regret') +
+  ggsave("wise_reg.png", dpi=400, height = 4, width=8, scale = 0.8)
+
+
+df_mse <- copy(regret_mse)[, mse := mean_mse][, c('regret', 'var_mse', 'mean_mse'):=NULL][, .(mse = mean(mse), se = sd(mse)/sqrt(.N)),.(x, alg)]
+
+
+mn <- ggplot(df_mse, aes(x=x, y=mse)) + geom_line(aes(color=alg)) +
+  xlim(0,2500) + ylim(0,1.15) + geom_ribbon(aes(ymin=mse-(1.96*se), ymax=mse+(1.96*se), group=alg), alpha=0.4,  fill="grey70") +
+  geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) + theme_minimal() + 
+  theme(legend.position = "none") + 
+  labs(x='Time Period', y = 'MSE of Mean') 
+
+# ggsave("wise_mn.png", dpi=400, height = 5, width=10, scale = 0.8)
+
+
+df_mse <- regret_mse[, mse := var_mse][, c('regret', 'var_mse', 'mean_mse'):=NULL][, .(mse = mean(mse), se = sd(mse)/sqrt(.N)),.(x, alg)]
+
+
+mn <- ggplot(df_mse, aes(x=x, y=mse)) + geom_line(aes(color=alg)) +
+  xlim(0,2500) + ylim(0,1.15) + geom_ribbon(aes(ymin=mse-(1.96*se), ymax=mse+(1.96*se), group=alg), alpha=0.4,  fill="grey70") +
+  geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) + theme_minimal() + 
+  theme(legend.position = "none") + 
+  labs(x='Time Period', y = 'MSE of Variance') 
+
+# ggsave("wise_mn.png", dpi=400, height = 5, width=10, scale = 0.8)
+
+par(mfrow = c(1,2))
+
+ggsave("wise_mn_var.png", arrangeGrob(mn, var, nrow = 1, ncol=2),
+       dpi=400, height = 4, width=10, scale = 0.8)
+
+
+```
+
+
+
+
+
+
+
+
+# Xi Analysis
+
+```{r echo=FALSE, cache=FALSE, warning=FALSE, eval=xi_analysis}
+
+setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")
+
+
+df1 <- fread("xi_analysis0.6.csv") 
+df2 <- fread("xi_analysis0.8.csv") 
+df3 <- fread("xi_analysis1.csv") 
+df4 <- fread("xi_analysis1.2.csv") 
+df5 <- fread("xi_analysis1.4.csv") 
+
+df1[, `:=`(xi=0.6, x= seq_len(.N))]
+df2[, `:=`(xi=0.8, x= seq_len(.N))]
+df3[, `:=`(xi=1, x= seq_len(.N))]
+df4[, `:=`(xi=1.2, x= seq_len(.N))]
+df5[, `:=`(xi=1.4, x= seq_len(.N))]
+
+
+main_df <- rbind(df1, df2, df3, df4, df5)
+
+
+# Setting new WD so that results are saved in different folder
+setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\plots")
+
+ggplot(main_df, aes(x=x, y=regret)) + geom_line(aes(color=factor(xi))) +
+  xlim(0,22000) +
+  geom_dl(aes(label=xi), method=list('last.points', cex=0.5)) + theme_minimal() + 
+  theme(legend.position = "none") + 
+  labs(x='Time Period', y = 'Regret') +
+  ggsave("xi_analysis.png", dpi=400, height = 4, width=8, scale = 0.8)
+
+
+```
+
+
+
+
+
+
+
+# Regret Order Analysis
+
+```{r echo=FALSE, cache=FALSE, warning=FALSE, eval=reg_order_analysis}
+
+
+setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")
+
+
+data <- fread("wise_regret_analysis_100.csv") 
+
+data <- data[, alg := ifelse(alg=="ab", "ABTesting", ifelse(alg=="thomp","THOMP", ifelse(alg=="thomp_inf", "THOMP_INF", NA)))]
+group_outcome <- data[, x:= seq_len(.N),.(ite,alg)][, .(alg, regret, x)][,regret:=mean(regret),.(alg, x)]
+group_outcome_thomp <- group_outcome[alg=='THOMP']
+group_outcome_thompinf <- group_outcome[alg=='THOMP_INF']
+
+
+logest <- lm(log(regret)~log(x),data=group_outcome_thompinf)
+summary(logest)
+
+
+logest <- lm(log(regret)~log(x),data=group_outcome_thomp)
+summary(logest)
+
+
+plot(log(group_outcome_thompinf$x), log(group_outcome_thompinf$regret))
+plot(log(group_outcome_thompinf$x), (group_outcome_thompinf$regret))
+plot(log(group_outcome_thomp$x), group_outcome_thomp$regret)
+plot(log(group_outcome_thomp$x), log(group_outcome_thomp$regret))
+
+
+```
+
+
+
+
+
+# Bias Analysis
+
+
+## Weighing algorithms
+
+Weighing algorithms like IPW (Inverse propensity weighed) and AIPW (Augmented Inverse propensity weighed) correct for this bias by inversely weighing the outcome estimate with propensity of picking the arm.
+
+We now empirically check whether Bias is 0 for these estimates
+
+
+
+### Bias and Variance of the Best arm
+
+```{r echo=FALSE, cache=FALSE, warning=FALSE}
+
+# Bias of the Best arm
+
+
+best <- agg_data[group==which.max(true_means)-1][,bias := mn-max(true_means)][, .(Bias = mean(bias), se = sd(bias)/sqrt(.N)),.(alg)]
+
+ylimit <- max(abs(c(best$Bias + qnorm(0.975)*best$se, best$Bias - qnorm(0.975)*best$se)))
+ylimit <- 1.5*ylimit
+
+ggplot(best, aes(x=reorder(alg, abs(Bias)), y=Bias)) + geom_bar(stat="identity") +
+  geom_errorbar(aes(ymin=Bias-qnorm(0.975)*se, ymax=Bias+qnorm(0.975)*se), width=0.2) +
+  theme_bw()  + ylim(-ylimit, ylimit) + theme(axis.title.x=element_blank()) +
+  geom_hline(yintercept = 0) + labs(title = "Bias of best arm") +
+  theme(axis.text.x = element_text(angle = 90)) 
+
+
+best <- agg_data[group==which.max(true_means)-1][,bias := mn-max(true_means)][, .(var = var(mn)),.(alg)]
+ 
+
+ylimit <- max(best$var)
+ylimit <- 1.5*ylimit
+
+ggplot(best, aes(x=reorder(alg, abs(var)), y=var)) + geom_bar(stat="identity") +
+  theme_bw()  + ylim(-ylimit, ylimit) + theme(axis.title.x=element_blank()) +
+  geom_hline(yintercept = 0) + labs(title = "Var of best arm") +
+  theme(axis.text.x = element_text(angle = 90)) 
+
+```
+
+
+
+### Bias and variance of the Worst arm
+
+```{r echo=FALSE, cache=FALSE, warning=FALSE}
+# Bias of the Best arm
+
+worst <- agg_data[group==which.min(true_means)-1][,bias := mn-min(true_means)][, .(Bias = mean(bias), se = sd(bias)/sqrt(.N)),.(alg)]
+
+ylimit <- max(abs(c(worst$Bias + qnorm(0.975)*worst$se, worst$Bias - qnorm(0.975)*worst$se)))
+ylimit <- 1.5*ylimit
+
+ggplot(worst, aes(x=reorder(alg, abs(Bias)), y=Bias)) + geom_bar(stat="identity") +
+  geom_errorbar(aes(ymin=Bias-qnorm(0.975)*se, ymax=Bias+qnorm(0.975)*se), width=0.2) +
+  theme_bw()  + ylim(-ylimit, ylimit) + theme(axis.title.x=element_blank()) +
+  geom_hline(yintercept = 0) + labs(title = "Bias of worst arm") +
+  theme(axis.text.x = element_text(angle = 90)) 
+
+
+worst <- agg_data[group==which.min(true_means)-1][,bias := mn-min(true_means)][, .(var = var(mn)),.(alg)]
+ 
+
+ylimit <- max(worst$var)
+ylimit <- 1.5*ylimit
+
+ggplot(worst, aes(x=reorder(alg, abs(var)), y=var)) + geom_bar(stat="identity") +
+  theme_bw()  + ylim(-ylimit, ylimit) + theme(axis.title.x=element_blank()) +
+  geom_hline(yintercept = 0) + labs(title = "Var of worst arm") +
+  theme(axis.text.x = element_text(angle = 90))
+
+
+```
+
+
+
+
+# Consistency of estimator
+
+
+
+# Normality of estimator
+
+

@@ -6,18 +6,18 @@ import pandas as pd
 
 def run_sim(file_path, true_means, true_vars=None, dist_type='Normal', xi=0.8):
     start_time = time.time()
-    alg_list=['ab', 'thomp', 'thomp_inf']
+    alg_list=['ab', 'thomp', 'thomp_athey', 'thomp_inf']
 
     estimator_list=['aipw', 'eval_aipw', 'ipw']
 
     sim = BanditSimulation(num_ite=100, arm_means=true_means,
                            arm_vars=true_vars,
                            eps_inf=0.2,
-                           horizon=20000,
+                           horizon=2000,
                            alg_list=alg_list,
-                           estimator_list=estimator_list,
-                           mse_calc=False,
-                           agg=True,
+                           estimator_list=None,
+                           mse_calc=True,
+                           agg=False,
                            xi=xi,
                            cap_prop=True,
                            dist_type=dist_type,
@@ -28,9 +28,11 @@ def run_sim(file_path, true_means, true_vars=None, dist_type='Normal', xi=0.8):
 
 if __name__ == '__main__':
     meta_analysis = False
-    normal_analysis = True
+    normal_analysis = False
     regret_order = False
     xi_analysis = False
+    hsn = True
+    lsn = True
     if meta_analysis:
         num_meta_ite = 100
         ref_lis = []
@@ -45,6 +47,12 @@ if __name__ == '__main__':
         true_means = [0.25, 1.82, 1.48, 2.25, 2]
         true_vars = [2.84, 1.97, 2.62, 1, 2.06]
         a = run_sim('analysis/output/agg_analysis_default_100_20000.csv', true_means, true_vars=true_vars, dist_type='Normal')
+    if hsn:
+        true_means = [1, 2, 3]
+        run_sim('analysis/output/non_agg_hsn_100_2000.csv', true_means, dist_type='HSN')
+    if lsn:
+        true_means = [1, 2, 3]
+        run_sim('analysis/output/non_agg_lsn_100_2000.csv', true_means, dist_type='LSN')
     if regret_order:
         true_means = [0.25, 1.82, 1.48, 2.25, 2]
         true_vars = [2.84, 1.97, 2.62, 1, 2.06]
