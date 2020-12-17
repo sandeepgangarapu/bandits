@@ -15,6 +15,7 @@ def power_analysis(arm_means, arm_vars, alpha=0.05, beta=0.1):
     num_arms = len(arm_means)
     effect_size_lis = []
     if arm_vars is None:
+        # variance of uniform distribution in (b-a)^2/12 if the dist is [-1, 1]
         arm_vars = [1/3 for i in range(num_arms)]
     for arm1 in range(num_arms):
         for arm2 in range(num_arms):
