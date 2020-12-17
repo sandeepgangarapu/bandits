@@ -14,6 +14,8 @@ def power_analysis(arm_means, arm_vars, alpha=0.05, beta=0.1):
     # find effect size of all arms
     num_arms = len(arm_means)
     effect_size_lis = []
+    if arm_vars is None:
+        arm_vars = [1/3 for i in range(num_arms)]
     for arm1 in range(num_arms):
         for arm2 in range(num_arms):
             if arm1 !=arm2:
