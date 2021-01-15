@@ -13,6 +13,7 @@ suppressPackageStartupMessages(
     library(data.table)
     require(gridExtra)
     require(directlabels)
+    require(rcompanion)
   })
 ```
 
@@ -32,12 +33,12 @@ seed_algs <- c("ab", "thomp", "thomp_inf")
 est_algs <- c("thomp_ipw", "thomp_aipw", "thomp_eval_aipw",
               "thomp_inf_ipw", "thomp_inf_aipw", "thomp_inf_eval_aipw")
 
-
-
 #true_means <- c(0.25, 1.82, 1.48, 2.25, 2)
 #true_vars = c(2.84, 1.97, 2.62, 1, 2.06)
 
-true_means <- c(1,2,3)
+true_means <- c(1,1.5,2)
+
+#true_means <- c(1, 1.1, 1.2)
 true_vars <- c(1/3, 1/3, 1/3)
 grp = c(0:(length(true_means)-1))
 true_df <- data.frame(grp, true_means, true_vars)
@@ -53,7 +54,7 @@ true_df <- true_df %>% mutate(grp=factor(grp))
 ```{r echo=FALSE, cache=FALSE, warning=FALSE}
 
 setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")
-non_agg_data <- fread("non_agg_hsn_100_2000.csv")
+non_agg_data <- fread("non_agg_analysis_default_100_20000.csv")
 # remove NA's
 non_agg_data <- non_agg_data[complete.cases(non_agg_data),]
 non_agg_data <- non_agg_data[, alg := ifelse(alg=="ab", "ABTesting", ifelse(alg=="thomp","THOMP", ifelse(alg=="thomp_inf", "THOMP_INF", ifelse(alg=="thomp_athey", "HADAD", NA))))]
@@ -68,9 +69,8 @@ regret_mse <- copy(non_agg_data)[, x:= seq_len(.N),.(ite,alg)][, .(alg, regret, 
 ```{r echo=FALSE, cache=FALSE, warning=FALSE}
 
 setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")
-agg_data <- fread("agg_hsn_100_2000.csv")
-agg_data <- agg_data[complete.cases(agg_data),][mean_est != -Inf | mean_est != Inf][, mn := mean_est][, alg := ifelse(alg=="ab", "ABTesting", ifelse(alg=="thomp","THOMP", ifelse(alg=="thomp_inf", "THOMP_INF", ifelse(alg=="thomp_athey", "HADAD", NA))))]
-
+agg_data <- fread("agg_lsn_100_20000.csv")
+agg_data <- agg_data[complete.cases(agg_data),][mean_est != -Inf | mean_est != Inf][, mn := mean_est]
 
 ```
 
@@ -85,13 +85,13 @@ agg_data <- agg_data[complete.cases(agg_data),][mean_est != -Inf | mean_est != I
 xlimit <- max(group_outcome$x) + 500
 
 
-df <- copy(group_outcome)[ite==0,] 
+df <- copy(group_outcome)[ite==0,] [x<2001]
 
 
 
-grp <- ggplot(df) + geom_point(aes(x=x, y=factor(group)), shape=1, alpha=0.6) +
+grp <- ggplot(df %>% filter(alg!='HADAD')) + geom_point(aes(x=x, y=factor(group)), shape=1, alpha=0.6) +
   facet_grid(alg ~.) +
-  labs(x='Time Period', y = 'Arm') +
+  labs(x='Time Period', y = 'Group') +
   theme(axis.text.y = element_text(size = rel(0.7)))  +  theme_bw() 
   ggsave("grp.png", dpi=400, height = 4, width=8, scale = 0.8)
 
@@ -124,7 +124,7 @@ df_mse <- copy(regret_mse)[, mse := mean_mse][, c('regret', 'var_mse', 'mean_mse
 
 
 mn <- ggplot(df_mse, aes(x=x, y=mse)) + geom_line(aes(color=alg)) +
-  xlim(0,2500) + ylim(0,1.15) +
+  xlim(0,2500) + ylim(0,0.03) +
   geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) + theme_minimal() + 
   theme(legend.position = "none") + 
   labs(x='Time Period', y = 'MSE of Mean') 
@@ -137,7 +137,7 @@ df_mse <- copy(regret_mse)[, mse := var_mse][, c('regret', 'var_mse', 'mean_mse'
 
 
 var <- ggplot(df_mse, aes(x=x, y=mse)) + geom_line(aes(color=alg)) +
-  xlim(0,2500) + ylim(0,1.8) +
+  xlim(0,2500) + ylim(0,0.01) +
   geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) + theme_minimal() + 
   theme(legend.position = "none") + 
   labs(x='Time Period', y = 'MSE of Variance') 
@@ -178,7 +178,7 @@ df_mse <- copy(regret_mse)[, mse := mean_mse][, c('regret', 'var_mse', 'mean_mse
 
 
 mn <- ggplot(df_mse, aes(x=x, y=mse)) + geom_line(aes(color=alg)) +
-  xlim(0,2500) + ylim(0,1.15) + geom_ribbon(aes(ymin=mse-(1.96*se), ymax=mse+(1.96*se), group=alg), alpha=0.4,  fill="grey70") +
+  xlim(0,2500) + ylim(0,0.03) + geom_ribbon(aes(ymin=mse-(1.96*se), ymax=mse+(1.96*se), group=alg), alpha=0.4,  fill="grey70") +
   geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) + theme_minimal() + 
   theme(legend.position = "none") + 
   labs(x='Time Period', y = 'MSE of Mean') + ggsave("wise_mn.png", dpi=400, height = 5, width=10, scale = 0.8)
@@ -189,7 +189,7 @@ df_mse <- copy(regret_mse)[, mse := var_mse][, c('regret', 'var_mse', 'mean_mse'
 
 
 var <- ggplot(df_mse, aes(x=x, y=mse)) + geom_line(aes(color=alg)) +
-  xlim(0,2500) + ylim(0,1.15) + geom_ribbon(aes(ymin=mse-(1.96*se), ymax=mse+(1.96*se), group=alg), alpha=0.4,  fill="grey70") +
+  xlim(0,2500) + ylim(0,0.03) + geom_ribbon(aes(ymin=mse-(1.96*se), ymax=mse+(1.96*se), group=alg), alpha=0.4,  fill="grey70") +
   geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) + theme_minimal() + 
   theme(legend.position = "none") + 
   labs(x='Time Period', y = 'MSE of Variance') + ggsave("wise_var.png", dpi=400, height = 5, width=10, scale = 0.8)
@@ -339,7 +339,7 @@ ggplot(best, aes(x=reorder(alg, abs(var)), y=var)) + geom_bar(stat="identity") +
 ```{r echo=FALSE, cache=FALSE, warning=FALSE}
 # Bias of the Best arm
 
-worst <- agg_data[group==which.min(true_means)-1][,bias := mn-min(true_means)][, .(Bias = mean(bias), se = sd(bias)/sqrt(.N)),.(alg)]
+worst <- agg_data[group==which.min(true_means)-1][,bias := mn-min(true_means)][, .(Bias = mean(bias), se = sd(bias)/sqrt(.N)),.(alg)][alg %in% c('ab', 'thomp', 'thom_inf', 'thomp_eval_aipw', 'thomp_inf_eval_aipw')]
 
 ylimit <- max(abs(c(worst$Bias + qnorm(0.975)*worst$se, worst$Bias - qnorm(0.975)*worst$se)))
 ylimit <- 1.5*ylimit
@@ -351,7 +351,7 @@ ggplot(worst, aes(x=reorder(alg, abs(Bias)), y=Bias)) + geom_bar(stat="identity"
   theme(axis.text.x = element_text(angle = 90)) 
 
 
-worst <- agg_data[group==which.min(true_means)-1][,bias := mn-min(true_means)][, .(var = var(mn)),.(alg)]
+worst <- agg_data[group==which.min(true_means)-1][,bias := mn-min(true_means)][, .(var = var(mn)),.(alg)][alg %in% c('ab', 'thomp', 'thom_inf', 'thomp_eval_aipw', 'thomp_inf_eval_aipw')]
  
 
 ylimit <- max(worst$var)
@@ -368,10 +368,214 @@ ggplot(worst, aes(x=reorder(alg, abs(var)), y=var)) + geom_bar(stat="identity") 
 
 
 
+
+# Hypothesis Testing
+```{r echo=FALSE, cache=FALSE, warning=FALSE, eval=group_allocations}
+
+
+setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")
+hyp_data <- copy(agg_data)[alg %in% c('ab', 'thomp_inf_eval_aipw', 'thomp_inf_eval_aipw_var', 'thomp_athey_eval_aipw', 'thomp_athey_eval_aipw')]
+
+
+data_0 <- hyp_data[group==1] 
+data_1 <- hyp_data[group==2]
+
+a <- data_0[data_0$alg=='thomp_eval_aipw_var', 'var_est']
+data_0[data_0$alg=='thomp_eval_aipw', 'var_est'] = a
+
+a <- data_0[data_0$alg=='thomp_inf_eval_aipw_var', 'var_est']
+data_0[data_0$alg=='thomp_inf_eval_aipw', 'var_est'] = a
+
+a <- data_1[data_1$alg=='thomp_eval_aipw_var', 'var_est']
+data_1[data_1$alg=='thomp_eval_aipw', 'var_est'] = a
+
+a <- data_1[data_1$alg=='thomp_inf_eval_aipw_var', 'var_est']
+data_1[data_1$alg=='thomp_inf_eval_aipw', 'var_est'] = a
+
+
+merged_data <- merge(data_0, data_1, by=c('ite','alg'))
+
+hyp <- merged_data[,`:=`(tval = (mean_est.y-mean_est.x)/(sqrt((var_est.x/arm_pull_tracker.x)+(var_est.y/arm_pull_tracker.y))), df = arm_pull_tracker.x+arm_pull_tracker.y-2)][,pval := dt(tval, df)][,test_pass := ifelse(pval<0.05, TRUE, FALSE)]
+
+final_results <- hyp[!grepl("var", alg) & test_pass !=TRUE][,.(cnt = .N, perc = .N/100),.(alg, test_pass)] 
+
+
+
+```
+
+
+
+
 # Consistency of estimator
 
 
 
 # Normality of estimator
 
+We Expect 
 
+* AB Testing - Best - Normal
+* AB Testing - Worst - Normal
+
+
+* Thompson Sampling - Best - Normal
+* Thompson Sampling - Worst - Not Normal
+
+
+## AB Testing
+
+```{r echo=FALSE, warning=FALSE}
+
+best_ab <- copy(agg_data)[group==which.max(true_means)-1 & alg=='ab']
+
+plotNormalHistogram(best_ab$mn, prob = TRUE, col = "gray",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50,
+                    main = "Mean estimates of Best Arm - AB")
+abline(v=3,  col="red")
+
+shapiro.test(best_ab$mn)
+
+worst_ab <- copy(agg_data)[group==which.min(true_means)-1 & alg=='ab']
+
+plotNormalHistogram(worst_ab$mn, prob = TRUE, col = "gray", main = "Mean estimates of Worst Arm - AB",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50)
+
+abline(v=2,  col="red")
+
+shapiro.test(worst_ab$mn)
+
+
+```
+
+## Thompson Sampling
+
+```{r echo=FALSE, warning=FALSE}
+
+best_thomp <- copy(agg_data)[group==which.max(true_means)-1 & alg=='thomp']
+
+plotNormalHistogram(best_thomp$mn, prob = TRUE, col = "gray",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50,
+                    main = "Mean estimates of Best Arm - THOMP")
+abline(v=2,  col="red")
+
+shapiro.test(best_thomp$mn)
+
+worst_thomp <- copy(agg_data)[group==which.min(true_means)-1 & alg=='thomp']
+
+plotNormalHistogram(worst_thomp$mn, prob = TRUE, col = "gray", main = "Mean estimates of Worst Arm - THOMP",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50)
+
+abline(v=1,  col="red")
+
+shapiro.test(worst_thomp$mn)
+```
+
+```{r echo=FALSE, warning=FALSE}
+
+best_thomp_ipw <- copy(agg_data)[group==which.max(true_means)-1 & alg=='thomp_ipw']
+
+plotNormalHistogram(best_thomp_ipw$mn, prob = TRUE, col = "gray",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50,
+                    main = "Mean estimates of Best Arm - THOMPIPW")
+
+abline(v=3,  col="red")
+
+shapiro.test(best_thomp_ipw$mn)
+
+worst_thomp_ipw <- copy(agg_data)[group==which.min(true_means)-1 & alg=='thomp_ipw']
+
+plotNormalHistogram(worst_thomp_ipw$mn, prob = TRUE, col = "gray", main = "Mean estimates of Worst Arm - THOMPIPW",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50)
+
+abline(v=2,  col="red")
+
+shapiro.test(worst_thomp_ipw$mn)
+```
+
+```{r echo=FALSE, warning=FALSE}
+
+best_thomp_eval_aipw <- copy(agg_data)[group==which.max(true_means)-1 & alg=='thomp_eval_aipw']
+
+plotNormalHistogram(best_thomp_eval_aipw$mn, prob = TRUE, col = "gray",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50,
+                    main = "Mean estimates of Best Arm - THOMP_EVAL")
+abline(v=3,  col="red")
+
+shapiro.test(best_thomp_eval_aipw$mn)
+
+worst_thomp_eval_aipw <- copy(agg_data)[group==which.min(true_means)-1 & alg=='thomp_eval_aipw']
+
+plotNormalHistogram(worst_thomp_eval_aipw$mn, prob = TRUE, col = "gray", main = "Mean estimates of Worst Arm - THOMP_EVAL",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50)
+
+abline(v=2,  col="red")
+
+shapiro.test(worst_thomp_eval_aipw$mn)
+```
+
+
+## Thompson Sampling INF
+
+```{r echo=FALSE, warning=FALSE}
+
+best_thomp_inf <- copy(agg_data)[group==which.max(true_means)-1 & alg=='thomp_inf']
+
+plotNormalHistogram(best_thomp_inf$mn, prob = TRUE, col = "gray",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50,
+                    main = "Mean estimates of Best Arm - THOMPINF")
+abline(v=3,  col="red")
+
+shapiro.test(best_thomp_inf$mn)
+
+worst_thomp_inf <- copy(agg_data)[group==which.min(true_means)-1 & alg=='thomp_inf']
+
+plotNormalHistogram(worst_thomp_inf$mn, prob = TRUE, col = "gray", main = "Mean estimates of Worst Arm - THOMPINF",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50)
+
+abline(v=1,  col="red")
+
+shapiro.test(worst_thomp_inf$mn)
+```
+
+```{r echo=FALSE, warning=FALSE}
+
+best_thomp_inf_ipw <- copy(agg_data)[group==which.max(true_means)-1 & alg=='thomp_inf_ipw']
+
+plotNormalHistogram(best_thomp_inf_ipw$mn, prob = TRUE, col = "gray",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50,
+                    main = "Mean estimates of Best Arm - THOMPINFIPW")
+abline(v=3,  col="red")
+
+shapiro.test(best_thomp_inf_ipw$mn)
+
+worst_thomp_inf_ipw <- copy(agg_data)[group==which.min(true_means)-1 & alg=='thomp_inf_ipw']
+
+plotNormalHistogram(worst_thomp_inf_ipw$mn, prob = TRUE, col = "gray", main = "Mean estimates of Worst Arm - THOMPINFIPW",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50)
+
+abline(v=2,  col="red")
+
+shapiro.test(worst_thomp_inf_ipw$mn)
+```
+
+```{r echo=FALSE, warning=FALSE}
+
+best_thomp_inf_eval_aipw <- copy(agg_data)[group==which.max(true_means)-1 & alg=='thomp_inf_eval_aipw']
+
+plotNormalHistogram(best_thomp_inf_eval_aipw$mn, prob = TRUE, col = "gray",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50,
+                    main = "Mean estimates of Best Arm - THOMPINFEVAL")
+abline(v=3,  col="red")
+
+shapiro.test(best_thomp_inf_eval_aipw$mn)
+
+worst_thomp_inf_eval_aipw <- copy(agg_data)[group==which.min(true_means)-1 & alg=='thomp_inf_eval_aipw']
+
+plotNormalHistogram(worst_thomp_inf_eval_aipw$mn, prob = TRUE, col = "gray", main = "Mean estimates of Worst Arm - THOMPINFEVAL",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50)
+
+abline(v=1,  col="red")
+
+shapiro.test(worst_thomp_inf_eval_aipw$mn)
+
+```

@@ -133,11 +133,13 @@ We Expect
 * Thompson Sampling - Best - Normal
 * Thompson Sampling - Worst - Not Normal
 
+The null hypothesis states that it follows Normal Distribution
 
+## AB Testing
 
 ```{r echo=FALSE, warning=FALSE}
 
-best_ab <- means %>%  filter(group==which.max(true_means)-1 & alg=='ab')
+best_ab <- copy(agg_data)[group==which.max(true_means)-1 & alg=='ab']
 
 plotNormalHistogram(best_ab$mn, prob = TRUE, col = "gray",
                     linecol = "blue", lwd = 2, length = 1000, breaks= 50,
@@ -146,14 +148,7 @@ abline(v=3,  col="red")
 
 shapiro.test(best_ab$mn)
 
-```
-
-Sample mean estimate of the best arm for AB testing follows Normal distribution.
-
-```{r echo=FALSE, warning=FALSE}
-worst_ab <- means %>%  filter(group==which.min(true_means)-1 & alg=='ab')
-
-
+worst_ab <- copy(agg_data)[group==which.min(true_means)-1 & alg=='ab']
 
 plotNormalHistogram(worst_ab$mn, prob = TRUE, col = "gray", main = "Mean estimates of Worst Arm - AB",
                     linecol = "blue", lwd = 2, length = 1000, breaks= 50)
@@ -162,205 +157,136 @@ abline(v=2,  col="red")
 
 shapiro.test(worst_ab$mn)
 
+
 ```
 
-
-Sample mean estimate of the worst arm for AB testing follows Normal distribution.
-
+## Thompson Sampling
 
 ```{r echo=FALSE, warning=FALSE}
 
+best_thomp <- copy(agg_data)[group==which.max(true_means)-1 & alg=='thomp']
 
-best_thomp <- means %>%  filter(group==which.max(true_means)-1 & alg=='thomp') 
-
-plotNormalHistogram(best_thomp$mn, prob = TRUE, col = "gray", 
-                    main = "Mean estimates of Best Arm - Thompson Sampling",
-                    linecol = "blue", lwd = 2, length = 1000, breaks= 50)
-
+plotNormalHistogram(best_thomp$mn, prob = TRUE, col = "gray",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50,
+                    main = "Mean estimates of Best Arm - THOMP")
 abline(v=3,  col="red")
 
 shapiro.test(best_thomp$mn)
 
-```
+worst_thomp <- copy(agg_data)[group==which.min(true_means)-1 & alg=='thomp']
 
-Sample mean estimate of the best arm for Thompson Sampling follows Normal distribution.
-
-
-```{r echo=FALSE, warning=FALSE}
-
-
-worst_thomp <- means %>%  filter(group==which.min(true_means)-1 & alg=='thomp') 
-
-plotNormalHistogram(worst_thomp$mn, prob = TRUE, col = "gray",
-                    main = "Mean estimates of Worst Arm - Thompson Sampling",
+plotNormalHistogram(worst_thomp$mn, prob = TRUE, col = "gray", main = "Mean estimates of Worst Arm - THOMP",
                     linecol = "blue", lwd = 2, length = 1000, breaks= 50)
-abline(v=2,  col="red")
 
+abline(v=2,  col="red")
 
 shapiro.test(worst_thomp$mn)
 ```
 
-Sample mean estimate of the worst arm for Thompson Sampling does not follow Normal distribution.
-
-
-# Bias and Normality of Thompson INF
-
-We expect the algorithm to be 
-
-* Thompson INF - Best arm - Unbiased and Normal
-* Thompson INF - Worst arm - Biased and Not Normal
-
 ```{r echo=FALSE, warning=FALSE}
 
-
-best <- means %>% filter(group==which.max(true_means)-1) %>%
-  filter (alg %in% c('thomp', 'thomp_inf_eps')) %>% 
-  mutate(bias = mn-max(true_means)) %>% group_by(alg) %>%
-  summarise(Bias = mean(bias), se = sd(bias)/sqrt(n()))
-
-ylimit <- 0.3
-
-ggplot(best, aes(x=reorder(alg, abs(Bias)), y=Bias)) + geom_bar(stat="identity") +
-  geom_errorbar(aes(ymin=Bias-qnorm(0.975)*se, ymax=Bias+qnorm(0.975)*se), width=0.2) +
-  theme_bw()  + ylim(-ylimit, ylimit) + theme(axis.title.x=element_blank()) +
-  geom_hline(yintercept = 0) + labs(title = "Bias of Best arm") +
-  theme(axis.text.x = element_text(angle = 90)) 
-
-
-best_thomp_inf_eps <- means %>%  filter(group==which.max(true_means)-1 & alg=='thomp_inf_eps') 
-
-plotNormalHistogram(best_thomp_inf_eps$mn, prob = TRUE, col = "gray",
-                    main = "Mean estimates of Best Arm - Thomp_Inf",
-                    linecol = "blue", lwd = 2, length = 1000, breaks= 50)
-
-abline(v=3,  col="red")
-
-shapiro.test(best_thomp_inf_eps$mn)
-```
-
-Sample mean estimate of the best arm for Thompson INF follows Normal distribution and is unbiased.
-
-```{r echo=FALSE, warning=FALSE}
-
-
-worst <- means %>% filter(group==which.min(true_means)-1) %>% 
-  filter (alg %in% c('thomp', 'thomp_inf_eps')) %>% 
-  mutate(bias = mn-min(true_means)) %>% group_by(alg) %>%
-  summarise(Bias = mean(bias), se = sd(bias)/sqrt(n()))
-
-
-ggplot(worst, aes(x=reorder(alg, abs(Bias)), y=Bias)) + geom_bar(stat="identity") +
-  geom_errorbar(aes(ymin=Bias-qnorm(0.975)*se, ymax=Bias+qnorm(0.975)*se), width=0.2) +
-  theme_bw()  + ylim(-ylimit, ylimit) + theme(axis.title.x=element_blank()) +
-  geom_hline(yintercept = 0) + labs(title = "Bias of Worst arm") + theme(axis.text.x = element_text(angle = 90)) 
-
-
-
-worst_thomp_inf_eps <- means %>%  filter(group==which.min(true_means)-1 & alg=='thomp_inf_eps') 
-
-plotNormalHistogram(worst_thomp_inf_eps$mn, prob = TRUE, col = "gray", 
-                    main = "Mean estimates of Worst Arm - Thomp_Inf",
-                    linecol = "blue", lwd = 2, length = 1000, breaks= 50)
-abline(v=2,  col="red")
-
-
-shapiro.test(worst_thomp_inf_eps$mn)
-```
-
-Sample mean estimate of the worst arm for Thompson INF does not follow Normal distribution and is biased.
-
-**The variance of the estimate is lower comapared to the original algorithm**
-
-
-# Weighed estimators
-
-We use IPW and AIPW estimators. We expect that the estimates will be unbiased but not sure about the normality of the estimates.
-
-```{r echo=FALSE, warning=FALSE}
-
-best <- weighed_means %>% filter(alg %in% c('thomp_ipw', 'thomp_aipw')) %>% filter(group==which.max(true_means)-1) %>% 
-  mutate(bias = mn-max(true_means)) %>% group_by(alg) %>%
-  summarise(Bias = mean(bias), se = sd(bias)/sqrt(n()))
-
-ylimit <- max(abs(c(best$Bias + qnorm(0.975)*best$se, best$Bias - qnorm(0.975)*best$se)))
-ylimit <- 0.3
-
-ggplot(best, aes(x=reorder(alg, abs(Bias)), y=Bias)) + geom_bar(stat="identity") +
-  geom_errorbar(aes(ymin=Bias-qnorm(0.975)*se, ymax=Bias+qnorm(0.975)*se), width=0.2) +
-  theme_bw()  + ylim(-ylimit, ylimit) + theme(axis.title.x=element_blank()) +
-  geom_hline(yintercept = 0) + labs(title = "Bias of best arm") +
-  theme(axis.text.x = element_text(angle = 90)) 
-
-
-best_thomp_ipw <- weighed_means %>%  filter(group==which.max(true_means)-1 & alg=='thomp_ipw') 
+best_thomp_ipw <- copy(agg_data)[group==which.max(true_means)-1 & alg=='thomp_ipw']
 
 plotNormalHistogram(best_thomp_ipw$mn, prob = TRUE, col = "gray",
-                    main = "Mean estimates of Best Arm - Thomp_IPW",
-                    linecol = "blue", lwd = 2, length = 1000, breaks= 50)
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50,
+                    main = "Mean estimates of Best Arm - THOMPIPW")
 abline(v=3,  col="red")
 
 shapiro.test(best_thomp_ipw$mn)
 
+worst_thomp_ipw <- copy(agg_data)[group==which.min(true_means)-1 & alg=='thomp_ipw']
 
-
-best_thomp_aipw <- weighed_means %>%  filter(group==which.max(true_means)-1 & alg=='thomp_aipw') 
-
-plotNormalHistogram(best_thomp_aipw$mn, prob = TRUE, col = "gray",
-                    main = "Mean estimates of Best Arm - Thomp_AIPW",
+plotNormalHistogram(worst_thomp_ipw$mn, prob = TRUE, col = "gray", main = "Mean estimates of Worst Arm - THOMPIPW",
                     linecol = "blue", lwd = 2, length = 1000, breaks= 50)
-abline(v=3,  col="red")
 
-shapiro.test(best_thomp_aipw$mn)
-
-
-```
-
-
-**For some reason, the weighed estimators of the best arm are negatively biased** but the normality is still maintained.
-
-```{r echo=FALSE, warning=FALSE}
-
-
-worst <- weighed_means %>% filter(alg %in% c('thomp_ipw', 'thomp_aipw')) %>% filter(group==which.min(true_means)-1) %>% 
-  mutate(bias = mn-min(true_means)) %>% group_by(alg) %>%
-  summarise(Bias = mean(bias), se = sd(bias)/sqrt(n()))
-
-ylimit <- max(abs(c(worst$Bias + qnorm(0.975)*worst$se, worst$Bias - qnorm(0.975)*worst$se)))
-ylimit <- 0.3
-
-ggplot(worst, aes(x=reorder(alg, abs(Bias)), y=Bias)) + geom_bar(stat="identity") +
-  geom_errorbar(aes(ymin=Bias-qnorm(0.975)*se, ymax=Bias+qnorm(0.975)*se), width=0.2) +
-  theme_bw()  + ylim(-ylimit, ylimit) + theme(axis.title.x=element_blank()) +
-  geom_hline(yintercept = 0) + labs(title = "Bias of Worst arm") + theme(axis.text.x = element_text(angle = 90)) 
-
-
-
-worst_thomp_ipw <- weighed_means %>%  filter(group==which.min(true_means)-1 & alg=='thomp_ipw') 
-
-plotNormalHistogram(worst_thomp_ipw$mn, prob = TRUE, col = "gray",
-                    main = "Mean estimates of Worst Arm - Thomp_AIPW",
-                    linecol = "blue", lwd = 2, length = 1000, breaks= 50)
 abline(v=2,  col="red")
 
 shapiro.test(worst_thomp_ipw$mn)
+```
 
+```{r echo=FALSE, warning=FALSE}
 
+best_thomp_eval_aipw <- copy(agg_data)[group==which.max(true_means)-1 & alg=='thomp_eval_aipw']
 
-worst_thomp_aipw <- weighed_means %>%  filter(group==which.min(true_means)-1 & alg=='thomp_aipw') 
+plotNormalHistogram(best_thomp_eval_aipw$mn, prob = TRUE, col = "gray",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50,
+                    main = "Mean estimates of Best Arm - THOMP")
+abline(v=3,  col="red")
 
-plotNormalHistogram(worst_thomp_aipw$mn, prob = TRUE, col = "gray",
-                    main = "Mean estimates of Worst Arm - Thomp_AIPW",
+shapiro.test(best_thomp_eval_aipw$mn)
+
+worst_thomp_eval_aipw <- copy(agg_data)[group==which.min(true_means)-1 & alg=='thomp_eval_aipw']
+
+plotNormalHistogram(worst_thomp_eval_aipw$mn, prob = TRUE, col = "gray", main = "Mean estimates of Worst Arm - THOMP",
                     linecol = "blue", lwd = 2, length = 1000, breaks= 50)
+
 abline(v=2,  col="red")
 
-shapiro.test(worst_thomp_aipw$mn)
-
-
-
+shapiro.test(worst_thomp_eval_aipw$mn)
 ```
 
 
-Worst arm estimate for IPW and AIPW are unbiased as expected but are not normal.
+## Thompson Sampling INF
 
+```{r echo=FALSE, warning=FALSE}
 
+best_thomp_inf <- copy(agg_data)[group==which.max(true_means)-1 & alg=='thomp_inf']
 
+plotNormalHistogram(best_thomp_inf$mn, prob = TRUE, col = "gray",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50,
+                    main = "Mean estimates of Best Arm - THOMP")
+abline(v=3,  col="red")
+
+shapiro.test(best_thomp_inf$mn)
+
+worst_thomp_inf <- copy(agg_data)[group==which.min(true_means)-1 & alg=='thomp_inf']
+
+plotNormalHistogram(worst_thomp_inf$mn, prob = TRUE, col = "gray", main = "Mean estimates of Worst Arm - THOMP",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50)
+
+abline(v=2,  col="red")
+
+shapiro.test(worst_thomp_inf$mn)
+```
+
+```{r echo=FALSE, warning=FALSE}
+
+best_thomp_inf_ipw <- copy(agg_data)[group==which.max(true_means)-1 & alg=='thomp_inf_ipw']
+
+plotNormalHistogram(best_thomp_inf_ipw$mn, prob = TRUE, col = "gray",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50,
+                    main = "Mean estimates of Best Arm - THOMPIPW")
+abline(v=3,  col="red")
+
+shapiro.test(best_thomp_inf_ipw$mn)
+
+worst_thomp_inf_ipw <- copy(agg_data)[group==which.min(true_means)-1 & alg=='thomp_inf_ipw']
+
+plotNormalHistogram(worst_thomp_inf_ipw$mn, prob = TRUE, col = "gray", main = "Mean estimates of Worst Arm - THOMPIPW",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50)
+
+abline(v=2,  col="red")
+
+shapiro.test(worst_thomp_inf_ipw$mn)
+```
+
+```{r echo=FALSE, warning=FALSE}
+
+best_thomp_inf_eval_aipw <- copy(agg_data)[group==which.max(true_means)-1 & alg=='thomp_inf_eval_aipw']
+
+plotNormalHistogram(best_thomp_inf_eval_aipw$mn, prob = TRUE, col = "gray",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50,
+                    main = "Mean estimates of Best Arm - THOMP")
+abline(v=3,  col="red")
+
+shapiro.test(best_thomp_inf_eval_aipw$mn)
+
+worst_thomp_inf_eval_aipw <- copy(agg_data)[group==which.min(true_means)-1 & alg=='thomp_inf_eval_aipw']
+
+plotNormalHistogram(worst_thomp_inf_eval_aipw$mn, prob = TRUE, col = "gray", main = "Mean estimates of Worst Arm - THOMP",
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 50)
+
+abline(v=2,  col="red")
+
+shapiro.test(worst_thomp_inf_eval_aipw$mn)
+```
