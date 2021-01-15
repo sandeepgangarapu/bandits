@@ -33,6 +33,7 @@ if __name__ == '__main__':
     xi_analysis = False
     hsn = True
     lsn = True
+    zsn = True
     if meta_analysis:
         num_meta_ite = 100
         ref_lis = []
@@ -47,14 +48,18 @@ if __name__ == '__main__':
         true_means = [0.25, 1.82, 1.48, 2.25, 2]
         true_vars = [2.84, 1.97, 2.62, 1, 2.06]
         a = run_sim('analysis/output/agg_analysis_default_100_20000.csv', true_means, true_vars=true_vars, dist_type='Normal')
-    if hsn:
+    if lsn:
         true_means = [1, 1.1, 1.2]
         true_vars = [1/3, 1/3, 1/3]
-        run_sim('analysis/output/non_agg_hsn_100_2000.csv', true_means, true_vars=true_vars, dist_type='HSN')
-    if lsn:
+        run_sim('analysis/output/non_agg_hsn_100_20000.csv', true_means, true_vars=true_vars, dist_type='HSN')
+    if hsn:
         true_means = [1, 1.5, 2]
         true_vars = [1/3, 1/3, 1/3]
-        run_sim('analysis/output/non_agg_lsn_100_2000.csv', true_means, true_vars=true_vars, dist_type='LSN')
+        run_sim('analysis/output/non_agg_lsn_100_20000.csv', true_means, true_vars=true_vars, dist_type='LSN')
+    if zsn:
+        true_means = [1, 1, 1]
+        true_vars = [1/3, 1/3, 1/3]
+        run_sim('analysis/output/non_agg_zsn_100_20000.csv', true_means, true_vars=true_vars, dist_type='ZSN')
     if regret_order:
         true_means = [0.25, 1.82, 1.48, 2.25, 2]
         true_vars = [2.84, 1.97, 2.62, 1, 2.06]
