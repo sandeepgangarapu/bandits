@@ -28,8 +28,11 @@ def power_analysis(arm_means, arm_vars, alpha=0.05, beta=0.1):
     min_effect_size = np.min(np.abs(effect_size_lis))
     # find sample size using power analysis if sample_size is none
     # this sample size is for 1 arm
-    sample_size = TTestIndPower().solve_power(effect_size=min_effect_size,
+    try:
+        sample_size = TTestIndPower().solve_power(effect_size=min_effect_size,
                                               power=1-beta, alpha=alpha)
+    except ValueError:
+        sample_size = 1000000
     sample_size = int(sample_size)
     return sample_size
 
@@ -56,6 +59,8 @@ def ab_testing(bandit, num_rounds, sample_size=None,
                           num_rounds_each)
 
     # simulating A/B testing
+    if sample_size > num_rounds_each:
+        sample_size = num_rounds_each
     for round in range(sample_size):
         for arm in range(bandit.num_arms):
             bandit.pull_arm(arm)
