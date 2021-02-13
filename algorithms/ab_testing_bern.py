@@ -70,7 +70,6 @@ def ab_testing_bern(bandit, num_rounds, sample_size=None,
         winning_arm = np.argmax(bandit.avg_reward_tracker)
         for round in range(remaining_rounds):
             bandit.pull_arm(winning_arm)
-    print(bandit.arm_pull_tracker)
     return bandit
 
 if __name__ == '__main__':

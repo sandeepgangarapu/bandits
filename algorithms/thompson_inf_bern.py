@@ -78,8 +78,6 @@ def thomp_inf_bern(bandit, num_rounds, xi=0.05, type_of_pull='single', cap_prop=
             # We calculate the posterior parameters of the beta distribution
             prior_params[chosen_arm][0] += x
             prior_params[chosen_arm][1] += 1 - x
-    print(var_allocs)
-    print(bandit.arm_pull_tracker)
     return bandit
 
 if __name__ == '__main__':

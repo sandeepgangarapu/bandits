@@ -38,7 +38,6 @@ def thompson_sampling_bern(bandit, num_rounds, type_of_pull='single', cap_prop=F
         # We calculate the posterior parameters of the beta distribution
         prior_params[chosen_arm][0] += x
         prior_params[chosen_arm][1] += 1-x
-    print(bandit.arm_pull_tracker)
     return bandit
 
 

@@ -4,16 +4,16 @@ import time
 import pandas as pd
 
 
-def run_sim(file_path, true_means, true_vars=None, dist_type='Normal', xi=0.8):
+def run_sim(file_path, true_means, true_vars=None, dist_type='Normal', xi=0.3):
     start_time = time.time()
-    alg_list=['ab', 'thomp', 'thomp_athey', 'thomp_inf']
+    alg_list=['ab_bern', 'thomp_bern', 'thomp_athey_bern', 'thomp_inf_bern']
 
     estimator_list=['aipw', 'eval_aipw', 'ipw']
 
-    sim = BanditSimulation(num_ite=100, arm_means=true_means,
+    sim = BanditSimulation(num_ite=20, arm_means=true_means,
                            arm_vars=true_vars,
                            eps_inf=0.2,
-                           horizon=2000,
+                           horizon=5000,
                            alg_list=alg_list,
                            estimator_list=None,
                            mse_calc=True,
@@ -31,9 +31,10 @@ if __name__ == '__main__':
     normal_analysis = False
     regret_order = False
     xi_analysis = False
-    hsn = True
-    lsn = True
-    zsn = True
+    bernoulli_analysis = True
+    hsn = False
+    lsn = False
+    zsn = False
     if meta_analysis:
         num_meta_ite = 100
         ref_lis = []
@@ -48,6 +49,10 @@ if __name__ == '__main__':
         true_means = [0.25, 1.82, 1.48, 2.25, 2]
         true_vars = [2.84, 1.97, 2.62, 1, 2.06]
         a = run_sim('analysis/output/agg_analysis_default_100_20000.csv', true_means, true_vars=true_vars, dist_type='Normal')
+    if bernoulli_analysis:
+        true_means = np.array([0.157, 0.178, 0.199, 0.146, 0.129])
+        true_vars = true_means*(1-true_means)
+        run_sim('analysis/output/non_agg_bern_20_5000.csv', true_means, true_vars=true_vars, dist_type='Bernoulli')
     if lsn:
         true_means = [1, 1.1, 1.2]
         true_vars = [1/3, 1/3, 1/3]
