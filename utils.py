@@ -72,7 +72,14 @@ def ucb_value_naive(num_arms, num_rounds, arm_pull_tracker,
     chosen_arm = np.argmax(ucb)
     return chosen_arm
 
-
+def ucb_value_1(num_arms, num_pulls_so_far, arm_pull_tracker,
+                avg_reward_tracker):
+    ucb = []
+    for arm in range(num_arms):
+        conf_interval = sqrt((2*log(num_pulls_so_far))/(arm_pull_tracker[arm]))
+        ucb.append(avg_reward_tracker[arm] + conf_interval)
+    chosen_arm = np.argmax(ucb)
+    return chosen_arm
 
 def lcb_value_naive(num_arms, num_rounds, arm_pull_tracker,
                     avg_reward_tracker):
@@ -154,6 +161,49 @@ def thompson_arm_pull(mean_lis, var_lis, type_of_pull='single', cap_prop=None):
         return chosen_arm, prop_score_lis
 
 
+def thompson_arm_pull_bern(param_lis, type_of_pull, cap_prop=None):
+    """
+        :param mean_lis: mean list of all arms
+        :param type_of_pull: either single pull or monte carlo pull
+        :param cap_prop: the value at which the propensity is capped
+        :return: if single pull, gives out only winning arm
+                 if monte carlo pull, gives out winning arm and prop_scores
+        """
+    num_arms = len(param_lis)
+    winning_arm = []
+    # we store all sampled values in this list
+    sample = []
+    # we sample each arm from the prior distribution
+    for arm in range(num_arms):
+        current_alpha = param_lis[arm][0]
+        current_beta = param_lis[arm][1]
+        sample.append(np.random.beta(current_alpha, current_beta))
+    # the arm that has the highest value of draw is selected
+    chosen_arm = np.argmax(sample)
+    winning_arm.append(chosen_arm)
+    if type_of_pull == 'single':
+        return chosen_arm
+    if type_of_pull == 'monte_carlo':
+        num_pulls = 20000
+        sample = []
+        for arm in range(num_arms):
+            current_alpha = param_lis[arm][0]
+            current_beta = param_lis[arm][1]
+            sample.append(np.random.beta(current_alpha, current_beta, num_pulls))
+        # the arm that has the highest value of draw is selected
+        winning_arm_lis = np.argmax(sample, axis=0)
+        arm_counter = Counter(winning_arm_lis)
+        prop_score_lis = []
+        for arm in range(num_arms):
+            prop_score_lis.append(float(arm_counter[arm] / len(winning_arm_lis)))
+        if cap_prop:
+            if np.min(prop_score_lis) < cap_prop:
+                # every arm gets cap propensity at the start, the remaining propensity is shared proportional to the
+                # true propensity
+                remaining_prop = 1 - (cap_prop * len(prop_score_lis))
+                prop_score_lis = cap_prop + (np.array(prop_score_lis) * remaining_prop)
+                chosen_arm = np.random.choice(range(num_arms), p=prop_score_lis)
+        return chosen_arm, prop_score_lis
 
 def bayesian_update(prior_params, x):
     """ m,k,v,s, are parameters of normal inverse chi squared distribution

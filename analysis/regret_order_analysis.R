@@ -20,6 +20,7 @@ logest <- lm(log(regret)~log(x),data=group_outcome_thompinf)
 summary(logest)
 
 
+
 logest <- lm(log(regret)~log(x),data=group_outcome_thomp)
 summary(logest)
 

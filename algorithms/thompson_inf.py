@@ -9,10 +9,11 @@ def calc_eps_n(bandit, xi):
         bandit.arm_pull_tracker)).sum()
     eta = sum_of_st_err / (bandit.num_arms * xi)
     eps_n = eta / (1 + eta)
+    print(eps_n)
     return eps_n
 
 
-def thomp_inf(bandit, num_rounds, xi=0.5, type_of_pull='single', cap_prop=False):
+def thomp_inf(bandit, num_rounds, xi=0.2, type_of_pull='single', cap_prop=False):
     print("---------------Running Thompson Sampling INF ---------------")
 
     # allocate one subject to each arm (We can remove this later rules)
@@ -109,7 +110,7 @@ def thomp_inf(bandit, num_rounds, xi=0.5, type_of_pull='single', cap_prop=False)
 
 if __name__ == '__main__':
     # Define bandit
-    num_rounds = 100
+    num_rounds = 1000
     thompson_inf_eps_bandit = Bandit(name='thompson_sampling',
                              arm_means=[1,2,3],
                              arm_vars=[1,1,1]
