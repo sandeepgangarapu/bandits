@@ -13,7 +13,7 @@ def run_sim(file_path, true_means, true_vars=None, dist_type='Normal', xi=0.05):
     sim = BanditSimulation(num_ite=62, arm_means=true_means,
                            arm_vars=true_vars,
                            eps_inf=0.2,
-                           horizon=5000,
+                           horizon=20000,
                            alg_list=alg_list,
                            estimator_list=None,
                            mse_calc=True,
@@ -23,7 +23,7 @@ def run_sim(file_path, true_means, true_vars=None, dist_type='Normal', xi=0.05):
                            dist_type=dist_type,
                            output_file_path=file_path)
     sim.run_simulation_multiprocessing()
-    print("--- %s seconds ---" % (time.time() - start_time))
+    print("--- %s mins ---" % ((time.time() - start_time)/60))
     return true_means, true_vars
 
 if __name__ == '__main__':
