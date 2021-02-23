@@ -227,31 +227,44 @@ var
 setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")
 
 
-df1 <- fread("xi_analysis0.6.csv") 
+df1 <- fread("xi_analysis0.5.csv") 
 df2 <- fread("xi_analysis0.8.csv") 
 df3 <- fread("xi_analysis1.csv") 
 df4 <- fread("xi_analysis1.2.csv") 
 df5 <- fread("xi_analysis1.4.csv") 
+df6 <- fread("xi_analysis0.2.csv")
+df7 <- fread("xi_analysis0.3.csv")
+df8 <- fread("xi_analysis0.01.csv")
+df9 <- fread("xi_analysis0.05.csv")
+df10 <- fread("xi_analysis0.1.csv")
+df11 <- fread("xi_analysis0.15.csv")
 
-df1[, `:=`(xi=0.6, x= seq_len(.N))]
+
+df1[, `:=`(xi=0.5, x= seq_len(.N))]
 df2[, `:=`(xi=0.8, x= seq_len(.N))]
 df3[, `:=`(xi=1, x= seq_len(.N))]
 df4[, `:=`(xi=1.2, x= seq_len(.N))]
 df5[, `:=`(xi=1.4, x= seq_len(.N))]
+df6[, `:=`(xi=0.2, x= seq_len(.N))] 
+df7[, `:=`(xi=0.3, x= seq_len(.N))] 
+df8[, `:=`(xi=0.01, x= seq_len(.N))] 
+df9[, `:=`(xi=0.05, x= seq_len(.N))] 
+df10[, `:=`(xi=0.1, x= seq_len(.N))]
+df11[, `:=`(xi=0.15, x= seq_len(.N))]
 
-
-main_df <- rbind(df1, df2, df3, df4, df5)
+main_df <- rbind(df1, df2, df3, df4, df5, df6, df7, df8, df9, df10, df11)
 
 
 # Setting new WD so that results are saved in different folder
 setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\plots")
 
 ggplot(main_df, aes(x=x, y=regret)) + geom_line(aes(color=factor(xi))) +
-  xlim(0,22000) +
+  xlim(0,12000) +
   geom_dl(aes(label=xi), method=list('last.points', cex=0.5)) + theme_minimal() + 
   theme(legend.position = "none") + 
-  labs(x='Time Period', y = 'Regret') +
-  ggsave("xi_analysis.png", dpi=400, height = 4, width=8, scale = 0.8)
+  labs(x='Time Period', y = 'Regret') 
+#+
+ # ggsave("xi_analysis.png", dpi=400, height = 4, width=8, scale = 0.8)
 
 
 ```

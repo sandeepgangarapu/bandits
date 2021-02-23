@@ -7,10 +7,11 @@ import pandas as pd
 def run_sim(file_path, true_means, true_vars=None, dist_type='Normal', xi=0.05):
     start_time = time.time()
     alg_list=['ab_bern', 'thomp_bern', 'thomp_athey_bern', 'thomp_inf_bern']
+    alg_list = ['thomp_inf_bern']
 
     estimator_list=['aipw', 'eval_aipw', 'ipw']
 
-    sim = BanditSimulation(num_ite=1, arm_means=true_means,
+    sim = BanditSimulation(num_ite=31, arm_means=true_means,
                            arm_vars=true_vars,
                            eps_inf=0.2,
                            horizon=10000,
@@ -72,7 +73,7 @@ if __name__ == '__main__':
     if xi_analysis:
         true_means = np.array([0.157, 0.178, 0.199, 0.146, 0.129])
         true_vars = true_means * (1 - true_means)
-        xi = [0.01, 0.05, 0.1, 0.15, 0.2, 0.3, 0.5, 0.8, 1, 1.2, 1.4]
+        xi = [0.01, 0.05, 0.1, 0.15, 0.2, 0.5, 0.8, 1.1, 1.5]
         for x in xi:
             f_path = 'analysis/output/xi_analysis' + str(x) + '.csv'
             run_sim(f_path, true_means, true_vars=true_vars, dist_type='Bernoulli', xi=x)
