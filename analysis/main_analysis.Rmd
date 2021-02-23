@@ -63,7 +63,7 @@ true_df <- true_df %>% mutate(grp=factor(grp))
 ```{r echo=FALSE, cache=FALSE, warning=FALSE}
 
 setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")
-non_agg_data <- fread("non_agg_bern_31_5000.csv")
+non_agg_data <- fread("non_agg_bern_62_5000.csv")
 # remove NA's
 non_agg_data <- non_agg_data[complete.cases(non_agg_data),]
 non_agg_data <- non_agg_data[, alg := ifelse(alg=="ab", "ABTesting", ifelse(alg=="thomp","THOMP", ifelse(alg=="thomp_inf", "THOMP_INF", ifelse(alg=="thomp_athey", "HADAD", ifelse(alg=="thomp_bern", "THOMP", ifelse(alg=="thomp_inf_bern", "THOMP_INF",ifelse(alg=="ab_bern", "AB", ifelse(alg=="thomp_athey_bern", "HADAD",'NONE'))))))))]
@@ -94,7 +94,7 @@ agg_data <- agg_data[complete.cases(agg_data),][mean_est != -Inf | mean_est != I
 xlimit <- max(group_outcome$x) + 500
 
 
-df <- copy(group_outcome)[ite==0,] [x<2001]
+df <- copy(group_outcome)[ite==5,] [x<2001]
 
 
 
