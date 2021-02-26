@@ -45,8 +45,11 @@ est_algs <- c("thomp_ipw", "thomp_aipw", "thomp_eval_aipw",
 
 
 # Bernoulli _means and vars
-true_means <- c(0.157, 0.178, 0.199, 0.146, 0.129)
-true_vars = c (0.132351, 0.146316, 0.159399, 0.124684, 0.112359)
+# true_means <- c(0.157, 0.178, 0.199, 0.146, 0.129)
+# true_vars = c (0.132351, 0.146316, 0.159399, 0.124684, 0.112359)
+
+true_means <- c(0.37098621, 0.33080171, 0.1699615 , 0.18902466, 0.6743146)
+true_vars = true_means**2
 
 
 grp = c(0:(length(true_means)-1))
@@ -63,7 +66,7 @@ true_df <- true_df %>% mutate(grp=factor(grp))
 ```{r echo=FALSE, cache=FALSE, warning=FALSE}
 
 setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")
-non_agg_data <- fread("non_agg_bern_62_5000.csv")
+non_agg_data <- fread("non_agg_bern_62_10000_2.csv")
 # remove NA's
 non_agg_data <- non_agg_data[complete.cases(non_agg_data),]
 non_agg_data <- non_agg_data[, alg := ifelse(alg=="ab", "ABTesting", ifelse(alg=="thomp","THOMP", ifelse(alg=="thomp_inf", "THOMP_INF", ifelse(alg=="thomp_athey", "HADAD", ifelse(alg=="thomp_bern", "THOMP", ifelse(alg=="thomp_inf_bern", "THOMP_INF",ifelse(alg=="ab_bern", "AB", ifelse(alg=="thomp_athey_bern", "HADAD",'NONE'))))))))]
@@ -121,7 +124,7 @@ df_regret =  copy(regret_mse)[ite==0,]
 
 
 reg <- ggplot(df_regret, aes(x=x, y=regret)) + geom_line(aes(color=alg)) +
-  xlim(0,5500) +
+  xlim(0,10500) +
   geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) + theme_minimal() + 
   theme(legend.position = "none") + 
   labs(x='Time Period', y = 'Regret') +
@@ -133,7 +136,7 @@ df_mse <- copy(regret_mse)[, mse := mean_mse][, c('regret', 'var_mse', 'mean_mse
 
 
 mn <- ggplot(df_mse, aes(x=x, y=mse)) + geom_line(aes(color=alg)) +
-  xlim(0,5500) + ylim(0,0.03) +
+  xlim(0,10500) + ylim(0,0.01) +
   geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) + theme_minimal() + 
   theme(legend.position = "none") + 
   labs(x='Time Period', y = 'MSE of Mean') 
@@ -146,7 +149,7 @@ df_mse <- copy(regret_mse)[, mse := var_mse][, c('regret', 'var_mse', 'mean_mse'
 
 
 var <- ggplot(df_mse, aes(x=x, y=mse)) + geom_line(aes(color=alg)) +
-  xlim(0,5500) + ylim(0,0.01) +
+  xlim(0,10500) + ylim(0,0.01) +
   geom_dl(aes(label=alg), method=list('last.points', cex=0.8)) + theme_minimal() + 
   theme(legend.position = "none") + 
   labs(x='Time Period', y = 'MSE of Variance') 

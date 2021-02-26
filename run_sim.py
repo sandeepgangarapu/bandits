@@ -7,7 +7,7 @@ import pandas as pd
 def run_sim(file_path, true_means, true_vars=None, dist_type='Normal', xi=0.05):
     start_time = time.time()
     alg_list=['ab_bern', 'thomp_bern', 'thomp_athey_bern', 'thomp_inf_bern']
-    # alg_list = ['thomp_inf_bern']
+    alg_list = ['thomp_inf_bern']
 
     estimator_list=['aipw', 'eval_aipw', 'ipw']
 
@@ -31,8 +31,8 @@ if __name__ == '__main__':
     meta_analysis = False
     normal_analysis = False
     regret_order = False
-    xi_analysis = False
-    bernoulli_analysis = True
+    xi_analysis = True
+    bernoulli_analysis = False
     hsn = False
     lsn = False
     zsn = False
@@ -71,7 +71,7 @@ if __name__ == '__main__':
         true_vars = [2.84, 1.97, 2.62, 1, 2.06]
         a = run_sim('analysis/output/wise_regret_analysis_100.csv', true_means, true_vars=true_vars, dist_type='Normal')
     if xi_analysis:
-        true_means = np.array([0.157, 0.178, 0.199, 0.146, 0.129])
+        true_means = np.array([0.37098621, 0.33080171, 0.1699615, 0.18902466, 0.6743146])
         true_vars = true_means * (1 - true_means)
         xi = [0.01, 0.05, 0.1, 0.15, 0.2, 0.5, 0.8, 1.1, 1.5]
         for x in xi:
