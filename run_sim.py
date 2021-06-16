@@ -6,12 +6,13 @@ import pandas as pd
 
 def run_sim(file_path, true_means, true_vars=None, dist_type='Normal', xi=0.05):
     start_time = time.time()
-    alg_list=['ab_bern', 'thomp_bern', 'thomp_athey_bern', 'thomp_inf_bern']
-    alg_list = ['thomp_inf_bern']
+    alg_list=['thomp_bern_batched',
+              'thomp_inf_bern_batched']
+    # alg_list = ['thomp_inf_bern']
 
     estimator_list=['aipw', 'eval_aipw', 'ipw']
 
-    sim = BanditSimulation(num_ite=1, arm_means=true_means,
+    sim = BanditSimulation(num_ite=32, arm_means=true_means,
                            arm_vars=true_vars,
                            eps_inf=0.2,
                            horizon=10000,
@@ -20,7 +21,7 @@ def run_sim(file_path, true_means, true_vars=None, dist_type='Normal', xi=0.05):
                            mse_calc=True,
                            agg=False,
                            xi=xi,
-                           cap_prop=True,
+                           cap_prop=False,
                            dist_type=dist_type,
                            output_file_path=file_path)
     sim.run_simulation_multiprocessing()
@@ -31,9 +32,9 @@ if __name__ == '__main__':
     meta_analysis = False
     normal_analysis = False
     regret_order = False
-    xi_analysis = True
+    xi_analysis = False
     bernoulli_analysis = False
-    hsn = False
+    hsn = True
     lsn = False
     zsn = False
     if meta_analysis:
@@ -61,7 +62,8 @@ if __name__ == '__main__':
     if hsn:
         true_means = [1, 1.5, 2]
         true_vars = [1/3, 1/3, 1/3]
-        run_sim('analysis/output/non_agg_lsn_100_20000.csv', true_means, true_vars=true_vars, dist_type='LSN')
+        run_sim('analysis/output/batched_test.csv', true_means,
+                true_vars=true_vars, dist_type='LSN')
     if zsn:
         true_means = [1, 1, 1]
         true_vars = [1/3, 1/3, 1/3]

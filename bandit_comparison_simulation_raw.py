@@ -1,8 +1,10 @@
 from algorithms.ab_testing import ab_testing
 from algorithms.thompson_sampling import thompson_sampling
 from algorithms.thomp_bern import thompson_sampling_bern
+from algorithms.thomp_bern_batched import thompson_sampling_bern_batched
 from algorithms.thompson_inf import thomp_inf
 from algorithms.thompson_inf_bern import thomp_inf_bern
+from algorithms.thompson_inf_bern_batched import thomp_inf_bern_batched
 from algorithms.ab_testing_bern import ab_testing_bern
 from algorithms.ucb_inf_eps import ucb_inf_eps
 from algorithms.ucb import ucb
@@ -159,10 +161,15 @@ class BanditSimulation:
             thomp_inf(bandit, self.horizon, xi=self.xi, type_of_pull=self.type_of_pull, cap_prop=self.cap_prop)
         if alg == 'thomp_bern':
             thompson_sampling_bern(bandit, self.horizon, type_of_pull=self.type_of_pull, cap_prop=False)
+        if alg == 'thomp_bern_batched':
+            thompson_sampling_bern_batched(bandit, self.horizon, cap_prop=False)
         if alg == 'thomp_athey_bern':
             thompson_sampling_bern(bandit, self.horizon, type_of_pull=self.type_of_pull, cap_prop=self.cap_prop)
         if alg == 'thomp_inf_bern':
             thomp_inf_bern(bandit, self.horizon, xi=self.xi, type_of_pull=self.type_of_pull, cap_prop=self.cap_prop)
+        if alg == 'thomp_inf_bern_batched':
+            thomp_inf_bern_batched(bandit, self.horizon, xi=self.xi,
+                                   cap_prop=self.cap_prop)
         if alg == 'ab_bern':
             sample_size = int(self.horizon / self.num_arms) if not self.post_allocation else None
             ab_testing_bern(bandit, self.horizon, sample_size=sample_size, post_allocation=self.post_allocation)

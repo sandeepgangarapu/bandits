@@ -3,8 +3,8 @@ from utils import thompson_arm_pull_bern
 from math import sqrt
 
 
-def thompson_sampling_bern_batched(bandit, num_rounds, type_of_pull='single',
-                            cap_prop=False, batch_size=100):
+def thompson_sampling_bern_batched(bandit, num_rounds, cap_prop=False,
+                                   batch_size=100):
     """Function that reproduces the steps involved in Thompson sampling
     algorithm"""
     print("---------------Running Thompson Sampling Bern "
@@ -24,7 +24,7 @@ def thompson_sampling_bern_batched(bandit, num_rounds, type_of_pull='single',
         arm_counts = [0 for i in range(num_arms)]
         rewards = [0 for i in range(num_arms)]
         for j in range(batch_size):
-            chosen_arm = thompson_arm_pull_bern(param_lis=prior_params, type_of_pull=type_of_pull)
+            chosen_arm = thompson_arm_pull_bern(param_lis=prior_params)
             arm_counts[chosen_arm] += 1
             bandit.pull_arm(chosen_arm)
             x = bandit.reward_tracker[-1]
