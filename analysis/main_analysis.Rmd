@@ -290,7 +290,7 @@ df_mse <- copy(main_xi_df)[, mse := mean_mse][, c('regret', 'var_mse', 'mean_mse
 
 
 ggplot(df_mse, aes(x=x, y=mse)) + geom_line(aes(color=factor(xi))) +
-  xlim(0,12000) + ylim(0,0.005) + geom_ribbon(aes(ymin=mse-(1.96*se), ymax=mse+(1.96*se), group=xi), alpha=0.4,  fill="grey70") +
+  xlim(0,12000) + ylim(0,0.02) + geom_ribbon(aes(ymin=mse-(1.96*se), ymax=mse+(1.96*se), group=xi), alpha=0.4,  fill="grey70") +
   geom_dl(aes(label=xi), method=list('last.points', cex=0.8)) + theme_minimal() + 
   theme(legend.position = "none") + 
   labs(x='Time Period', y = 'MSE of Mean') + ggsave("wise_mn.png", dpi=400, height = 5, width=10, scale = 0.8)
@@ -300,8 +300,8 @@ ggplot(df_mse, aes(x=x, y=mse)) + geom_line(aes(color=factor(xi))) +
 df_mse <- copy(main_xi_df)[, mse := var_mse][, c('regret', 'var_mse', 'mean_mse'):=NULL][, .(mse = mean(mse), se = sd(mse)/sqrt(.N)),.(x, xi)]
 
 
-ggplot(df_mse, aes(x=x, y=mse)) + geom_line(aes(color=xi)) +
-  xlim(0,12000) + ylim(0,0.0025) + geom_ribbon(aes(ymin=mse-(1.96*se), ymax=mse+(1.96*se), group=xi), alpha=0.4,  fill="grey70") +
+ggplot(df_mse, aes(x=x, y=mse)) + geom_line(aes(color=factor(xi))) +
+  xlim(0,12000) + ylim(0,0.02) + geom_ribbon(aes(ymin=mse-(1.96*se), ymax=mse+(1.96*se), group=xi), alpha=0.4,  fill="grey70") +
   geom_dl(aes(label=xi), method=list('last.points', cex=0.8)) + theme_minimal() + 
   theme(legend.position = "none") + 
   labs(x='Time Period', y = 'MSE of Variance') + ggsave("wise_var.png", dpi=400, height = 5, width=10, scale = 0.8)

@@ -161,7 +161,7 @@ def thompson_arm_pull(mean_lis, var_lis, type_of_pull='single', cap_prop=None):
         return chosen_arm, prop_score_lis
 
 
-def thompson_arm_pull_bern(param_lis, type_of_pull, cap_prop=None):
+def thompson_arm_pull_bern(param_lis, type_of_pull='single', cap_prop=None):
     """
         :param mean_lis: mean list of all arms
         :param type_of_pull: either single pull or monte carlo pull

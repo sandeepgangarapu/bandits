@@ -11,7 +11,7 @@ def run_sim(file_path, true_means, true_vars=None, dist_type='Normal', xi=0.05):
 
     estimator_list=['aipw', 'eval_aipw', 'ipw']
 
-    sim = BanditSimulation(num_ite=62, arm_means=true_means,
+    sim = BanditSimulation(num_ite=1, arm_means=true_means,
                            arm_vars=true_vars,
                            eps_inf=0.2,
                            horizon=10000,
