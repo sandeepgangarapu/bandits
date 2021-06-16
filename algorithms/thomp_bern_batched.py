@@ -46,4 +46,5 @@ if __name__ == '__main__':
         thompson_bandit = Bandit(name='thompson_sampling',
                                  arm_means=[0.1, 0.2, 0.3],
                                  dist_type='Bernoulli')
-        thompson_sampling_bern_batched(thompson_bandit, num_rounds=num_rounds, type_of_pull="monte_carlo", cap_prop=True)
+        thompson_sampling_bern_batched(thompson_bandit,
+                                       num_rounds=num_rounds, cap_prop=False)

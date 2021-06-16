@@ -6,8 +6,7 @@ import pandas as pd
 
 def run_sim(file_path, true_means, true_vars=None, dist_type='Normal', xi=0.05):
     start_time = time.time()
-    alg_list=['thomp_bern_batched',
-              'thomp_inf_bern_batched']
+    alg_list=['thomp_bern_batched', 'thomp_inf_bern_batched']
     # alg_list = ['thomp_inf_bern']
 
     estimator_list=['aipw', 'eval_aipw', 'ipw']
@@ -33,8 +32,8 @@ if __name__ == '__main__':
     normal_analysis = False
     regret_order = False
     xi_analysis = False
-    bernoulli_analysis = False
-    hsn = True
+    bernoulli_analysis = True
+    hsn = False
     lsn = False
     zsn = False
     if meta_analysis:
@@ -54,16 +53,18 @@ if __name__ == '__main__':
     if bernoulli_analysis:
         true_means = np.array([0.37098621, 0.33080171, 0.1699615 , 0.18902466, 0.6743146])
         true_vars = true_means*(1-true_means)
-        run_sim('analysis/output/non_agg_bern_62_10000_2.csv', true_means, true_vars=true_vars, dist_type='Bernoulli')
+        run_sim('analysis/output/test_batched.csv', true_means,
+                true_vars=true_vars, dist_type='Bernoulli')
     if lsn:
         true_means = [1, 1.1, 1.2]
         true_vars = [1/3, 1/3, 1/3]
-        run_sim('analysis/output/non_agg_hsn_100_20000.csv', true_means, true_vars=true_vars, dist_type='HSN')
+        run_sim('analysis/output/non_agg_hsn_100_20000.csv', true_means,
+                true_vars=true_vars, dist_type='LSN')
     if hsn:
         true_means = [1, 1.5, 2]
         true_vars = [1/3, 1/3, 1/3]
         run_sim('analysis/output/batched_test.csv', true_means,
-                true_vars=true_vars, dist_type='LSN')
+                true_vars=true_vars, dist_type='HSN')
     if zsn:
         true_means = [1, 1, 1]
         true_vars = [1/3, 1/3, 1/3]

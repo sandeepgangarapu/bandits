@@ -61,6 +61,7 @@ class BanditSimulation:
         :return: either saves the output or gives out data frame of output
         """
         a_pool = multiprocessing.Pool()
+        print(multiprocessing.cpu_count())
         result = a_pool.map(self.run_simulation, range(self.num_ite))
         # save output or return it
         final_output = pd.concat(result)
