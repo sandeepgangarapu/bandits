@@ -21,7 +21,8 @@ class BanditSimulation:
 
     def __init__(self, num_ite, arm_means, eps_inf, horizon, alg_list, arm_vars=None, mse_calc=True,
                  agg=False, estimator_list=None, xi=1, dist_type='Normal',
-                 cap_prop=True, output_file_path=None, post_allocation=True):
+                 batch_size=100, cap_prop=True, output_file_path=None,
+                 post_allocation=True):
         """This class is to run bandits simulation for given params and give simulation output.
         :param seed: seed for randomization
         :param num_ite: number of iterations
@@ -35,6 +36,7 @@ class BanditSimulation:
         :param estimator_list: list of estimators like ipw, aipw etc
         :param xi: xi value for inf eps
         :param dist_type: type of outcome distribution
+        :param batch_size: batch for thompson batched bandits
         :param cap_prop: capping the propensity in thompson based algs
         :param output_file_path: path of file where output needs to be stored
         """
@@ -51,6 +53,7 @@ class BanditSimulation:
         self.xi = xi
         self.dist_type = dist_type
         self.output_file_path = output_file_path
+        self.batch_size = batch_size
         self.cap_prop = cap_prop
         self.type_of_pull = 'monte_carlo' if self.estimator_list else 'single'
         self.post_allocation = post_allocation
@@ -163,14 +166,15 @@ class BanditSimulation:
         if alg == 'thomp_bern':
             thompson_sampling_bern(bandit, self.horizon, type_of_pull=self.type_of_pull, cap_prop=False)
         if alg == 'thomp_bern_batched':
-            thompson_sampling_bern_batched(bandit, self.horizon, cap_prop=False)
+            thompson_sampling_bern_batched(bandit, self.horizon,
+                                           cap_prop=False, batch_size=self.batch_size)
         if alg == 'thomp_athey_bern':
             thompson_sampling_bern(bandit, self.horizon, type_of_pull=self.type_of_pull, cap_prop=self.cap_prop)
         if alg == 'thomp_inf_bern':
             thomp_inf_bern(bandit, self.horizon, xi=self.xi, type_of_pull=self.type_of_pull, cap_prop=self.cap_prop)
         if alg == 'thomp_inf_bern_batched':
             thomp_inf_bern_batched(bandit, self.horizon, xi=self.xi,
-                                   cap_prop=self.cap_prop)
+                                   cap_prop=self.cap_prop, batch_size=self.batch_size)
         if alg == 'ab_bern':
             sample_size = int(self.horizon / self.num_arms) if not self.post_allocation else None
             ab_testing_bern(bandit, self.horizon, sample_size=sample_size, post_allocation=self.post_allocation)

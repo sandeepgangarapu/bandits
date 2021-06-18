@@ -6,26 +6,29 @@ import pandas as pd
 
 def run_sim(file_path, true_means, true_vars=None, dist_type='Normal', xi=0.05):
     start_time = time.time()
-    alg_list=['thomp_bern_batched', 'thomp_inf_bern_batched', 'thomp_bern', 'thomp_inf_bern']
+    alg_list=['thomp_bern_batched', 'thomp_inf_bern_batched', 'thomp_bern',
+              'thomp_inf_bern', 'ab']
     # alg_list = ['thomp_inf_bern']
 
-    estimator_list=['aipw', 'eval_aipw', 'ipw']
+    estimator_list=['eval_aipw']
 
     sim = BanditSimulation(num_ite=32, arm_means=true_means,
                            arm_vars=true_vars,
                            eps_inf=0.2,
                            horizon=10000,
                            alg_list=alg_list,
-                           estimator_list=None,
+                           estimator_list=estimator_list,
                            mse_calc=True,
-                           agg=False,
+                           agg=True,
                            xi=xi,
+                           batch_size=100,
                            cap_prop=False,
                            dist_type=dist_type,
                            output_file_path=file_path)
     sim.run_simulation_multiprocessing()
     print("--- %s mins ---" % ((time.time() - start_time)/60))
     return true_means, true_vars
+
 
 if __name__ == '__main__':
     meta_analysis = False
@@ -53,7 +56,7 @@ if __name__ == '__main__':
     if bernoulli_analysis:
         true_means = np.array([0.37098621, 0.33080171, 0.1699615 , 0.18902466, 0.6743146])
         true_vars = true_means*(1-true_means)
-        run_sim('analysis/output/test_batched.csv', true_means,
+        run_sim('analysis/output/test_batched_agg.csv', true_means,
                 true_vars=true_vars, dist_type='Bernoulli')
     if lsn:
         true_means = [1, 1.1, 1.2]
