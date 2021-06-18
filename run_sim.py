@@ -7,7 +7,7 @@ import pandas as pd
 def run_sim(file_path, true_means, true_vars=None, dist_type='Normal', xi=0.05):
     start_time = time.time()
     alg_list=['thomp_bern_batched', 'thomp_inf_bern_batched', 'thomp_bern',
-              'thomp_inf_bern', 'ab']
+              'thomp_inf_bern', 'ab_bern']
     # alg_list = ['thomp_inf_bern']
 
     estimator_list=['eval_aipw']

@@ -4,7 +4,7 @@ from math import sqrt
 
 
 def thompson_sampling_bern_batched(bandit, num_rounds, cap_prop=False,
-                                   batch_size=100):
+                                   batch_size=100, type_of_pull='single'):
     """Function that reproduces the steps involved in Thompson sampling
     algorithm"""
     print("---------------Running Thompson Sampling Bern "
@@ -15,7 +15,11 @@ def thompson_sampling_bern_batched(bandit, num_rounds, cap_prop=False,
     num_initial_pulls = int(batch_size/num_arms)
     for ite in range(num_initial_pulls):
         for arm in range(num_arms):
-            bandit.pull_arm(arm)
+            if type_of_pull == 'monte_carlo':
+                bandit.pull_arm(arm, prop_lis=[1 if i == arm else 0 for i in
+                                               range(bandit.num_arms)])
+            else:
+                bandit.pull_arm(arm)
 
     # beta bernoulli updation process
     prior_params = [[1, 1] for i in range(num_arms)]
@@ -24,9 +28,13 @@ def thompson_sampling_bern_batched(bandit, num_rounds, cap_prop=False,
         arm_counts = [0 for i in range(num_arms)]
         rewards = [0 for i in range(num_arms)]
         for j in range(batch_size):
-            chosen_arm = thompson_arm_pull_bern(param_lis=prior_params)
+            if type_of_pull == 'monte_carlo':
+                chosen_arm, prop_lis = thompson_arm_pull_bern(param_lis=prior_params, type_of_pull=type_of_pull)
+                bandit.pull_arm(chosen_arm, prop_lis=prop_lis)
+            else:
+                chosen_arm = thompson_arm_pull_bern(param_lis=prior_params)
+                bandit.pull_arm(chosen_arm)
             arm_counts[chosen_arm] += 1
-            bandit.pull_arm(chosen_arm)
             x = bandit.reward_tracker[-1]
             rewards[chosen_arm] += x
         

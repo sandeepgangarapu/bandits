@@ -167,14 +167,17 @@ class BanditSimulation:
             thompson_sampling_bern(bandit, self.horizon, type_of_pull=self.type_of_pull, cap_prop=False)
         if alg == 'thomp_bern_batched':
             thompson_sampling_bern_batched(bandit, self.horizon,
-                                           cap_prop=False, batch_size=self.batch_size)
+                                           cap_prop=False,
+                                           batch_size=self.batch_size,
+                                           type_of_pull=self.type_of_pull)
         if alg == 'thomp_athey_bern':
             thompson_sampling_bern(bandit, self.horizon, type_of_pull=self.type_of_pull, cap_prop=self.cap_prop)
         if alg == 'thomp_inf_bern':
             thomp_inf_bern(bandit, self.horizon, xi=self.xi, type_of_pull=self.type_of_pull, cap_prop=self.cap_prop)
         if alg == 'thomp_inf_bern_batched':
             thomp_inf_bern_batched(bandit, self.horizon, xi=self.xi,
-                                   cap_prop=self.cap_prop, batch_size=self.batch_size)
+                                   cap_prop=self.cap_prop,
+                                   batch_size=self.batch_size, type_of_pull=self.type_of_pull)
         if alg == 'ab_bern':
             sample_size = int(self.horizon / self.num_arms) if not self.post_allocation else None
             ab_testing_bern(bandit, self.horizon, sample_size=sample_size, post_allocation=self.post_allocation)
