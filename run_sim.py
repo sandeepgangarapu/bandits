@@ -10,12 +10,12 @@ def run_sim(file_path, true_means, true_vars=None, dist_type='Normal', xi=0.05):
               'thomp_inf_bern', 'ab_bern']
     # alg_list = ['thomp_inf_bern']
 
-    estimator_list=['eval_aipw']
+    estimator_list=['eval_aipw', 'eval_aipw_var']
 
-    sim = BanditSimulation(num_ite=32, arm_means=true_means,
+    sim = BanditSimulation(num_ite=96, arm_means=true_means,
                            arm_vars=true_vars,
                            eps_inf=0.2,
-                           horizon=10000,
+                           horizon=20000,
                            alg_list=alg_list,
                            estimator_list=estimator_list,
                            mse_calc=True,
@@ -56,7 +56,7 @@ if __name__ == '__main__':
     if bernoulli_analysis:
         true_means = np.array([0.37098621, 0.33080171, 0.1699615 , 0.18902466, 0.6743146])
         true_vars = true_means*(1-true_means)
-        run_sim('analysis/output/test_batched_agg.csv', true_means,
+        run_sim('analysis/output/agg_batched_bern_hyp.csv', true_means,
                 true_vars=true_vars, dist_type='Bernoulli')
     if lsn:
         true_means = [1, 1.1, 1.2]
