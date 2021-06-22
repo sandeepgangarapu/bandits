@@ -81,7 +81,7 @@ regret_mse <- copy(non_agg_data)[, x:= seq_len(.N),.(ite,alg)][, .(alg, regret, 
 ```{r echo=FALSE, cache=FALSE, warning=FALSE}
 
 setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")
-agg_data <- fread("agg_lsn_100_20000.csv")
+agg_data <- fread("agg_batched_bern_hyp.csv")
 agg_data <- agg_data[complete.cases(agg_data),][mean_est != -Inf | mean_est != Inf][, mn := mean_est]
 
 ```
@@ -404,7 +404,8 @@ ggplot(best, aes(x=reorder(alg, abs(var)), y=var)) + geom_bar(stat="identity") +
 ```{r echo=FALSE, cache=FALSE, warning=FALSE}
 # Bias of the Best arm
 
-worst <- agg_data[group==which.min(true_means)-1][,bias := mn-min(true_means)][, .(Bias = mean(bias), se = sd(bias)/sqrt(.N)),.(alg)][alg %in% c('ab', 'thomp', 'thom_inf', 'thomp_eval_aipw', 'thomp_inf_eval_aipw')]
+worst <- agg_data[group==which.min(true_means)-1][,bias := mn-min(true_means)][, .(Bias = mean(bias), se = sd(bias)/sqrt(.N)),.(alg)]
+#[alg %in% c('ab', 'thomp', 'thom_inf', 'thomp_eval_aipw', 'thomp_inf_eval_aipw')]
 
 ylimit <- max(abs(c(worst$Bias + qnorm(0.975)*worst$se, worst$Bias - qnorm(0.975)*worst$se)))
 ylimit <- 1.5*ylimit
@@ -416,7 +417,8 @@ ggplot(worst, aes(x=reorder(alg, abs(Bias)), y=Bias)) + geom_bar(stat="identity"
   theme(axis.text.x = element_text(angle = 90)) 
 
 
-worst <- agg_data[group==which.min(true_means)-1][,bias := mn-min(true_means)][, .(var = var(mn)),.(alg)][alg %in% c('ab', 'thomp', 'thom_inf', 'thomp_eval_aipw', 'thomp_inf_eval_aipw')]
+worst <- agg_data[group==which.min(true_means)-1][,bias := mn-min(true_means)][, .(var = var(mn)),.(alg)]
+#[alg %in% c('ab', 'thomp', 'thom_inf', 'thomp_eval_aipw', 'thomp_inf_eval_aipw')]
  
 
 ylimit <- max(worst$var)
@@ -439,30 +441,47 @@ ggplot(worst, aes(x=reorder(alg, abs(var)), y=var)) + geom_bar(stat="identity") 
 
 
 setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")
-hyp_data <- copy(agg_data)[alg %in% c('ab', 'thomp_inf_eval_aipw', 'thomp_inf_eval_aipw_var', 'thomp_athey_eval_aipw', 'thomp_athey_eval_aipw')]
+hyp_data <- copy(agg_data)
 
 
-data_0 <- hyp_data[group==1] 
-data_1 <- hyp_data[group==2]
+data_0 <- hyp_data[group==0] 
+data_1 <- hyp_data[group==1]
 
-a <- data_0[data_0$alg=='thomp_eval_aipw_var', 'var_est']
-data_0[data_0$alg=='thomp_eval_aipw', 'var_est'] = a
+a <- data_0[data_0$alg=='thomp_bern_eval_aipw_var', 'var_est']
+data_0[data_0$alg=='thomp_bern_eval_aipw', 'var_est'] = a
 
-a <- data_0[data_0$alg=='thomp_inf_eval_aipw_var', 'var_est']
-data_0[data_0$alg=='thomp_inf_eval_aipw', 'var_est'] = a
+a <- data_0[data_0$alg=='thomp_bern_inf_eval_aipw_var', 'var_est']
+data_0[data_0$alg=='thomp_bern_inf_eval_aipw', 'var_est'] = a
 
-a <- data_1[data_1$alg=='thomp_eval_aipw_var', 'var_est']
-data_1[data_1$alg=='thomp_eval_aipw', 'var_est'] = a
+a <- data_1[data_1$alg=='thomp_bern_eval_aipw_var', 'var_est']
+data_1[data_1$alg=='thomp_bern_eval_aipw', 'var_est'] = a
 
-a <- data_1[data_1$alg=='thomp_inf_eval_aipw_var', 'var_est']
-data_1[data_1$alg=='thomp_inf_eval_aipw', 'var_est'] = a
+a <- data_1[data_1$alg=='thomp_bern_inf_eval_aipw_var', 'var_est']
+data_1[data_1$alg=='thomp_bern_inf_eval_aipw', 'var_est'] = a
+
+a <- data_0[data_0$alg=='thomp_bern_batched_eval_aipw_var', 'var_est']
+data_0[data_0$alg=='thomp_bern_batched_eval_aipw', 'var_est'] = a
+
+a <- data_0[data_0$alg=='thomp_bern_batched_inf_eval_aipw_var', 'var_est']
+data_0[data_0$alg=='thomp_bern_batched_inf_eval_aipw', 'var_est'] = a
+
+a <- data_1[data_1$alg=='thomp_bern_batched_eval_aipw_var', 'var_est']
+data_1[data_1$alg=='thomp_bern_batched_eval_aipw', 'var_est'] = a
+
+a <- data_1[data_1$alg=='thomp_bern_batched_inf_eval_aipw_var', 'var_est']
+data_1[data_1$alg=='thomp_bern_batched_inf_eval_aipw', 'var_est'] = a
 
 
 merged_data <- merge(data_0, data_1, by=c('ite','alg'))
 
+hyp_z <- merged_data[, zval := (mean_est.y-mean_est.x)/sqrt((((mean_est.y*arm_pull_tracker.y) + (mean_est.x*arm_pull_tracker.x))/(arm_pull_tracker.y + arm_pull_tracker.x))*(1-((mean_est.y*arm_pull_tracker.y) + (mean_est.x*arm_pull_tracker.x))/(arm_pull_tracker.y + arm_pull_tracker.x))*((1/arm_pull_tracker.y)+(1/arm_pull_tracker.x)))][,pval := pnorm(zval)][,test_pass := ifelse(pval<0.05, TRUE, FALSE)]
+
+
 hyp <- merged_data[,`:=`(tval = (mean_est.y-mean_est.x)/(sqrt((var_est.x/arm_pull_tracker.x)+(var_est.y/arm_pull_tracker.y))), df = arm_pull_tracker.x+arm_pull_tracker.y-2)][,pval := dt(tval, df)][,test_pass := ifelse(pval<0.05, TRUE, FALSE)]
 
-final_results <- hyp[!grepl("var", alg) & test_pass !=TRUE][,.(cnt = .N, perc = .N/100),.(alg, test_pass)] 
+
+
+final_results <- hyp_z[!grepl("var", alg) & test_pass !=TRUE][,.(cnt = .N, perc = .N/100),.(alg, test_pass)] 
 
 
 

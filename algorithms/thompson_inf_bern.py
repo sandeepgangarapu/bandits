@@ -9,10 +9,12 @@ def calc_eps_n(bandit, xi):
         bandit.arm_pull_tracker)).sum()
     eta = sum_of_st_err / (bandit.num_arms * xi)
     eps_n = eta / (1 + eta)
+    # print(eps_n)
     return eps_n
 
 
-def thomp_inf_bern(bandit, num_rounds, xi=0.05, type_of_pull='single', cap_prop=False):
+def thomp_inf_bern(bandit, num_rounds, xi=0.2, type_of_pull='single',
+                   cap_prop=False):
     """Function that reproduces the steps involved in Thompson sampling
         algorithm"""
     print("---------------Running Thompson Inf Bern ---------------")
@@ -34,6 +36,7 @@ def thomp_inf_bern(bandit, num_rounds, xi=0.05, type_of_pull='single', cap_prop=
     for rnd in range(int(num_rounds - (num_initial_pulls * num_arms))):
         if np.random.uniform(0, 1) < calc_eps_n(bandit, xi):
             var_allocs += 1
+            # print(var_allocs, "----------------------------")
             # variance base, we pick arm proportional to the variance of
             # mean estimate, i.e. s^2/n
             var_of_mean_est = \
