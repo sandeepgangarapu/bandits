@@ -48,7 +48,7 @@ def thompson_sampling_bern_batched(bandit, num_rounds, cap_prop=False,
         for arm in range(num_arms):
             prior_params[arm][0] += rewards[arm]
             prior_params[arm][1] += arm_counts[arm] - rewards[arm]
-            print(prior_params[arm])
+            # print(prior_params[arm])
             
     return bandit
 
