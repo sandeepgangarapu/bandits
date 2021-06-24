@@ -23,17 +23,13 @@ def thompson_sampling_bern(bandit, num_rounds, type_of_pull='single', cap_prop=F
     prior_params = [[1, 1] for i in range(num_arms)]
 
     for rnd in range(int(num_rounds - (num_initial_pulls * num_arms))):
-
-        if type_of_pull == 'monte_carlo':
-            chosen_arm, prop_lis = thompson_arm_pull_bern(param_lis=prior_params, type_of_pull=type_of_pull)
-            # this is to cap probability of allocation as per Athey's algorthm
-            if cap_prop:
-                cap = 0.1 / sqrt(rnd + 1)
-                chosen_arm, prop_lis = thompson_arm_pull_bern(param_lis=prior_params, type_of_pull=type_of_pull, cap_prop=cap)
-            bandit.pull_arm(chosen_arm, prop_lis=prop_lis)
+        # this is to cap probability of allocation as per Athey's algorthm
+        if cap_prop:
+            cap = 0.1 / sqrt(rnd + 1)
+            chosen_arm, prop_lis = thompson_arm_pull_bern(param_lis=prior_params, type_of_pull=type_of_pull, cap_prop=cap)
         else:
-            chosen_arm = thompson_arm_pull_bern(param_lis=prior_params, type_of_pull=type_of_pull)
-            bandit.pull_arm(chosen_arm)
+            chosen_arm, prop_lis = thompson_arm_pull_bern(param_lis=prior_params, type_of_pull=type_of_pull)
+        bandit.pull_arm(chosen_arm, prop_lis)
         x = bandit.reward_tracker[-1]
         # We calculate the posterior parameters of the beta distribution
         prior_params[chosen_arm][0] += x

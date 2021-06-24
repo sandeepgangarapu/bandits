@@ -39,19 +39,14 @@ def thompson_sampling(bandit, num_rounds, type_of_pull='single', cap_prop=False)
                     range(num_arms)]
         mu_prior = [np.random.normal(prior_params[i][0], 1 / sqrt(prior_params[i][1] * tau_prior[i])) for i in
                     range(num_arms)]
-        if type_of_pull == 'monte_carlo':
+        if cap_prop:
+            cap = 0.1 / sqrt(rnd + 1)
+            chosen_arm, prop_lis = thompson_arm_pull(mean_lis=mu_prior, var_lis=1 / np.array(tau_prior),
+                                                     type_of_pull=type_of_pull, cap_prop=cap)
+        else:
             chosen_arm, prop_lis = thompson_arm_pull(mean_lis=mu_prior, var_lis=1 / np.array(tau_prior),
                                                      type_of_pull=type_of_pull)
-            # this is to cap probility of allocation as per Athey's algortihm
-            if cap_prop:
-                cap = 0.1 / sqrt(rnd + 1)
-                chosen_arm, prop_lis = thompson_arm_pull(mean_lis=mu_prior, var_lis=1 / np.array(tau_prior),
-                                                         type_of_pull=type_of_pull, cap_prop=cap)
-            bandit.pull_arm(chosen_arm, prop_lis=prop_lis)
-        else:
-            chosen_arm = thompson_arm_pull(mean_lis=mu_prior, var_lis=1/np.array(tau_prior),
-                                           type_of_pull=type_of_pull)
-            bandit.pull_arm(chosen_arm)
+        bandit.pull_arm(chosen_arm, prop_lis=prop_lis)
         (mu_0_prior, n_0_prior, alpha_prior, beta_prior) = prior_params[chosen_arm]
         x = bandit.reward_tracker[-1]
         # We calculate the posterior parameters as per the normal inv gamma bayesian update rules

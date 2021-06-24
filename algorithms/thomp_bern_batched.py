@@ -27,13 +27,15 @@ def thompson_sampling_bern_batched(bandit, num_rounds, cap_prop=False,
     for batch in range(int(num_rounds/batch_size)-1):
         arm_counts = [0 for i in range(num_arms)]
         rewards = [0 for i in range(num_arms)]
+        # cap will be same for the entire batch
+        cap = 0.1 / sqrt(((batch+1)*batch_size) + 1)
         for j in range(batch_size):
-            if type_of_pull == 'monte_carlo':
-                chosen_arm, prop_lis = thompson_arm_pull_bern(param_lis=prior_params, type_of_pull=type_of_pull)
-                bandit.pull_arm(chosen_arm, prop_lis=prop_lis)
+            # this is to cap probility of allocation as per Athey's algortihm
+            if cap_prop:
+                chosen_arm, prop_lis = thompson_arm_pull_bern(param_lis=prior_params, type_of_pull=type_of_pull, cap_prop=cap)
             else:
-                chosen_arm = thompson_arm_pull_bern(param_lis=prior_params)
-                bandit.pull_arm(chosen_arm)
+                chosen_arm, prop_lis = thompson_arm_pull_bern(param_lis=prior_params, type_of_pull=type_of_pull)
+            bandit.pull_arm(chosen_arm, prop_lis)
             arm_counts[chosen_arm] += 1
             x = bandit.reward_tracker[-1]
             rewards[chosen_arm] += x

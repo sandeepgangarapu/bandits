@@ -10,10 +10,10 @@ def run_sim(file_path, true_means, true_vars=None, dist_type='Normal',
     alg_list=['thomp_bern_batched', 'thomp_inf_bern_batched', 'thomp_bern',
               'thomp_inf_bern', 'ab_bern']
     # alg_list = ['thomp_inf_bern', 'thomp_inf_bern_batched']
-
+    # alg_list=['thomp_inf_bern']
     estimator_list = ['eval_aipw']
 
-    sim = BanditSimulation(num_ite=96, arm_means=true_means,
+    sim = BanditSimulation(num_ite=128, arm_means=true_means,
                            arm_vars=true_vars,
                            eps_inf=0.5,
                            horizon=20000,
@@ -23,7 +23,7 @@ def run_sim(file_path, true_means, true_vars=None, dist_type='Normal',
                            agg=True,
                            xi=xi,
                            batch_size=100,
-                           cap_prop=False,
+                           cap_prop=True,
                            dist_type=dist_type,
                            output_file_path=file_path)
     sim.run_simulation_multiprocessing()

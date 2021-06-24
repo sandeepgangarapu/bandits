@@ -78,6 +78,8 @@ def weighed_estimators(type, arm_lis, reward_lis, weight_lis,
             eval_array = np.sqrt((np.array(weight_lis_of_lis)[:, i]/horizon))
             eval_aipw_est = np.sum(aipw_array * eval_array) / np.sum(eval_array)
             eval_aipw_mean_est.append(eval_aipw_est)
+        if eval_aipw_mean_est == 0:
+            print("HI")
         return eval_aipw_mean_est
 
     if type == "eval_aipw_var":

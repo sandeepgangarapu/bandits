@@ -1,5 +1,5 @@
 import numpy as np
-from utils import thompson_arm_pull_bern
+from utils import thompson_arm_pull_bern, capped_prop
 from bandit import Bandit
 from math import sqrt
 
@@ -35,6 +35,8 @@ def thomp_inf_bern_batched(bandit, num_rounds, xi=0.05, cap_prop=False,
     for batch in range(int(num_rounds/batch_size)-1):
         arm_counts = [0 for i in range(num_arms)]
         rewards = [0 for i in range(num_arms)]
+        # cap will be same for the entire batch
+        cap = 0.1 / sqrt(((batch+1)*batch_size) + 1)
         eps_n = calc_eps_n(bandit, xi)
         # variance based, we pick arm proportional to the variance of
         # mean estimate, i.e. s^2/n
@@ -49,18 +51,21 @@ def thomp_inf_bern_batched(bandit, num_rounds, xi=0.05, cap_prop=False,
                 arm_var = np.random.choice(list(range(bandit.num_arms)),
                                            p=norm_prob)
                 arm_counts[arm_var] += 1
-                if type_of_pull == 'monte_carlo':
-                    bandit.pull_arm(arm_var, prop_lis=norm_prob)
-                else:
-                    bandit.pull_arm(arm_var)
+                if cap_prop:
+                    norm_prob = capped_prop(norm_prob, cap)
+                    arm_var = np.random.choice(range(bandit.num_arms),
+                                               p=norm_prob)
+                bandit.pull_arm(arm_var, prop_lis=norm_prob)
                 x = bandit.reward_tracker[-1]
                 rewards[arm_var] += x
             else:
-                if type_of_pull == 'monte_carlo':
-                    chosen_arm, prop_lis = thompson_arm_pull_bern(param_lis=prior_params, type_of_pull=type_of_pull)
+                if cap_prop:
+                    chosen_arm, prop_lis = thompson_arm_pull_bern(
+                        param_lis=prior_params, type_of_pull=type_of_pull, cap_prop=cap)
                 else:
-                    chosen_arm = thompson_arm_pull_bern(param_lis=prior_params, type_of_pull=type_of_pull)
-                    bandit.pull_arm(chosen_arm)
+                    chosen_arm, prop_lis = thompson_arm_pull_bern(param_lis=prior_params, type_of_pull=type_of_pull)
+            
+                bandit.pull_arm(chosen_arm, prop_lis)
                 arm_counts[chosen_arm] += 1
                 x = bandit.reward_tracker[-1]
                 rewards[chosen_arm] += x

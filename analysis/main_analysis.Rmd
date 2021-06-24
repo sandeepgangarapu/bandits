@@ -81,12 +81,8 @@ regret_mse <- copy(non_agg_data)[, x:= seq_len(.N),.(ite,alg)][, .(alg, regret, 
 ```{r echo=FALSE, cache=FALSE, warning=FALSE}
 
 setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")
-agg_data <- fread("agg_batched_bern_hyp.csv")
-agg_data <- agg_data[complete.cases(agg_data),][mean_est != -Inf | mean_est != Inf][, mn := mean_est][!grepl('inf', alg) | !grepl('var', alg)]
-#[alg!='thomp_inf_bern' | alg!= 'thomp_inf_bern_batched' | alg!='thomp_inf_bern_eval_aipw' | alg!= #'thomp_inf_bern_batched_eval_aipw']
-agg_data_2 <- fread("thomp_inf_bern_less_xi.csv")
-agg_data_2 <- agg_data_2[complete.cases(agg_data_2),][mean_est != -Inf | mean_est != Inf][, mn := mean_est]
-agg_data <- rbind(agg_data, agg_data_2)
+agg_data <- fread("agg_analysis_batched.csv")
+agg_data <- agg_data[complete.cases(agg_data),][mean_est != -Inf | mean_est != Inf][, mn := mean_est]
 
 ```
 
@@ -486,7 +482,7 @@ hyp_z <- merged_data[, zval := (mean_est.y-mean_est.x)/sqrt((((mean_est.y*arm_pu
 
 
 final_results <- hyp_z[!grepl("var", alg) & test_pass !=TRUE][,.(cnt = .N, perc = .N/100),.(alg, test_pass)] 
-final_results <- hyp_z[!grepl("var", alg)][,.(cnt = .N, perc = .N/100),.(alg, test_pass)] 
+final_results <- hyp_z[!grepl("var", alg) & test_pass !=TRUE][,.(cnt = .N, perc = .N/100),.(alg, test_pass)] 
 
 
 
@@ -515,7 +511,7 @@ We Expect
 
 ```{r echo=FALSE, warning=FALSE}
 
-best_ab <- copy(agg_data)[group==which.max(true_means)-1 & alg=='ab']
+best_ab <- copy(agg_data)[group==which.max(true_means)-1 & alg=='ab_bern']
 
 plotNormalHistogram(best_ab$mn, prob = TRUE, col = "gray",
                     linecol = "blue", lwd = 2, length = 1000, breaks= 50,
@@ -524,7 +520,7 @@ abline(v=3,  col="red")
 
 shapiro.test(best_ab$mn)
 
-worst_ab <- copy(agg_data)[group==which.min(true_means)-1 & alg=='ab']
+worst_ab <- copy(agg_data)[group==which.min(true_means)-1 & alg=='ab_bern']
 
 plotNormalHistogram(worst_ab$mn, prob = TRUE, col = "gray", main = "Mean estimates of Worst Arm - AB",
                     linecol = "blue", lwd = 2, length = 1000, breaks= 50)
@@ -540,7 +536,7 @@ shapiro.test(worst_ab$mn)
 
 ```{r echo=FALSE, warning=FALSE}
 
-best_thomp <- copy(agg_data)[group==which.max(true_means)-1 & alg=='thomp']
+best_thomp <- copy(agg_data)[group==which.max(true_means)-1 & alg=='thomp_bern']
 
 plotNormalHistogram(best_thomp$mn, prob = TRUE, col = "gray",
                     linecol = "blue", lwd = 2, length = 1000, breaks= 50,
@@ -549,7 +545,7 @@ abline(v=2,  col="red")
 
 shapiro.test(best_thomp$mn)
 
-worst_thomp <- copy(agg_data)[group==which.min(true_means)-1 & alg=='thomp']
+worst_thomp <- copy(agg_data)[group==which.min(true_means)-1 & alg=='thomp_bern']
 
 plotNormalHistogram(worst_thomp$mn, prob = TRUE, col = "gray", main = "Mean estimates of Worst Arm - THOMP",
                     linecol = "blue", lwd = 2, length = 1000, breaks= 50)
@@ -583,7 +579,7 @@ shapiro.test(worst_thomp_ipw$mn)
 
 ```{r echo=FALSE, warning=FALSE}
 
-best_thomp_eval_aipw <- copy(agg_data)[group==which.max(true_means)-1 & alg=='thomp_eval_aipw']
+best_thomp_eval_aipw <- copy(agg_data)[group==which.max(true_means)-1 & alg=='thomp_bern_eval_aipw']
 
 plotNormalHistogram(best_thomp_eval_aipw$mn, prob = TRUE, col = "gray",
                     linecol = "blue", lwd = 2, length = 1000, breaks= 50,
@@ -592,10 +588,10 @@ abline(v=3,  col="red")
 
 shapiro.test(best_thomp_eval_aipw$mn)
 
-worst_thomp_eval_aipw <- copy(agg_data)[group==which.min(true_means)-1 & alg=='thomp_eval_aipw']
+worst_thomp_eval_aipw <- copy(agg_data)[group==which.min(true_means)-1 & alg=='thomp_bern_eval_aipw']
 
 plotNormalHistogram(worst_thomp_eval_aipw$mn, prob = TRUE, col = "gray", main = "Mean estimates of Worst Arm - THOMP_EVAL",
-                    linecol = "blue", lwd = 2, length = 1000, breaks= 50)
+                    linecol = "blue", lwd = 2, length = 1000, breaks= 100)
 
 abline(v=2,  col="red")
 
@@ -607,7 +603,7 @@ shapiro.test(worst_thomp_eval_aipw$mn)
 
 ```{r echo=FALSE, warning=FALSE}
 
-best_thomp_inf <- copy(agg_data)[group==which.max(true_means)-1 & alg=='thomp_inf']
+best_thomp_inf <- copy(agg_data)[group==which.max(true_means)-1 & alg=='thomp_inf_bern']
 
 plotNormalHistogram(best_thomp_inf$mn, prob = TRUE, col = "gray",
                     linecol = "blue", lwd = 2, length = 1000, breaks= 50,
@@ -616,7 +612,7 @@ abline(v=3,  col="red")
 
 shapiro.test(best_thomp_inf$mn)
 
-worst_thomp_inf <- copy(agg_data)[group==which.min(true_means)-1 & alg=='thomp_inf']
+worst_thomp_inf <- copy(agg_data)[group==which.min(true_means)-1 & alg=='thomp_inf_bern']
 
 plotNormalHistogram(worst_thomp_inf$mn, prob = TRUE, col = "gray", main = "Mean estimates of Worst Arm - THOMPINF",
                     linecol = "blue", lwd = 2, length = 1000, breaks= 50)
@@ -649,7 +645,7 @@ shapiro.test(worst_thomp_inf_ipw$mn)
 
 ```{r echo=FALSE, warning=FALSE}
 
-best_thomp_inf_eval_aipw <- copy(agg_data)[group==which.max(true_means)-1 & alg=='thomp_inf_eval_aipw']
+best_thomp_inf_eval_aipw <- copy(agg_data)[group==which.max(true_means)-1 & alg=='thomp_inf_bern_eval_aipw']
 
 plotNormalHistogram(best_thomp_inf_eval_aipw$mn, prob = TRUE, col = "gray",
                     linecol = "blue", lwd = 2, length = 1000, breaks= 50,
@@ -658,7 +654,7 @@ abline(v=3,  col="red")
 
 shapiro.test(best_thomp_inf_eval_aipw$mn)
 
-worst_thomp_inf_eval_aipw <- copy(agg_data)[group==which.min(true_means)-1 & alg=='thomp_inf_eval_aipw']
+worst_thomp_inf_eval_aipw <- copy(agg_data)[group==which.min(true_means)-1 & alg=='thomp_inf_bern_eval_aipw']
 
 plotNormalHistogram(worst_thomp_inf_eval_aipw$mn, prob = TRUE, col = "gray", main = "Mean estimates of Worst Arm - THOMPINFEVAL",
                     linecol = "blue", lwd = 2, length = 1000, breaks= 50)

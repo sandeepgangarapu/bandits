@@ -137,7 +137,7 @@ def thompson_arm_pull(mean_lis, var_lis, type_of_pull='single', cap_prop=None):
     chosen_arm = np.argmax(sample)
     winning_arm.append(chosen_arm)
     if type_of_pull == 'single':
-        return chosen_arm
+        return chosen_arm, []
     if type_of_pull == 'monte_carlo':
         num_pulls = 20000
         sample = []
@@ -152,12 +152,9 @@ def thompson_arm_pull(mean_lis, var_lis, type_of_pull='single', cap_prop=None):
         for arm in range(num_arms):
             prop_score_lis.append(float(arm_counter[arm]/len(winning_arm_lis)))
         if cap_prop:
-            if np.min(prop_score_lis) < cap_prop:
-                # every arm gets cap propensity at the start, the remaining propensity is shared proportional to the
-                # true propensity
-                remaining_prop = 1 - (cap_prop * len(prop_score_lis))
-                prop_score_lis = cap_prop + (np.array(prop_score_lis) * remaining_prop)
-                chosen_arm = np.random.choice(range(num_arms), p=prop_score_lis)
+            prop_score_lis = capped_prop(prop_score_lis, cap_prop)
+            # because the propensities changed, we choose the arm again
+            chosen_arm = np.random.choice(range(num_arms), p=prop_score_lis)
         return chosen_arm, prop_score_lis
 
 
@@ -183,7 +180,7 @@ def thompson_arm_pull_bern(param_lis, type_of_pull='single', cap_prop=None):
     chosen_arm = np.argmax(sample)
     winning_arm.append(chosen_arm)
     if type_of_pull == 'single':
-        return chosen_arm
+        return chosen_arm, []
     if type_of_pull == 'monte_carlo':
         num_pulls = 20000
         sample = []
@@ -198,12 +195,9 @@ def thompson_arm_pull_bern(param_lis, type_of_pull='single', cap_prop=None):
         for arm in range(num_arms):
             prop_score_lis.append(float(arm_counter[arm] / len(winning_arm_lis)))
         if cap_prop:
-            if np.min(prop_score_lis) < cap_prop:
-                # every arm gets cap propensity at the start, the remaining propensity is shared proportional to the
-                # true propensity
-                remaining_prop = 1 - (cap_prop * len(prop_score_lis))
-                prop_score_lis = cap_prop + (np.array(prop_score_lis) * remaining_prop)
-                chosen_arm = np.random.choice(range(num_arms), p=prop_score_lis)
+            prop_score_lis = capped_prop(prop_score_lis, cap_prop)
+            # because the propensities changed, we choose the arm again
+            chosen_arm = np.random.choice(range(num_arms), p=prop_score_lis)
         return chosen_arm, prop_score_lis
 
 def bayesian_update(prior_params, x):
@@ -422,3 +416,15 @@ def get_final_mean(num_arms, arm_lis, mean_est_t):
                 num_updates = num_updates + 1
     return mean_est_arm
 
+
+def capped_prop(prop_lis, cap):
+    # the cap is defined in the athey paper
+    if np.min(prop_lis) < cap:
+        # every arm gets cap propensity at the start, the remaining propensity is shared proportional to the
+        # true propensity
+        num_arms = len(prop_lis)
+        remaining_prop = 1 - cap * num_arms
+        prop_lis = cap + np.array(prop_lis) * remaining_prop
+        return prop_lis
+    else:
+        return prop_lis
