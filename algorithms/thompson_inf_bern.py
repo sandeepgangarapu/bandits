@@ -21,6 +21,9 @@ def thomp_inf_bern(bandit, num_rounds, xi=0.2, type_of_pull='single',
 
     # we use 2 in order to calculate sample variance
     num_arms = bandit.num_arms
+    # beta bernoulli updation process
+    prior_params = [[1, 1] for i in range(num_arms)]
+    
     num_initial_pulls = 3
     for ite in range(num_initial_pulls):
         for arm in range(num_arms):
@@ -29,9 +32,11 @@ def thomp_inf_bern(bandit, num_rounds, xi=0.2, type_of_pull='single',
                                                range(bandit.num_arms)])
             else:
                 bandit.pull_arm(arm)
-
-    # beta bernoulli updation process
-    prior_params = [[1, 1] for i in range(num_arms)]
+            x = bandit.reward_tracker[-1]
+            # We calculate the posterior parameters of the beta distribution
+            prior_params[arm][0] += x
+            prior_params[arm][1] += 1-x
+    
     var_allocs = 0
     for rnd in range(int(num_rounds - (num_initial_pulls * num_arms))):
         if np.random.uniform(0, 1) < calc_eps_n(bandit, xi):

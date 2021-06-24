@@ -10,7 +10,7 @@ def run_sim(file_path, true_means, true_vars=None, dist_type='Normal',
     alg_list=['thomp_bern_batched', 'thomp_inf_bern_batched', 'thomp_bern',
               'thomp_inf_bern', 'ab_bern']
     # alg_list = ['thomp_inf_bern', 'thomp_inf_bern_batched']
-    # alg_list=['thomp_inf_bern']
+    # alg_list=['thomp_inf_bern_batched', 'thomp_bern_batched']
     estimator_list = ['eval_aipw']
 
     sim = BanditSimulation(num_ite=128, arm_means=true_means,

@@ -20,6 +20,8 @@ def thomp_inf_bern_batched(bandit, num_rounds, xi=0.05, cap_prop=False,
 
     # we use 2 in order to calculate sample variance
     num_arms = bandit.num_arms
+    # beta bernoulli updation process
+    prior_params = [[1, 1] for i in range(num_arms)]
     num_initial_pulls = int(batch_size/num_arms)
     for ite in range(num_initial_pulls):
         for arm in range(num_arms):
@@ -28,9 +30,10 @@ def thomp_inf_bern_batched(bandit, num_rounds, xi=0.05, cap_prop=False,
                                                range(bandit.num_arms)])
             else:
                 bandit.pull_arm(arm)
-
-    # beta bernoulli updation process
-    prior_params = [[1, 1] for i in range(num_arms)]
+            x = bandit.reward_tracker[-1]
+            # We calculate the posterior parameters of the beta distribution
+            prior_params[arm][0] += x
+            prior_params[arm][1] += 1-x
     var_allocs = 0
     for batch in range(int(num_rounds/batch_size)-1):
         arm_counts = [0 for i in range(num_arms)]
@@ -80,9 +83,11 @@ def thomp_inf_bern_batched(bandit, num_rounds, xi=0.05, cap_prop=False,
 
 if __name__ == '__main__':
     # Define bandit
-    for i in range(10):
-        num_rounds = 3000
+    for i in range(100):
+        num_rounds = 2000
         thompson_bandit = Bandit(name='thompson_sampling',
-                                 arm_means=[0.1, 0.2, 0.3],
+                                 arm_means=[0.37098621, 0.33080171, 0.1699615, 0.18902466, 0.6743146],
                                  dist_type='Bernoulli')
-        thomp_inf_bern_batched(thompson_bandit, num_rounds=num_rounds, cap_prop=False)
+        thomp_inf_bern_batched(thompson_bandit,
+                                       num_rounds=num_rounds, cap_prop=True,
+                                       type_of_pull='monte_carlo')

@@ -8,8 +8,14 @@ def thompson_sampling_bern(bandit, num_rounds, type_of_pull='single', cap_prop=F
     algorithm"""
     print("---------------Running Thompson Sampling Bern---------------")
 
+
     # we use 2 in order to calculate sample variance
     num_arms = bandit.num_arms
+
+    # beta bernoulli updation process
+    prior_params = [[1, 1] for i in range(num_arms)]
+
+
     num_initial_pulls = 2
     for ite in range(num_initial_pulls):
         for arm in range(num_arms):
@@ -18,10 +24,12 @@ def thompson_sampling_bern(bandit, num_rounds, type_of_pull='single', cap_prop=F
                                                range(bandit.num_arms)])
             else:
                 bandit.pull_arm(arm)
+            x = bandit.reward_tracker[-1]
+            # We calculate the posterior parameters of the beta distribution
+            prior_params[arm][0] += x
+            prior_params[arm][1] += 1-x
 
-    # beta bernoulli updation process
-    prior_params = [[1, 1] for i in range(num_arms)]
-
+ 
     for rnd in range(int(num_rounds - (num_initial_pulls * num_arms))):
         # this is to cap probability of allocation as per Athey's algorthm
         if cap_prop:
