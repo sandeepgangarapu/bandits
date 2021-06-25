@@ -10,7 +10,6 @@ def run_sim(file_path, true_means, true_vars=None, dist_type='Normal',
     alg_list=['thomp_bern_batched', 'thomp_inf_bern_batched', 'thomp_bern',
               'thomp_inf_bern', 'ab_bern']
     # alg_list = ['thomp_inf_bern', 'thomp_inf_bern_batched']
-    # alg_list=['thomp_inf_bern_batched', 'thomp_bern_batched']
     estimator_list = ['eval_aipw']
 
     sim = BanditSimulation(num_ite=128, arm_means=true_means,
@@ -36,10 +35,13 @@ if __name__ == '__main__':
     normal_analysis = False
     regret_order = False
     xi_analysis = False
-    bernoulli_analysis = True
+    bernoulli_analysis = False
     hsn = False
     lsn = False
     zsn = False
+    hsn_bern = True
+    lsn_bern = True
+    zsn_bern = True
     if meta_analysis:
         num_meta_ite = 100
         ref_lis = []
@@ -73,6 +75,18 @@ if __name__ == '__main__':
         true_means = [1, 1, 1]
         true_vars = [1/3, 1/3, 1/3]
         run_sim('analysis/output/non_agg_zsn_100_20000.csv', true_means, true_vars=true_vars, dist_type='ZSN')
+    if lsn_bern:
+        true_means = [0.4, 0.5, 0.6]
+        run_sim('analysis/output/lsn_bern_agg_batched.csv', true_means,
+                dist_type='LSN_bern')
+    if hsn_bern:
+        true_means = [0.2, 0.5, 0.8]
+        run_sim('analysis/output/hsn_bern_agg_batched.csv', true_means,
+                dist_type='HSN_bern')
+    if zsn_bern:
+        true_means = [0.5, 0.5, 0,5]
+        run_sim('analysis/output/zsn_bern_agg_batched.csv', true_means,
+                dist_type='ZSN_bern')
     if regret_order:
         true_means = [0.25, 1.82, 1.48, 2.25, 2]
         true_vars = [2.84, 1.97, 2.62, 1, 2.06]

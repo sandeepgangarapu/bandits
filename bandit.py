@@ -46,9 +46,14 @@ class Bandit:
             reward = np.random.normal(self.arm_means[arm_num], sqrt(self.arm_vars[arm_num]))
         if self.dist_type == "HSN" or self.dist_type == "LSN" or self.dist_type == "ZSN":
             reward = self.arm_means[arm_num]+ np.random.uniform(-1, 1)
+        
         # Do all updates after the arm is pulled
         if self.dist_type == "Bernoulli":
             reward = 1 if np.random.random() < self.arm_means[arm_num] else 0
+        if self.dist_type == "HSN_bern" or self.dist_type == "LSN_bern" or \
+                self.dist_type == "ZSN_bern":
+            reward = 1 if np.random.random() < (self.arm_means[arm_num]+ \
+                          np.random.uniform(-0.2, 0.2)) else 0
         if prop_lis is not None:
             self.update_after_pull(arm_num, reward, prop_lis)
         else:

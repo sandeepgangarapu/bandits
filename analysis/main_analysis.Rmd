@@ -481,8 +481,7 @@ hyp_z <- merged_data[, zval := (mean_est.y-mean_est.x)/sqrt((((mean_est.y*arm_pu
 # 
 
 
-final_results <- hyp_z[!grepl("var", alg) & test_pass !=TRUE][,.(cnt = .N, perc = .N/100),.(alg, test_pass)] 
-final_results <- hyp_z[!grepl("var", alg) & test_pass !=TRUE][,.(cnt = .N, perc = .N/100),.(alg, test_pass)] 
+final_results <- hyp_z[!grepl("var", alg)][,tot := .N,.(alg)][,.(cnt = .N, perc = .N/128),.(alg, test_pass)] 
 
 
 
