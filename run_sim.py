@@ -12,7 +12,7 @@ def run_sim(file_path, true_means, true_vars=None, dist_type='Normal',
     alg_list = ['thomp_inf_bern_batched']
     estimator_list = ['eval_aipw']
 
-    sim = BanditSimulation(num_ite=32, arm_means=true_means,
+    sim = BanditSimulation(num_ite=1, arm_means=true_means,
                            arm_vars=true_vars,
                            eps_inf=0.5,
                            horizon=20000,
@@ -39,8 +39,8 @@ if __name__ == '__main__':
     hsn = False
     lsn = False
     zsn = False
-    hsn_bern = True
-    lsn_bern = True
+    hsn_bern = False
+    lsn_bern = False
     zsn_bern = True
     if meta_analysis:
         num_meta_ite = 100
