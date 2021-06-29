@@ -78,16 +78,15 @@ def thomp_inf_bern_batched(bandit, num_rounds, xi=0.05, cap_prop=False,
         for arm in range(num_arms):
             prior_params[arm][0] += rewards[arm]
             prior_params[arm][1] += arm_counts[arm] - rewards[arm]
-            
     return bandit
 
 if __name__ == '__main__':
     # Define bandit
     for i in range(100):
-        num_rounds = 2000
+        num_rounds = 20000
         thompson_bandit = Bandit(name='thompson_sampling',
-                                 arm_means=[0.37098621, 0.33080171, 0.1699615, 0.18902466, 0.6743146],
-                                 dist_type='Bernoulli')
+                                 arm_means=[0.5, 0.5, 0.5],
+                                 dist_type='LSN_bern')
         thomp_inf_bern_batched(thompson_bandit,
                                        num_rounds=num_rounds, cap_prop=True,
                                        type_of_pull='monte_carlo')

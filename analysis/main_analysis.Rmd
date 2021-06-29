@@ -49,6 +49,8 @@ est_algs <- c("thomp_ipw", "thomp_aipw", "thomp_eval_aipw",
 # true_vars = c (0.132351, 0.146316, 0.159399, 0.124684, 0.112359)
 
 true_means <- c(0.37098621, 0.33080171, 0.1699615 , 0.18902466, 0.6743146)
+true_means = c(0.4, 0.5, 0.6)
+true_means = c(0.2, 0.5, 0.8)
 true_vars = true_means**2
 
 
@@ -81,7 +83,9 @@ regret_mse <- copy(non_agg_data)[, x:= seq_len(.N),.(ite,alg)][, .(alg, regret, 
 ```{r echo=FALSE, cache=FALSE, warning=FALSE}
 
 setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")
+agg_data <- fread("hsn_bern_agg_batched.csv")
 agg_data <- fread("agg_analysis_batched.csv")
+
 agg_data <- agg_data[complete.cases(agg_data),][mean_est != -Inf | mean_est != Inf][, mn := mean_est]
 
 ```
@@ -443,6 +447,8 @@ ggplot(worst, aes(x=reorder(alg, abs(var)), y=var)) + geom_bar(stat="identity") 
 setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")
 hyp_data <- copy(agg_data)
 
+#true_means <- c(0.37098621, 0.33080171, 0.1699615 , 0.18902466, 0.6743146)
+
 
 data_0 <- hyp_data[group==0] 
 data_1 <- hyp_data[group==1]
@@ -473,8 +479,9 @@ data_1 <- hyp_data[group==1]
 
 
 merged_data <- merge(data_0, data_1, by=c('ite','alg'))
+merged_data <- merged_data[, ':='(m1 = mean_est.x, m2=mean_est.y, n1=arm_pull_tracker.x, n2=arm_pull_tracker.y)]
 
-hyp_z <- merged_data[, zval := (mean_est.y-mean_est.x)/sqrt((((mean_est.y*arm_pull_tracker.y) + (mean_est.x*arm_pull_tracker.x))/(arm_pull_tracker.y + arm_pull_tracker.x))*(1-((mean_est.y*arm_pull_tracker.y) + (mean_est.x*arm_pull_tracker.x))/(arm_pull_tracker.y + arm_pull_tracker.x))*((1/arm_pull_tracker.y)+(1/arm_pull_tracker.x)))][,pval := pnorm(zval)][,test_pass := ifelse(pval<0.05, TRUE, FALSE)]
+hyp_z <- merged_data[, pooled_m := ((m2*n2) + (m1*n1))/(n2+n1)][,zval := (m2-m1)/sqrt(pooled_m*(1-pooled_m)*((1/n2)+(1/n1)))][,pval := 2*pnorm(-abs(zval))][,test_pass := ifelse(pval<0.05, TRUE, FALSE)]
 
 # 
 # hyp <- merged_data[,`:=`(tval = (mean_est.y-mean_est.x)/(sqrt((var_est.x/arm_pull_tracker.x)+(var_est.y/arm_pull_tracker.y))), df = arm_pull_tracker.x+arm_pull_tracker.y-2)][,pval := dt(tval, df)][,test_pass := ifelse(pval<0.05, TRUE, FALSE)]

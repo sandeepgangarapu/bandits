@@ -175,7 +175,6 @@ def thompson_arm_pull_bern(param_lis, type_of_pull='single', cap_prop=None):
         current_alpha = param_lis[arm][0]
         current_beta = param_lis[arm][1]
         sample.append(np.random.beta(current_alpha, current_beta))
-    
     # the arm that has the highest value of draw is selected
     chosen_arm = np.argmax(sample)
     winning_arm.append(chosen_arm)
@@ -187,6 +186,7 @@ def thompson_arm_pull_bern(param_lis, type_of_pull='single', cap_prop=None):
         for arm in range(num_arms):
             current_alpha = param_lis[arm][0]
             current_beta = param_lis[arm][1]
+            print(current_alpha, current_beta)
             sample.append(np.random.beta(current_alpha, current_beta, num_pulls))
         # the arm that has the highest value of draw is selected
         winning_arm_lis = np.argmax(sample, axis=0)
