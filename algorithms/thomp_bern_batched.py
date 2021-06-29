@@ -58,8 +58,8 @@ if __name__ == '__main__':
     for i in range(120):
         num_rounds = 2000
         thompson_bandit = Bandit(name='thompson_sampling',
-                                 arm_means=[0.37098621, 0.33080171, 0.1699615, 0.18902466, 0.6743146],
-                                 dist_type='Bernoulli')
+                                 arm_means=[0.5, 0.5, 0.5],
+                                 dist_type='LSN_bern')
         thompson_sampling_bern_batched(thompson_bandit,
-                                       num_rounds=num_rounds, cap_prop=True,
-                                       type_of_pull='monte_carlo')
+                               num_rounds=num_rounds, cap_prop=True,
+                               type_of_pull='monte_carlo')

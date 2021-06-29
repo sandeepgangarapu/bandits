@@ -72,18 +72,18 @@ def thomp_inf_bern_batched(bandit, num_rounds, xi=0.05, cap_prop=False,
                 arm_counts[chosen_arm] += 1
                 x = bandit.reward_tracker[-1]
                 rewards[chosen_arm] += x
-                print(bandit.arm_pull_tracker)
         
         # We calculate the posterior parameters of the beta distribution
         # after batch allocation is done
         for arm in range(num_arms):
             prior_params[arm][0] += rewards[arm]
             prior_params[arm][1] += arm_counts[arm] - rewards[arm]
+            print(prior_params[arm])
     return bandit
 
 if __name__ == '__main__':
     # Define bandit
-    for i in range(100):
+    for i in range(1):
         num_rounds = 20000
         thompson_bandit = Bandit(name='thompson_sampling',
                                  arm_means=[0.5, 0.5, 0.5],
