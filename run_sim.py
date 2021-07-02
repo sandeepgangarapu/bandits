@@ -40,8 +40,8 @@ if __name__ == '__main__':
     lsn = False
     zsn = False
     hsn_bern = True
-    lsn_bern = True
-    zsn_bern = True
+    lsn_bern = False
+    zsn_bern = False
     if meta_analysis:
         num_meta_ite = 100
         ref_lis = []
@@ -80,7 +80,7 @@ if __name__ == '__main__':
         run_sim('analysis/output/lsn_bern_agg_1280_1000.csv', true_means,
                 dist_type='LSN_bern')
     if hsn_bern:
-        true_means = [0.2, 0.5, 0.8]
+        true_means = [0.25, 0.5, 0.75]
         run_sim('analysis/output/hsn_bern_agg_1280_1000.csv', true_means,
                 dist_type='HSN_bern')
     if zsn_bern:

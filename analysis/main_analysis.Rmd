@@ -81,7 +81,7 @@ regret_mse <- copy(non_agg_data)[, x:= seq_len(.N),.(ite,alg)][, .(alg, regret, 
 ```{r echo=FALSE, cache=FALSE, warning=FALSE}
 
 setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")
-agg_data <- fread("hsn_bern_agg_batched.csv")
+agg_data <- fread("lsn_bern_agg_1280_1000.csv")
 agg_data <- agg_data[complete.cases(agg_data),][mean_est != -Inf | mean_est != Inf][, mn := mean_est]
 
 ```
@@ -446,8 +446,8 @@ hyp_data <- copy(agg_data)
 true_means <- c(0.37098621, 0.33080171, 0.1699615 , 0.18902466, 0.6743146)
 
 
-data_0 <- hyp_data[group==0] 
-data_1 <- hyp_data[group==1]
+data_0 <- hyp_data[group==1] 
+data_1 <- hyp_data[group==2]
 # 
 # a <- data_0[data_0$alg=='thomp_bern_eval_aipw_var', 'var_est']
 # data_0[data_0$alg=='thomp_bern_eval_aipw', 'var_est'] = a
@@ -476,14 +476,14 @@ data_1 <- hyp_data[group==1]
 
 merged_data <- merge(data_0, data_1, by=c('ite','alg'))
 
-hyp_z <- merged_data[, zval := (mean_est.y-mean_est.x)/sqrt((((mean_est.y*arm_pull_tracker.y) + (mean_est.x*arm_pull_tracker.x))/(arm_pull_tracker.y + arm_pull_tracker.x))*(1-((mean_est.y*arm_pull_tracker.y) + (mean_est.x*arm_pull_tracker.x))/(arm_pull_tracker.y + arm_pull_tracker.x))*((1/arm_pull_tracker.y)+(1/arm_pull_tracker.x)))][,pval := pnorm(zval)][,test_pass := ifelse(pval<0.05, TRUE, FALSE)]
+hyp_z <- merged_data[,`:=`(m1 = mean_est.x, m2 = mean_est.y, n1 = arm_pull_tracker.x, n2 = arm_pull_tracker.x)][, zval := (m2-m1)/sqrt((((m2*n2) + (m1*n1))/(n2+n1))*(1-((m2*n2) + (m1*n1))/(n2 + n1))*((1/n2)+(1/n2)))][,pval := 2*pnorm(-abs(zval))][,test_pass := ifelse(pval<0.05, TRUE, FALSE)]
 
 # 
 # hyp <- merged_data[,`:=`(tval = (mean_est.y-mean_est.x)/(sqrt((var_est.x/arm_pull_tracker.x)+(var_est.y/arm_pull_tracker.y))), df = arm_pull_tracker.x+arm_pull_tracker.y-2)][,pval := dt(tval, df)][,test_pass := ifelse(pval<0.05, TRUE, FALSE)]
 # 
 
 
-final_results <- hyp_z[!grepl("var", alg)][,tot := .N,.(alg)][,.(cnt = .N, perc = .N/128),.(alg, test_pass)] 
+final_results <- hyp_z[!grepl("var", alg)][,tot := .N,.(alg)][,.(cnt = .N, perc = .N/1280),.(alg, test_pass)] 
 
 
 
