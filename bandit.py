@@ -23,7 +23,7 @@ class Bandit:
         self.arm_reward_tracker = [[] for i in range(self.num_arms)]
         # number of times each arm is pulled
         self.arm_pull_tracker = [0 for i in range(self.num_arms)]
-        # man reward of each arm
+        # mean reward of each arm
         self.avg_reward_tracker = [0.0 for i in range(self.num_arms)]
         # tracking the propensity with with an arm at that time is pulled
         self.propensity_tracker = []

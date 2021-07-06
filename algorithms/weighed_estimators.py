@@ -127,6 +127,7 @@ if __name__ == '__main__':
                                        reward_lis=reward_lis,
                                        weight_lis=weight_lis,
                                        num_arms=4)
+                print(a)
                 dt_sub = pd.DataFrame({'ite': np.repeat([i], 4),
                                        'main_ite': np.repeat([j], 4),
                                        'alg': np.repeat([alg], 4),

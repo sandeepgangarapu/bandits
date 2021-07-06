@@ -15,12 +15,15 @@ from algorithms.weighed_estimators import weighed_estimators
 import pandas as pd
 import multiprocessing
 import numpy as np
+from sklearn.metrics import mean_squared_error
+
 
 
 class BanditSimulation:
 
     def __init__(self, num_ite, arm_means, eps_inf, horizon, alg_list, arm_vars=None, mse_calc=True,
-                 agg=False, estimator_list=None, xi=1, dist_type='Normal',
+                 agg=False, final_metrics=False, estimator_list=None, xi=1,
+                 dist_type='Normal',
                  batch_size=100, cap_prop=True, output_file_path=None,
                  post_allocation=True):
         """This class is to run bandits simulation for given params and give simulation output.
@@ -33,6 +36,7 @@ class BanditSimulation:
         :param alg_list: list of algorithms for simulations to run
         :param mse_calc: whether to calculate MSE
         :param agg: output aggregated values like mean etc instead of raw values of rewards
+        :param final_metrics: final values of regret, mse and etc
         :param estimator_list: list of estimators like ipw, aipw etc
         :param xi: xi value for inf eps
         :param dist_type: type of outcome distribution
@@ -49,6 +53,7 @@ class BanditSimulation:
         self.alg_list = alg_list
         self.mse_calc = mse_calc
         self.agg = agg
+        self.final_metrics = final_metrics
         self.estimator_list = estimator_list
         self.xi = xi
         self.dist_type = dist_type
@@ -198,7 +203,18 @@ class BanditSimulation:
                        'alg': bandit.name,
                        'ite': ite}
             df = pd.DataFrame(dict_df)
-            # TODO add mse calc when aggregation is true
+        elif self.final_metrics:
+            total_mean_mse = mean_squared_error(bandit.avg_reward_tracker, self.arm_means)
+            total_var_mse = mean_squared_error(bandit.var_est_tracker, self.arm_vars)
+            # keeping these values in list as that will not trigger scalar
+            # values error
+            dict_df = {'ite': [ite],
+                       'alg': [bandit.name],
+                       'regret': [bandit.regret[-1]],
+                       'tot_mean_mse': [total_mean_mse],
+                       'tot_var_mse': [total_var_mse]
+                       }
+            df = pd.DataFrame(dict_df)
         else:
             dict_df = {"group": bandit.arm_tracker,
                        'outcome': bandit.reward_tracker,
@@ -232,6 +248,16 @@ class BanditSimulation:
                        'var_est': mean_est}
             df = pd.DataFrame(dict_df)
             # TODO add mse calc when aggregation is true
+        elif self.final_metrics:
+            total_mean_mse = mean_squared_error(mean_est, self.arm_means)
+            total_var_mse = mean_squared_error(mean_est, self.arm_vars)
+            dict_df = {'ite': [ite],
+                       'alg': [bandit.name],
+                       'regret': [bandit.regret[-1]],
+                       'tot_mean_mse': [total_mean_mse],
+                       'tot_var_mse': [total_var_mse]
+                       }
+            df = pd.DataFrame(dict_df)
         else:
             dict_df = {'alg': alg_name,
                        'ite': ite,

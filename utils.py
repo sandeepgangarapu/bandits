@@ -327,7 +327,6 @@ def mse_outcome(group, outcome, true_mean, true_var):
     # rmse_plot(group, outcome, true_mean, true_var)
     return mean_mse_lis, var_mse_lis
 
-
 def prop_mse(group, mean_est, true_est):
     """
     given group list and list of estimated means, the outcome will be mse at each point of time
