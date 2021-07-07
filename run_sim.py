@@ -44,8 +44,8 @@ if __name__ == '__main__':
     hsn_bern = False
     lsn_bern = False
     zsn_bern = False
-    xi_analysis_hsn = True
-    xi_analysis_lsn = True
+    xi_analysis_hsn = False
+    xi_analysis_lsn = False
     xi_analysis_zsn = True
     xi = [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.15, 0.2, 0.5, 0.8,
           1.1, 1.5]

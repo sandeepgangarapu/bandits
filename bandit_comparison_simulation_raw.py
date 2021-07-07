@@ -252,7 +252,7 @@ class BanditSimulation:
             total_mean_mse = mean_squared_error(mean_est, self.arm_means)
             total_var_mse = mean_squared_error(mean_est, self.arm_vars)
             dict_df = {'ite': [ite],
-                       'alg': [bandit.name],
+                       'alg': [alg_name],
                        'regret': [bandit.regret[-1]],
                        'tot_mean_mse': [total_mean_mse],
                        'tot_var_mse': [total_var_mse]

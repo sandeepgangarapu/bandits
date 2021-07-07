@@ -227,19 +227,24 @@ var
 
 ```{r echo=FALSE, cache=FALSE, warning=FALSE, eval=xi_analysis}
 
-setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output")
+setwd("G:\\My Drive\\Research\\Bandits\\code\\bandits\\analysis\\output\\xi_analysis")
+options(scipen = 999)
+xi = c(0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.15, 0.2, 0.5, 0.8,
+          1.1, 1.5)
 
-xi = c(0.01, 0.05, 0.1, 0.15, 0.2, 0.5, 0.8, 1.1, 1.5)
-
+type = c('lsn', 'hsn', 'zsn')
 main_xi_df <- data.frame()
 
 for (i in xi){
-  
-  file_name = paste("xi_analysis", i, ".csv", sep="")
+  for (j in type){
+  file_name = paste("xi_analysis", i,'_',j, ".csv", sep="")
   df <- fread(file_name)
-  df <- df[, xi:=i][, x := seq_len(.N), .(ite)]
+  df <- df[, xi:=i][, type:=j][, x := seq_len(.N), .(ite)]
+  print(colnames(df))
+  print(df$alg[1])
+  print(file_name)
   main_xi_df <- rbind(main_xi_df, df)
-}
+}}
 
 table(main_xi_df$xi)
 
